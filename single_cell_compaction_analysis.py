@@ -308,19 +308,15 @@ for n,i in tqdm(enumerate(fiber_list)):
     dx_norm = dx/distance
     dy_norm = dy/distance
     
-    # angle of orientation
-    angle_evec = np.arctan2(min_evec[:,:,0][edge:-edge,edge:-edge],min_evec[:,:,1][edge:-edge,edge:-edge] ) *360/(2*np.pi)
-    # angle between center vector and oreintation vector
-    angle_dev = np.abs( np.abs(angle)-np.abs(angle_evec) )  # now ranges from 0 180 degree
-    # direction toward or awaz should not matter , bnorm from 0 to 90 here
-    angle_dev[angle_dev>90] -= 90
-    
+ 
+    # Angular deviation from orietation to center vector
+    angle_dev= np.arccos(np.abs(dx_norm*min_evec[:,:,1][edge:-edge,edge:-edge] + dy_norm*min_evec[:,:,0][edge:-edge,edge:-edge] ))  *360/(2*np.pi)
+    plt.figure();plt.imshow(angle_dev, origin="lower");plt.colorbar(); plt.savefig(os.path.join(out_list[n],"angle_dev.png"), dpi=200)
+
     
     # GRADIENT    
-    grad_x = np.gradient(im_fiber_n[edge:-edge,edge:-edge], axis=0) 
-    grad_y = np.gradient(im_fiber_n[edge:-edge,edge:-edge], axis=1) # between -1 and 1   
-    # test  hould be 1:    np.sqrt(dx_norm**2+dy_norm**2)
-    # test  TODO    np.sqrt(grad_x**2+grad_y**2)
+    grad_y = np.gradient(im_fiber_g, axis=0)  [edge:-edge,edge:-edge]
+    grad_x = np.gradient(im_fiber_g, axis=1)[edge:-edge,edge:-edge] # between -1 and 1   
     s = (grad_x* dx_norm) + (grad_y * dy_norm)
     s= s**2  # since + -  should not matter here   between 0 and 1
 
@@ -333,8 +329,9 @@ for n,i in tqdm(enumerate(fiber_list)):
     alpha_dev_slice = []
     alpha_dev_slice_weight = []
     
- 
-     
+    angle_dev_normed = (angle_dev*ori[edge:-edge,edge:-edge]) / np.mean(ori[edge:-edge,edge:-edge]) 
+    s_norm = (s) / (grad_x**2 + grad_y**2)
+    
     ang_sec = 5
     for alpha in range(-180, 180, ang_sec):  
 
@@ -352,22 +349,43 @@ for n,i in tqdm(enumerate(fiber_list)):
             int_mean.append(np.mean(im_fiber_n[edge:-edge,edge:-edge][mask_angle]))
 
             # gradient to center
-            grad_orient = s[mask_angle]/(grad_x[mask_angle]**2 + grad_y[mask_angle]**2)
-            grad_slice.append(np.nansum(grad_orient))  #/np.count_nonzero(~np.isnan(grad_orient)))
+            grad_slice.append(np.nanmean(s_norm[mask_angle])) 
             
             # angle deviation to center    weighted and not weighted wir coheency
-            alpha_dev_slice.append(np.mean(angle_dev[mask_angle])) 
-            alpha_dev_slice_weight.append(np.average(angle_dev[mask_angle], weights= ori[edge:-edge,edge:-edge][mask_angle] ))
+            alpha_dev_slice.append(np.nanmean(angle_dev[mask_angle])) 
+            
+            alpha_dev_slice_weight.append( np.mean( angle_dev_normed[mask_angle]) )
+            
+            #alpha_dev_slice_weight.append(np.average(angle_dev[mask_angle], weights= ori[edge:-edge,edge:-edge][mask_angle] ))
 
     
     # Total Value for complete image (without the mask)
     # average angle deviation
-    alpha_dev_total =  np.average(angle_dev[(~segmention["mask"][edge:-edge,edge:-edge]) ], weights= ori[edge:-edge,edge:-edge][(~segmention["mask"][edge:-edge,edge:-edge]) ] )
+    alpha_dev_total = np.nanmean(angle_dev_normed[(~segmention["mask"][edge:-edge,edge:-edge])])
     # total gradient value for whole image
-    #grad_total = np.n todo
+    grad_total = np.nanmean(s_norm[(~segmention["mask"][edge:-edge,edge:-edge])])
+    # total coherency 
+    coh_total = np.nanmean(ori[edge:-edge,edge:-edge][(~segmention["mask"][edge:-edge,edge:-edge]) ])
+    
     print(alpha_dev_total)
     np.savetxt(os.path.join(out_list[n],"alpha_dev_total.txt"), [alpha_dev_total])
+    np.savetxt(os.path.join(out_list[n],"grad_total.txt"), [grad_total])
+    np.savetxt(os.path.join(out_list[n],"coh_total.txt"), [coh_total])
     
+    
+    # dipol character
+    dip_ang = (np.max(alpha_dev_slice_weight)-np.min(alpha_dev_slice_weight))/ (np.max(alpha_dev_slice_weight)+np.min(alpha_dev_slice_weight))
+    dip_ori = (np.max(ori_mean / np.max(ori_mean))-np.min(ori_mean / np.max(ori_mean)))/ (np.max(ori_mean / np.max(ori_mean))+np.min(ori_mean / np.max(ori_mean)))
+    np.savetxt(os.path.join(out_list[n],"dip_ori.txt"), [dip_ori])
+    np.savetxt(os.path.join(out_list[n],"dip_ang.txt"), [dip_ang])
+   
+    
+   # to do coherence over distance
+    # figsdf = plt.figure()
+    # s = np.array(sorted(zip(  distance.flatten(), ori[edge:-edge,edge:-edge].flatten()  )) )
+    # d = s[:,1]  #gaussian(s[:,0])
+    # o = gaussian(s[:,0])
+    # plt.scatter(d,o)
     
     """
     polar plots
@@ -375,8 +393,10 @@ for n,i in tqdm(enumerate(fiber_list)):
     
     fig13 = plt.figure()
     ax = plt.subplot(111, projection="polar")
-    ax.plot( np.array(ori_angle)*np.pi/180,  grad_slice / np.max(grad_slice) )
+    grad_slice = np.array(grad_slice)
+    ax.plot( np.array(ori_angle)*np.pi/180,  (grad_slice-np.min(grad_slice))/(np.max(grad_slice)-np.min(grad_slice))   )  #/ np.max(grad_slice)
     plt.tight_layout()
+    ax.set_rlim(bottom=1, top=0)
     plt.savefig(os.path.join(out_list[n],"gradient_norm.png"), dpi=200)       
    
 

@@ -11,7 +11,6 @@ Needs an Image of cell and one image of the fibers
 
 """
 
-
 import matplotlib.pyplot as plt
 from skimage.filters import gaussian
 from scipy.ndimage.filters import uniform_filter
@@ -31,7 +30,8 @@ from skimage.morphology import remove_small_objects
 from skimage.exposure import adjust_gamma   
 from PIL import Image
 from copy import copy
-
+import imageio
+from skimage import color
 
 def set_vmin_vmax(x, vmin, vmax):
     if not isinstance(vmin, (float, int)):
@@ -178,7 +178,7 @@ def segment_cell(img, thres=1):
 
 # read in cells to evaluate
 # maxproj
-fiber_list = glob.glob(r"test_data\fiber.tif")
+fiber_list = glob.glob(r"test_data\fiber.tif")   #fiber_random_c24
 cell_list = glob.glob(r"test_data\cell.tif")   #check that order is same to fiber
 
 
@@ -201,8 +201,8 @@ for n,i in tqdm(enumerate(fiber_list)):
         print('WARNING: Output folder already exists! ({})'.format(out_list[n]))
     
     # load images
-    im_cell = plt.imread(cell_list[n])
-    im_fiber = plt.imread(fiber_list[n])   
+    im_cell  = color.rgb2gray(imageio.imread(cell_list[n]))
+    im_fiber = color.rgb2gray(imageio.imread(fiber_list[n]))
     #"contrast spreading" by setting all values below norm1-percentile to zero and
     # # all values above norm2-percentile to 1
     norm1 = 5

@@ -304,6 +304,11 @@ for n,i in tqdm(enumerate(fiber_list)):
     coh_total = np.nanmean(ori[(~segmention["mask"][edge:-edge,edge:-edge]) ])
     coh_total2 = np.nanmean(ori_weight2[(~segmention["mask"][edge:-edge, edge:-edge])])
     
+     # Angular deviation from orietation to center vector
+    #angle_dev= np.arccos(np.abs(dx_norm*min_evec[:,:,1][edge:-edge,edge:-edge] + dy_norm*min_evec[:,:,0][edge:-edge,edge:-edge] ))  *360/(2*np.pi)
+    plt.figure();plt.imshow(angle_dev, origin="upper", cmap="viridis");plt.colorbar(); plt.savefig(os.path.join(out_list[n],"angle_dev.png"), dpi=200)
+    
+    
     # translating the angles to coordinates in polar plot
     angle_plotting1 = (np.array(ori_angle) * np.pi / 180)
     angle_plotting = angle_plotting1.copy()
@@ -311,41 +316,42 @@ for n,i in tqdm(enumerate(fiber_list)):
     angle_plotting[angle_plotting1 > 0] =  np.abs(angle_plotting[angle_plotting1>0] - 2* np.pi)
 
     # test to appreciate how the angles work in plot
-    a = np.linspace(np.pi, np.pi * 2, len(angle_plotting))
-    b = np.linspace(0, 1, len(angle_plotting))
-    plt.figure()
-    ax = plt.subplot(111, projection="polar")
-    ax.plot(angle_plotting, b, label="angle_plotting")
-    ax.plot((np.array(ori_angle) * np.pi / 180), b, label="ori_angle directly")
-    plt.legend()
-    plt.title("illustration of how angles in the polar plot work")
+    # a = np.linspace(np.pi, np.pi * 2, len(angle_plotting))
+    # b = np.linspace(0, 1, len(angle_plotting))
+    # plt.figure()
+    # ax = plt.subplot(111, projection="polar")
+    # ax.plot(angle_plotting, b, label="angle_plotting")
+    # ax.plot((np.array(ori_angle) * np.pi / 180), b, label="ori_angle directly")
+    # plt.legend()
+    # plt.title("illustration of how angles in the polar plot work")
 
 
-    plt.figure()
-    axs1 = plt.subplot(221, projection="polar")
+    plt.figure(figsize=(20,6))
+    axs1 = plt.subplot(131, projection="polar")
     axs1.plot(angle_plotting, ori_mean, label="Allignment Collagen" )
     axs1.plot(angle_plotting, ori_mean_weight, label="Allignment Collagen weighted with intesity" )
     #axs1.plot(angle_plotting,  int_mean, c = "C1" , label="Intensity Collagen")
-    plt.legend()
-
-    ax2 = plt.subplot(222, projection="polar")
+    plt.legend(fontsize=12)
+    ax2 = plt.subplot(132, projection="polar")
     ax2.plot(angle_plotting, alpha_dev_slice , label="no weights")
     ax2.plot(angle_plotting, alpha_dev_slice_weight , label="coherence weighting")
     ax2.plot(angle_plotting, alpha_dev_slice_weight2, label="coherence and intensity weighting")
     #ax.set_rlim(bottom=90, top=0)  # put allignet values further out for visualization
-    plt.legend()
-
+    plt.legend(fontsize=12)
     strings = ["mean coherency", "mean_coherency\nweighted by intensity", "mean angle",
                "mean angle weighted\nby coherency", "mean angle weighted\nby coherency and intensity"]
     values = [coh_total ,coh_total2, alpha_dev_total1, alpha_dev_total2, alpha_dev_total3]
     values = [[str(np.round(x,4))] for x in values]
     table_text = [[strings[i], values[i]] for i in range(len(values))]
-    ax3 = plt.subplot(223)
-
+    ax3 = plt.subplot(133)
     ax3.axis('tight')
     ax3.axis('off')
     ax3.table(cellText = values, rowLabels=strings,bbox=[0.6,0.2,0.7,0.9])
-
+    #plt.tight_layout()
+    plt.savefig(os.path.join(out_list[n],"orientation.png"), dpi=200)
+    
+    
+    
     # plot max +seg
     fig7= plt.figure() 
     my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
@@ -377,5 +383,5 @@ for n,i in tqdm(enumerate(fiber_list)):
     plt.scatter(center_small[0],center_small[1], c= "w")
     plt.tight_layout()
     plt.savefig(os.path.join(out_list[n],"struc-tens-o.png"), dpi=200)
-    
+    ddsf
     plt.close("all")

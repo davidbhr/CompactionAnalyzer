@@ -272,8 +272,8 @@ for n,i in tqdm(enumerate(fiber_list)):
                                    f_dist=15)  #
 
     plt.quiver(x, y, mx*300, my*300,scale=1,scale_units="xy", angles="xy")
-    plt.figure();plt.imshow(ori); plt.colorbar()
-    plt.title("orientation vector, angle_dev_weighted overlay")
+    plt.figure();plt.imshow(ori); plt.colorbar();  plt.title("orientation vector, angle_dev_weighted overlay")
+    plt.savefig(os.path.join(out_list[n],"angle_dev_weighted.png"), dpi=200)
 
 
     ang_sec = 5

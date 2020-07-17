@@ -190,6 +190,9 @@ out_list = [os.path.join("analysis",cell_list[i].split(os.sep)[0], os.path.basen
 
 # loop thorugh cells
 for n,i in tqdm(enumerate(fiber_list)):
+    #create output folder if not existing
+    if not os.path.exists(out_list[n]):
+        os.makedirs(out_list[n])
     # load images
     im_cell  = color.rgb2gray(imageio.imread(cell_list[n]))
     im_fiber = color.rgb2gray(imageio.imread(fiber_list[n]))
@@ -390,5 +393,5 @@ for n,i in tqdm(enumerate(fiber_list)):
     plt.scatter(center_small[0],center_small[1], c= "w")
     plt.tight_layout()
     plt.savefig(os.path.join(out_list[n],"struc-tens-o.png"), dpi=200)
-    ddsf
+    
     plt.close("all")

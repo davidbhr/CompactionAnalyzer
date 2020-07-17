@@ -236,6 +236,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     grad_x = np.gradient( gaussian(im_fiber_n, sigma=0.5), axis=1)[edge:-edge,edge:-edge] # between -1 and 1
     s = (grad_x * dx_norm) + (grad_y * dy_norm)
     s = s**2  # since + -  should not matter here   between 0 and 1
+    s_norm = s / (grad_x**2 + grad_y**2)
 
 
     ori_angle = []
@@ -262,8 +263,6 @@ for n,i in tqdm(enumerate(fiber_list)):
     # also weighting the coherency like this
     ori_weight2 = (ori * weight_image) / np.mean(weight_image)
 
-
-    s_norm = s / (grad_x**2 + grad_y**2)
 
 
     plt.figure();plt.imshow(angle_dev_weighted); plt.colorbar()
@@ -303,6 +302,14 @@ for n,i in tqdm(enumerate(fiber_list)):
     alpha_dev_total3 = np.nanmean(angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])])
     coh_total = np.nanmean(ori[(~segmention["mask"][edge:-edge,edge:-edge]) ])
     coh_total2 = np.nanmean(ori_weight2[(~segmention["mask"][edge:-edge, edge:-edge])])
+    # save to txt file
+    values = [coh_total ,coh_total2, alpha_dev_total1, alpha_dev_total2, alpha_dev_total3]
+    strings = ["mean_coh.txt", "mean_coh_w_int.txt", "mean_angle.txt",
+      "mean_angle_we_coh.txt", "mean_angle_we_coh_int.txt"]
+    for i,v in enumerate(values):
+        np.savetxt(os.path.join(out_list[n],strings[i]), [v] ) 
+
+    
     
      # Angular deviation from orietation to center vector
     #angle_dev= np.arccos(np.abs(dx_norm*min_evec[:,:,1][edge:-edge,edge:-edge] + dy_norm*min_evec[:,:,0][edge:-edge,edge:-edge] ))  *360/(2*np.pi)

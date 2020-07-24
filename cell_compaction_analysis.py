@@ -176,16 +176,32 @@ def segment_cell(img, thres=1):
 
 
 
-# read in cells to evaluate
-# maxproj
+
+
+# maxprojection Data
+# read in list of cells and list of fibers to evaluate (must be in same order)
+# use glob.glob or individual list of paths []    
+
 fiber_list = glob.glob(r"test_data\fiber.tif")   #fiber_random_c24
 cell_list = glob.glob(r"test_data\cell.tif")   #check that order is same to fiber
 
 
-edge = 40
+# Set Parameters 
+sigma_tensor = 15  # sigma of applied gauss filter / window for structure tensor analysis in px
+                    # should be in the order of the objects to analyze !! test
+edge = 40   # Cutt of pixels at the edge since values at the border cannot be trusted
+segmention_thres =1  # for cell segemetntion, thres 1 equals normal otsu threshold
+sigma_first_blur  = 0.5  # slight first bluring of whole image before using structure tensor
+angle_sections = 5   # size of angle sections in degree 
+
+
+
 # create output folder accordingly
 #out_list = [os.path.join("angle_eval","2-angle",cell_list[i].split(os.sep)[0], os.path.basename(cell_list[i])[:-4]) for i in range(len(cell_list))]
 out_list = [os.path.join("analysis",cell_list[i].split(os.sep)[0], os.path.basename(cell_list[i])[:-4]) for i in range(len(cell_list))]
+
+
+
 
 
 # loop thorugh cells
@@ -202,27 +218,25 @@ for n,i in tqdm(enumerate(fiber_list)):
     norm2 = 95
     # # applying normalizing/ contrast spreading
     im_cell_n = normalize(im_cell, norm1, norm2)
-    im_fiber_n = normalize(im_fiber, norm1, norm2)
+    im_fiber_n = normalize(im_fiber, norm1, norm2)  
+    im_fiber_g = gaussian(im_fiber_n, sigma=sigma_first_blur)     # blur fiber image slightly (test with local gauss - similar)
     # segment cell
-    segmention = segment_cell(im_cell_n, thres=1) # thres 1 equals normal otsu threshold
+    segmention = segment_cell(im_cell_n, thres= segmention_thres ) # thres 1 equals normal otsu threshold
+    center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
+
     """
     Structure tensor
     """
     # Structure Tensor Orientation
-    # blur fiber image slightly (trz local gauss - similar)
-    im_fiber_g = gaussian(im_fiber_n, sigma=0.5)
+
     # get structure tensor
-    ori, max_evec, min_evec, max_eval, min_eval = analyze_local(im_fiber_g, sigma=15, size=0, filter_type="gaussian")
+    ori, max_evec, min_evec, max_eval, min_eval = analyze_local(im_fiber_g, sigma=sigma_tensor, size=0, filter_type="gaussian")
     ori, max_evec, min_evec, max_eval, min_eval = ori[edge:-edge,edge:-edge], max_evec[edge:-edge,edge:-edge], min_evec[edge:-edge,edge:-edge], \
                                                   max_eval[edge:-edge,edge:-edge], min_eval[edge:-edge,edge:-edge]
-
-    f = np.percentile(ori,0.75)
-
-    # cutt off the edges    
-    edge = 40
-    fig5, ax5 = show_quiver (min_evec[:,:,0] * ori, min_evec[:,:,1] * ori, filter=[f, 15], scale_ratio=0.1,width=0.003, cbar_str="coherency", cmap="viridis")
-    center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
-    ax5.plot(center_small[0],center_small[1],"o")
+    """
+    coordinates
+    """
+    
     # Calculate Angle + Distances
     y,x = np.indices(ori.shape)
     dx = x - center_small[0]
@@ -231,29 +245,15 @@ for n,i in tqdm(enumerate(fiber_list)):
     angle = np.arctan2(dy, dx) *360/(2*np.pi)
     dx_norm = (dx/distance)
     dy_norm = (dy/distance)
+    
+    """
+    total image analysis
+    """
 
     # Angular deviation from orietation to center vector
     angle_dev = np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) * 360/(2*np.pi)
-    # GRADIENT    
-    grad_y = np.gradient( gaussian(im_fiber_n, sigma=0.5), axis=0)[edge:-edge,edge:-edge]
-    grad_x = np.gradient( gaussian(im_fiber_n, sigma=0.5), axis=1)[edge:-edge,edge:-edge] # between -1 and 1
-    s = (grad_x * dx_norm) + (grad_y * dy_norm)
-    s = s**2  # since + -  should not matter here   between 0 and 1
-    s_norm = s / (grad_x**2 + grad_y**2)
-
-
-    ori_angle = []
-    ori_mean = []
-    ori_mean_weight = []
-    int_mean = []
-    proj_angle = []
-    grad_slice = []
-    alpha_dev_slice = []
-    alpha_dev_slice_weight = []
-    alpha_dev_slice_weight2 = []
-
     # weighting by coherence
-    angle_dev_weighted = (angle_dev * ori) / np.mean(ori)
+    angle_dev_weighted = (angle_dev * ori) / np.mean(ori)     # !!!! WRONG ?
     # weighting by coherence and image intensity
     im_fiber_g = im_fiber_g[edge:-edge,edge:-edge]
     # could also use non filtered image
@@ -262,42 +262,22 @@ for n,i in tqdm(enumerate(fiber_list)):
     # corresponding to pixels in the intesity iamage above a threshold are considered.
     weight_image = gaussian(im_fiber_g,sigma=15)
     angle_dev_weighted2 = (angle_dev_weighted *weight_image) / np.mean(weight_image)
-
     # also weighting the coherency like this
     ori_weight2 = (ori * weight_image) / np.mean(weight_image)
-
-
-
-    plt.figure();plt.imshow(angle_dev_weighted); plt.colorbar()
-    mx = min_evec[:,:,0] * ori
-    my = min_evec[:,:,1] * ori
-    mx, my, x, y = filter_values(mx, my, abs_filter=0,
-                                   f_dist=15)  #
-
-    plt.quiver(x, y, mx*300, my*300,scale=1,scale_units="xy", angles="xy")
-    plt.figure();plt.imshow(ori); plt.colorbar();  plt.title("orientation vector, angle_dev_weighted overlay")
-    plt.savefig(os.path.join(out_list[n],"angle_dev_weighted.png"), dpi=200)
-
-
-    ang_sec = 5
-    for alpha in range(-180, 180, ang_sec):
-            mask_angle = (angle > (alpha-ang_sec/2)) & (angle <= (alpha+ang_sec/2)) & (~segmention["mask"][edge:-edge,edge:-edge])
-            if alpha == -180:
-                  mask_angle = ((angle > (180-ang_sec/2)) | (angle <= (alpha+ang_sec/2))) & (~segmention["mask"][edge:-edge,edge:-edge])
-            if alpha == 180:
-                  mask_angle = ((angle > (alpha-ang_sec/2)) | (angle <= (-180 +ang_sec/2))) & (~segmention["mask"][edge:-edge,edge:-edge])
-                    
-            ori_angle.append(alpha)
-            ori_mean.append(np.mean(ori[mask_angle]))
-            ori_mean_weight.append(np.mean(ori_weight2[mask_angle]))
-            int_mean.append(np.mean(im_fiber_g[mask_angle]))
-            # gradient to center
-            grad_slice.append(np.nanmean(s_norm[mask_angle]))
-            alpha_dev_slice.append(np.nanmean(angle_dev[mask_angle]))
-            alpha_dev_slice_weight.append(np.mean(angle_dev_weighted[mask_angle]))
-            alpha_dev_slice_weight2.append(np.mean(angle_dev_weighted2[mask_angle]))
-
     
+ 
+    # GRADIENT towards center   
+    grad_y = np.gradient(im_fiber_g, axis=0)
+    grad_x = np.gradient(im_fiber_g, axis=1)
+    dx_norm_a = -dy_norm.copy()
+    dy_norm_a = dx_norm.copy()
+    s_to_center = ((grad_x * dx_norm) + (grad_y * dy_norm))**2
+    s_around_center = ((grad_x * dx_norm_a) + (grad_y * dy_norm_a))**2
+    s_norm1 = (s_around_center - s_to_center)/(grad_x**2 + grad_y**2)
+    #s_norm2 = (s_around_center - s_to_center)/(s_around_center + s_to_center)
+    
+    
+    # save values for total image analysis
     # Total Value for complete image (without the mask)
     # averages
     alpha_dev_total1 = np.nanmean(angle_dev[(~segmention["mask"][edge:-edge,edge:-edge])])
@@ -311,19 +291,76 @@ for n,i in tqdm(enumerate(fiber_list)):
       "mean_angle_we_coh.txt", "mean_angle_we_coh_int.txt"]
     for i,v in enumerate(values):
         np.savetxt(os.path.join(out_list[n],strings[i]), [v] ) 
+        
 
+   
+    """
+    Angular sections
+    """
+    ori_angle = []
+    ori_mean = []
+    ori_mean_weight = []
+    int_mean = []
+    proj_angle = []
+    grad_slice = []
+    alpha_dev_slice = []
+    alpha_dev_slice_weight = []
+    alpha_dev_slice_weight2 = []
     
-    
-     # Angular deviation from orietation to center vector
-    #angle_dev= np.arccos(np.abs(dx_norm*min_evec[:,:,1][edge:-edge,edge:-edge] + dy_norm*min_evec[:,:,0][edge:-edge,edge:-edge] ))  *360/(2*np.pi)
-    plt.figure();plt.imshow(angle_dev, origin="upper", cmap="viridis");plt.colorbar(); plt.savefig(os.path.join(out_list[n],"angle_dev.png"), dpi=200)
-    
-    
+    # make the angle analysis in sections
+    ang_sec = angle_sections
+    for alpha in range(-180, 180, ang_sec):
+            mask_angle = (angle > (alpha-ang_sec/2)) & (angle <= (alpha+ang_sec/2)) & (~segmention["mask"][edge:-edge,edge:-edge])
+            if alpha == -180:
+                  mask_angle = ((angle > (180-ang_sec/2)) | (angle <= (alpha+ang_sec/2))) & (~segmention["mask"][edge:-edge,edge:-edge])
+            if alpha == 180:
+                  mask_angle = ((angle > (alpha-ang_sec/2)) | (angle <= (-180 +ang_sec/2))) & (~segmention["mask"][edge:-edge,edge:-edge])            
+            ori_angle.append(alpha)
+            ori_mean.append(np.mean(ori[mask_angle]))
+            ori_mean_weight.append(np.mean(ori_weight2[mask_angle]))
+            int_mean.append(np.mean(im_fiber_g[mask_angle]))
+            grad_slice.append(np.nanmean(s_norm1[mask_angle]))
+            alpha_dev_slice.append(np.nanmean(angle_dev[mask_angle]))
+            alpha_dev_slice_weight.append(np.mean(angle_dev_weighted[mask_angle]))
+            alpha_dev_slice_weight2.append(np.mean(angle_dev_weighted2[mask_angle]))
+
+
     # translating the angles to coordinates in polar plot
     angle_plotting1 = (np.array(ori_angle) * np.pi / 180)
     angle_plotting = angle_plotting1.copy()
     angle_plotting[angle_plotting1 < 0] =  np.abs(angle_plotting[angle_plotting1 < 0])
     angle_plotting[angle_plotting1 > 0] =  np.abs(angle_plotting[angle_plotting1>0] - 2* np.pi)
+
+
+    """
+    save plots here
+    """
+    
+    # angle deviation no weights
+    plt.figure();plt.imshow(angle_dev); plt.colorbar()
+    mx = min_evec[:,:,0] * ori
+    my = min_evec[:,:,1] * ori
+    mx, my, x, y = filter_values(mx, my, abs_filter=0,
+                                   f_dist=15)  #
+    plt.quiver(x, y, mx*300, my*300,scale=1,scale_units="xy", angles="xy")
+    plt.savefig(os.path.join(out_list[n],"angle_dev_quiv.png"), dpi=200)
+    
+     # angle deviation weights intensity + coherency
+    plt.figure();plt.imshow(angle_dev_weighted2); plt.colorbar()
+    mx = min_evec[:,:,0] * ori
+    my = min_evec[:,:,1] * ori
+    mx, my, x, y = filter_values(mx, my, abs_filter=0,
+                                   f_dist=15)  #
+    plt.quiver(x, y, mx*300, my*300,scale=1,scale_units="xy", angles="xy")
+    plt.savefig(os.path.join(out_list[n],"angle_dev_quiv_weight_i_c.png"), dpi=200)
+    
+    # pure coherency
+    plt.figure();plt.imshow(ori); plt.colorbar();  
+    plt.savefig(os.path.join(out_list[n],"coherency.png"), dpi=200)
+    
+     # Angular deviation from orietation to center vector
+    #angle_dev= np.arccos(np.abs(dx_norm*min_evec[:,:,1][edge:-edge,edge:-edge] + dy_norm*min_evec[:,:,0][edge:-edge,edge:-edge] ))  *360/(2*np.pi)
+    plt.figure();plt.imshow(angle_dev, origin="upper", cmap="viridis");plt.colorbar(); plt.savefig(os.path.join(out_list[n],"angle_dev.png"), dpi=200)
 
     # test to appreciate how the angles work in plot
     # a = np.linspace(np.pi, np.pi * 2, len(angle_plotting))
@@ -336,6 +373,12 @@ for n,i in tqdm(enumerate(fiber_list)):
     # plt.title("illustration of how angles in the polar plot work")
 
 
+    plt.figure(figsize=(5,5))
+    axs1 = plt.subplot(111, projection="polar")
+    axs1.plot(angle_plotting, ori_mean_weight, label="Allignment Collagen" , linewidth=2, c = "C0")
+    plt.savefig(os.path.join(out_list[n],"orientation_w.png"), dpi=200)
+    
+    # Triple plot
     plt.figure(figsize=(20,6))
     axs1 = plt.subplot(131, projection="polar")
     axs1.plot(angle_plotting, ori_mean, label="Allignment Collagen" )
@@ -358,8 +401,13 @@ for n,i in tqdm(enumerate(fiber_list)):
     ax3.axis('off')
     ax3.table(cellText = values, rowLabels=strings,bbox=[0.6,0.2,0.7,0.9])
     #plt.tight_layout()
-    plt.savefig(os.path.join(out_list[n],"orientation.png"), dpi=200)
+    plt.savefig(os.path.join(out_list[n],"orientation_triple.png"), dpi=200)
     
+    
+    f = np.percentile(ori,0.75)
+    fig5, ax5 = show_quiver (min_evec[:,:,0] * ori, min_evec[:,:,1] * ori, filter=[f, 15], scale_ratio=0.1,width=0.003, cbar_str="coherency", cmap="viridis")
+    ax5.plot(center_small[0],center_small[1],"o")
+    plt.savefig(os.path.join(out_list[n],"coh_quiver.png"), dpi=200)
     
     
     # plot max +seg
@@ -377,8 +425,8 @@ for n,i in tqdm(enumerate(fiber_list)):
     plt.scatter(center_small[0],center_small[1], c= "w")
     plt.tight_layout()
     plt.savefig(os.path.join(out_list[n],"seg-max.png"), dpi=200)
+    
     # plot overlay
-    fig8= plt.figure() 
     my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
     cmap =  copy(plt.get_cmap('Greys'))
     # everything under vmin gets transparent (all zeros in mask)

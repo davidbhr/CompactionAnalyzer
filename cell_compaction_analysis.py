@@ -137,7 +137,7 @@ def add_colorbar(vmin, vmax, cmap="rainbow", ax=None, cbar_style="not-clickpoint
     return cb0
 
 
-def segment_cell(img, thres=1, gaus1 = 6, gaus2=20):
+def segment_cell(img, thres=1, gaus1 = 11, gaus2=20):
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
     Args:
@@ -192,7 +192,7 @@ cell_list = glob.glob(r"test_data\cell.tif")   #check that order is same to fibe
 sigma_tensor = 14  # sigma of applied gauss filter / window for structure tensor analysis in px
                     # should be in the order of the objects to analyze !! test
 edge = 40   # Cutt of pixels at the edge since values at the border cannot be trusted
-segmention_thres =1  # for cell segemetntion, thres 1 equals normal otsu threshold
+segmention_thres = 1  # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
 sigma_first_blur  = 0.5  # slight first bluring of whole image before using structure tensor
 angle_sections = 5   # size of angle sections in degree 
 shell_width = 14   # pixel width of distance shells
@@ -224,7 +224,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     im_fiber_g = gaussian(im_fiber_n, sigma=sigma_first_blur)     # blur fiber image slightly (test with local gauss - similar)
     
     # segment cell
-    segmention = segment_cell(im_cell_n, thres= segmention_thres ) # thres 1 equals normal otsu threshold
+    segmention = segment_cell(im_cell_n, thres= segmention_thres, gaus1 = 11, gaus2=20)    # thres 1 equals normal otsu threshold
     center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
     
     # Maybe ToDo : set segmention to nan for effects close to cell -maybe not since more problems ..
@@ -370,8 +370,8 @@ for n,i in tqdm(enumerate(fiber_list)):
         
     # norm intensities   
     dist_int = np.array(dist_int)/ np.max(np.array(dist_int))    
-    # Calculate value where ntensity drops 10%
-    distintdrop = np.abs(dist_int-0.9)
+    # Calculate value where ntensity drops 20%
+    distintdrop = np.abs(dist_int-0.75)
     # distance where it drops   
     halflife_int =  midofshells[np.where(distintdrop == np.nanmin(distintdrop.min()))] [0] 
     # if decrease is not within range (minimum equals last value) then set to nan
@@ -379,7 +379,7 @@ for n,i in tqdm(enumerate(fiber_list)):
         halflife_int = np.nan
   
     
-    # # Calculate value where orientation drops to 10% within maxorientation(min) to 45° (random) range 
+    # # Calculate value where orientation drops to 20% within maxorientation(min) to 45° (random) range 
     # difference to 45 degree instead of min-max range    
     # calculate halflife of maximal orientation over distance
     # difference to 45 degree for all
@@ -387,18 +387,17 @@ for n,i in tqdm(enumerate(fiber_list)):
     # maximal orientation
     diffmax = np.max(diffdist)
     diffmax_pos = np.where(diffmax==diffdist)[0][0]
-    # difference to the half of maximal orientation  TODO Maybe use 2/3
-    diff2 = np.abs(diffdist-(0.9*diffmax))
+    # difference 
+    diff2 = np.abs(diffdist-(0.75*diffmax))
     diff2[:diffmax_pos] = np.nan    # only look at distances on the right side /further out 
-    # half orientation    
     halflife_ori =  midofshells[np.where(diff2 == np.nanmin(diff2))]     
     
     # save distane arrays
     np.savetxt(os.path.join(out_list[n],"shells-mid_px.txt"), midofshells)
     np.savetxt(os.path.join(out_list[n],"dist_int.txt"), dist_int)
     np.savetxt(os.path.join(out_list[n],"dist_angle.txt"), dist_angle)
-    np.savetxt(os.path.join(out_list[n],"distdrop10_ori_px.txt"), [halflife_ori])
-    np.savetxt(os.path.join(out_list[n],"distdrop10_int_px.txt"), [halflife_int])   
+    np.savetxt(os.path.join(out_list[n],"distdrop25_ori_px.txt"), [halflife_ori])
+    np.savetxt(os.path.join(out_list[n],"distdrop25_int_px.txt"), [halflife_int])   
     
 
     
@@ -546,7 +545,8 @@ for n,i in tqdm(enumerate(fiber_list)):
     plt.xlabel("distance (px)")
     plt.ylabel("intensity")
     plt.tight_layout()
-    plt.show()
+    plt.savefig(os.path.join(out_list[n],"distance-shell.png"), dpi=200)
+
    
     
      # plot overlay version 2

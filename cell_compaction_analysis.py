@@ -1,13 +1,13 @@
 """
 Created on Wed Jul  1 15:45:34 2020
 
-@author: david + andi
+@author: david boehringer + andreas bauer
 
 Evaluates the fiber orientation around cells that compact collagen tissue.
-Applying the Structure tensor and evaluates the orientation within 
-angle sections around the segmented cell center.
+Evaluates the orientation of collagen fibers towards the segmented cell center 
+by using the structure tensor (globally / in angle sections / within distance shells).
 
-Needs an Image of cell and one image of the fibers
+Needs an Image of the cell and one image of the fibers (e.g. maximum projection of small stack)
 
 """
 
@@ -32,6 +32,8 @@ from PIL import Image
 from copy import copy
 import imageio
 from skimage import color
+from scipy.ndimage.morphology import distance_transform_edt
+#import skfmm    #      pip install scikit-fmm
 
 def set_vmin_vmax(x, vmin, vmax):
     if not isinstance(vmin, (float, int)):
@@ -187,13 +189,13 @@ cell_list = glob.glob(r"test_data\cell.tif")   #check that order is same to fibe
 
 
 # Set Parameters 
-sigma_tensor = 15  # sigma of applied gauss filter / window for structure tensor analysis in px
+sigma_tensor = 14  # sigma of applied gauss filter / window for structure tensor analysis in px
                     # should be in the order of the objects to analyze !! test
 edge = 40   # Cutt of pixels at the edge since values at the border cannot be trusted
 segmention_thres =1  # for cell segemetntion, thres 1 equals normal otsu threshold
 sigma_first_blur  = 0.5  # slight first bluring of whole image before using structure tensor
 angle_sections = 5   # size of angle sections in degree 
-
+shell_width = 14   # pixel width of distance shells
 
 
 # create output folder accordingly
@@ -220,10 +222,15 @@ for n,i in tqdm(enumerate(fiber_list)):
     im_cell_n = normalize(im_cell, norm1, norm2)
     im_fiber_n = normalize(im_fiber, norm1, norm2)  
     im_fiber_g = gaussian(im_fiber_n, sigma=sigma_first_blur)     # blur fiber image slightly (test with local gauss - similar)
+    
     # segment cell
     segmention = segment_cell(im_cell_n, thres= segmention_thres ) # thres 1 equals normal otsu threshold
     center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
-
+    
+    # Maybe ToDo : set segmention to nan for effects close to cell -maybe not since more problems ..
+    #im_fiber_g[segmention["mask"]] = np.nan
+    #plt.imshow(im_fiber_g)
+    
     """
     Structure tensor
     """
@@ -231,20 +238,26 @@ for n,i in tqdm(enumerate(fiber_list)):
 
     # get structure tensor
     ori, max_evec, min_evec, max_eval, min_eval = analyze_local(im_fiber_g, sigma=sigma_tensor, size=0, filter_type="gaussian")
+    # cut off edges as specified
     ori, max_evec, min_evec, max_eval, min_eval = ori[edge:-edge,edge:-edge], max_evec[edge:-edge,edge:-edge], min_evec[edge:-edge,edge:-edge], \
                                                   max_eval[edge:-edge,edge:-edge], min_eval[edge:-edge,edge:-edge]
     """
     coordinates
     """
     
-    # Calculate Angle + Distances
+    # Calculate Angle + Distances 
     y,x = np.indices(ori.shape)
     dx = x - center_small[0]
     dy = y - center_small[1]
-    distance = np.sqrt(dx ** 2 + dy ** 2)
+    distance = np.sqrt(dx ** 2 + dy ** 2)  # dist to center
     angle = np.arctan2(dy, dx) *360/(2*np.pi)
     dx_norm = (dx/distance)
     dy_norm = (dy/distance)
+    dist_surface = distance_transform_edt(~segmention["mask"])[edge:-edge,edge:-edge] # dist to surface
+
+    
+   
+    
     
     """
     total image analysis
@@ -253,7 +266,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     # Angular deviation from orietation to center vector
     angle_dev = np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) * 360/(2*np.pi)
     # weighting by coherence
-    angle_dev_weighted = (angle_dev * ori) / np.mean(ori)     # !!!! WRONG ?
+    angle_dev_weighted = (angle_dev * ori) / np.mean(ori)     # no angle values anymore but the mean later is again an angle
     # weighting by coherence and image intensity
     im_fiber_g = im_fiber_g[edge:-edge,edge:-edge]
     # could also use non filtered image
@@ -331,7 +344,64 @@ for n,i in tqdm(enumerate(fiber_list)):
     angle_plotting[angle_plotting1 < 0] =  np.abs(angle_plotting[angle_plotting1 < 0])
     angle_plotting[angle_plotting1 > 0] =  np.abs(angle_plotting[angle_plotting1>0] - 2* np.pi)
 
+    """
+    Distance Evaluation
+    """
 
+    shells = np.arange(0, dist_surface.max(), shell_width)
+    midofshells = (shells + shell_width/2)[:-1]
+    allshellmasks = []
+    dist_int = []
+    dist_angle = []
+    
+    # make the distance shell analysis
+    for i in range(len(shells)-1):
+        # mask of individual shells and accumulation of all points closer to the correponding cell
+        mask_shell = (dist_surface > (shells[i])) & (dist_surface <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])  
+        mask_shell_lower=  (dist_surface <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])
+        allshellmasks.append(mask_shell)
+        # calculate mintensity and angle deviation within the growing shells (always within start shell to highest shell)
+        dist_angle.append(np.mean(angle_dev[mask_shell_lower])  )
+        # MAYBE TODO:  weight by coherency+Intensity   within shell instead of the pure angle ?
+        # mean intensity
+        dist_int.append(np.mean(im_fiber_g[mask_shell_lower]))
+     
+        
+        
+    # norm intensities   
+    dist_int = np.array(dist_int)/ np.max(np.array(dist_int))    
+    # Calculate value where ntensity drops 10%
+    distintdrop = np.abs(dist_int-0.9)
+    # distance where it drops   
+    halflife_int =  midofshells[np.where(distintdrop == np.nanmin(distintdrop.min()))] [0] 
+    # if decrease is not within range (minimum equals last value) then set to nan
+    if halflife_int == midofshells[-1]:
+        halflife_int = np.nan
+  
+    
+    # # Calculate value where orientation drops to 10% within maxorientation(min) to 45° (random) range 
+    # difference to 45 degree instead of min-max range    
+    # calculate halflife of maximal orientation over distance
+    # difference to 45 degree for all
+    diffdist = np.abs(np.array(dist_angle)-45)  
+    # maximal orientation
+    diffmax = np.max(diffdist)
+    diffmax_pos = np.where(diffmax==diffdist)[0][0]
+    # difference to the half of maximal orientation  TODO Maybe use 2/3
+    diff2 = np.abs(diffdist-(0.9*diffmax))
+    diff2[:diffmax_pos] = np.nan    # only look at distances on the right side /further out 
+    # half orientation    
+    halflife_ori =  midofshells[np.where(diff2 == np.nanmin(diff2))]     
+    
+    # save distane arrays
+    np.savetxt(os.path.join(out_list[n],"shells-mid_px.txt"), midofshells)
+    np.savetxt(os.path.join(out_list[n],"dist_int.txt"), dist_int)
+    np.savetxt(os.path.join(out_list[n],"dist_angle.txt"), dist_angle)
+    np.savetxt(os.path.join(out_list[n],"distdrop10_ori_px.txt"), [halflife_ori])
+    np.savetxt(os.path.join(out_list[n],"distdrop10_int_px.txt"), [halflife_int])   
+    
+
+    
     """
     save plots here
     """
@@ -371,13 +441,16 @@ for n,i in tqdm(enumerate(fiber_list)):
     # ax.plot((np.array(ori_angle) * np.pi / 180), b, label="ori_angle directly")
     # plt.legend()
     # plt.title("illustration of how angles in the polar plot work")
+    
+    
+    
 
 
     plt.figure(figsize=(5,5))
     axs1 = plt.subplot(111, projection="polar")
     axs1.plot(angle_plotting, ori_mean_weight, label="Allignment Collagen" , linewidth=2, c = "C0")
     plt.savefig(os.path.join(out_list[n],"orientation_w.png"), dpi=200)
-    
+ 
     # Triple plot
     plt.figure(figsize=(20,6))
     axs1 = plt.subplot(131, projection="polar")
@@ -441,5 +514,70 @@ for n,i in tqdm(enumerate(fiber_list)):
     plt.scatter(center_small[0],center_small[1], c= "w")
     plt.tight_layout()
     plt.savefig(os.path.join(out_list[n],"struc-tens-o.png"), dpi=200)
+    
+    
+    # plot shells
+    plt.figure()
+    cmap_list = ["Greens","Greys","Reds","Oranges","Blues","PuBu","GnBu"]
+    for s in  range(len(allshellmasks)):
+        my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
+        cmap =  copy(plt.get_cmap(cmap_list[s%len(cmap_list)]))
+        # everything under vmin gets transparent (all zeros in mask)
+        cmap.set_under('k', alpha=1)
+        #everything else visible
+        cmap.set_over('k', alpha=0)
+        # plot mask and center
+        plt.imshow(allshellmasks[-s], cmap = cmap ,  origin="upper", alpha= 0.2 ) #- 0.2* s/len(allshellmasks) )
+    plt.savefig(os.path.join(out_list[n],"shells.png"), dpi=200)   
+        
+     # plot distance shell analysis    
+    plt.figure(figsize=(7,3))
+    plt.subplot(121)    
+    plt.plot(midofshells,dist_angle,"o-", c="lightgreen",label="orientation")
+    plt.plot([halflife_ori,halflife_ori],[np.min(dist_angle),np.max(dist_angle)], c="orange", linestyle="--")
+    plt.grid()
+    plt.tight_layout()
+    plt.xlabel("distance (px)")
+    plt.ylabel("orientation")
+    plt.subplot(122)    
+    plt.plot(midofshells,dist_int,"o-", c="plum", label="intensity")
+    plt.grid()
+    plt.plot([halflife_int,halflife_int],[np.min(dist_int),np.max(dist_int)], c="orange", linestyle="--")
+    plt.xlabel("distance (px)")
+    plt.ylabel("intensity")
+    plt.tight_layout()
+    plt.show()
+   
+    
+     # plot overlay version 2
+    my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
+    cmap =  copy(plt.get_cmap('Greys'))
+    # everything under vmin gets transparent (all zeros in mask)
+    cmap.set_under('k', alpha=0)
+    #everything else visible
+    cmap.set_over('k', alpha=1)
+    # plot mask and center
+    show_quiver (min_evec[:,:,0] * ori, min_evec[:,:,1] * ori, filter=[0, 8],alpha=0 , scale_ratio=0.1,width=0.0012, plot_cbar=False, cbar_str="coherency", cmap="viridis")
+    plt.imshow(normalize(im_fiber_n[edge:-edge,edge:-edge]), origin="upper")
+    plt.imshow(segmention["mask"][edge:-edge,edge:-edge], cmap=cmap, norm = my_norm, origin="upper")
+    center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
+    plt.scatter(center_small[0],center_small[1], c= "w")
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_list[n],"struc-tens-o2.png"), dpi=200)
+    
+    # fig7= plt.figure() 
+    # my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
+    # cmap =  copy(plt.get_cmap('Greys'))
+    # # everything under vmin gets transparent (all zeros in mask)
+    # cmap.set_under('k', alpha=0)
+    # #everything else visible
+    # cmap.set_over('k', alpha=1)
+    # # plot mask and center
+    # plt.subplot(121)
+    # plt.imshow(dist_surface, cmap=cmap, norm = my_norm, origin="upper")
+    # plt.subplot(122)
+    # plt.imshow(normalize(im_fiber_n[edge:-edge,edge:-edge]), origin="upper")
+    
+    
     
     plt.close("all")

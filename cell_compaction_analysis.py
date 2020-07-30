@@ -137,7 +137,7 @@ def add_colorbar(vmin, vmax, cmap="rainbow", ax=None, cbar_style="not-clickpoint
     return cb0
 
 
-def segment_cell(img, thres=1):
+def segment_cell(img, thres=1, gaus1 = 6, gaus2=20):
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
     Args:
@@ -149,7 +149,7 @@ def segment_cell(img, thres=1):
     height = img.shape[0]
     width = img.shape[1]
     # local gaussian   
-    img = gaussian(img, sigma=12) - gaussian(img, sigma=40)
+    img = gaussian(img, sigma=gaus1) - gaussian(img, sigma=gaus2)
     # segment cell
     mask = img > threshold_otsu(img) * thres    #[::-1]
     # remove other objects

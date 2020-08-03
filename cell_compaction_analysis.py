@@ -33,7 +33,7 @@ from copy import copy
 import imageio
 from skimage import color
 from scipy.ndimage.morphology import distance_transform_edt
-#import skfmm    #      pip install scikit-fmm
+from natsort import natsorted
 
 def set_vmin_vmax(x, vmin, vmax):
     if not isinstance(vmin, (float, int)):
@@ -184,13 +184,16 @@ def segment_cell(img, thres=1, gaus1 = 11, gaus2=20):
 # read in list of cells and list of fibers to evaluate (must be in same order)
 # use glob.glob or individual list of paths []    
 
-fiber_list = glob.glob(r"test_data\fiber.tif")   #fiber_random_c24
-cell_list = glob.glob(r"test_data\cell.tif")   #check that order is same to fiber
+fiber_list = natsorted(glob.glob(r"test_data\fiber.tif"))   #fiber_random_c24
+cell_list = natsorted(glob.glob(r"test_data\cell.tif"))   #check that order is same to fiber
+
+scale =  1 # um per pixel
 
 
 # Set Parameters 
-sigma_tensor = 14  # sigma of applied gauss filter / window for structure tensor analysis in px
-                    # should be in the order of the objects to analyze !! test
+sigma_tensor = 7/scale  # sigma of applied gauss filter / window for structure tensor analysis in px
+                    # should be in the order of the objects to analyze !! 
+                    # 7 um for collagen 
 edge = 40   # Cutt of pixels at the edge since values at the border cannot be trusted
 segmention_thres = 1  # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
 sigma_first_blur  = 0.5  # slight first bluring of whole image before using structure tensor
@@ -398,7 +401,10 @@ for n,i in tqdm(enumerate(fiber_list)):
     np.savetxt(os.path.join(out_list[n],"dist_angle.txt"), dist_angle)
     np.savetxt(os.path.join(out_list[n],"distdrop25_ori_px.txt"), [halflife_ori])
     np.savetxt(os.path.join(out_list[n],"distdrop25_int_px.txt"), [halflife_int])   
-    
+    try:
+        np.savetxt(os.path.join(out_list[n],"meanangle_within10shells.txt"), [dist_angle[9]]) 
+    except:
+        pass
 
     
     """
@@ -564,6 +570,11 @@ for n,i in tqdm(enumerate(fiber_list)):
     plt.scatter(center_small[0],center_small[1], c= "w")
     plt.tight_layout()
     plt.savefig(os.path.join(out_list[n],"struc-tens-o2.png"), dpi=200)
+    
+    plt.figure()
+    plt.imshow(im_cell_n)
+    plt.savefig(os.path.join(out_list[n],"cell-raw.png"), dpi=200)
+    
     
     # fig7= plt.figure() 
     # my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  

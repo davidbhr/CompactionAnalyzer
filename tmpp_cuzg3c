@@ -137,14 +137,12 @@ def add_colorbar(vmin, vmax, cmap="rainbow", ax=None, cbar_style="not-clickpoint
     return cb0
 
 
-def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmentation = False):
+def segment_cell(img, thres=1, gaus1 = 10, gaus2=40):
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
     Args:
         img(array): Grayscale image as a Numpy array
-        thres(float): To adjust the segmentation, keep 1
-        iterations: iterations of closing steps , might increase to get more 
-        robust segmentation but less precise segmentation, by default 1
+        thres(float): To adjust the segmentation
     Returns:
         dict: Dictionary with keys: mask, radius, centroid (x/y)
     """
@@ -158,9 +156,9 @@ def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmenta
     
     # remove other objects
     
-    mask = scipy_morph.binary_closing(mask, iterations=iterartions)
+    mask = scipy_morph.binary_closing(mask, iterations=8)
     mask = remove_small_objects(mask, min_size=100)
-    mask = scipy_morph.binary_dilation(mask, iterations=iterartions)
+    mask = scipy_morph.binary_dilation(mask, iterations=8)
     mask = scipy_morph.binary_fill_holes(mask)
     
 
@@ -172,11 +170,10 @@ def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmenta
     mask = (labeled_mask == distance_to_center.argmin() + 1)
 
     # show segmentation
-    if show_segmentation:
-        plt.figure()
-        plt.subplot(121), plt.imshow(img)
-        plt.subplot(122), plt.imshow(mask)
-
+    plt.subplot(121), plt.imshow(img)
+    plt.subplot(122), plt.imshow(mask)
+    
+    fsdfdsfds
     
     
     # determine radius of spheroid

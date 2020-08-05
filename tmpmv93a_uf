@@ -137,7 +137,7 @@ def add_colorbar(vmin, vmax, cmap="rainbow", ax=None, cbar_style="not-clickpoint
     return cb0
 
 
-def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmentation = False):
+def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1):
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
     Args:
@@ -172,11 +172,10 @@ def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmenta
     mask = (labeled_mask == distance_to_center.argmin() + 1)
 
     # show segmentation
-    if show_segmentation:
-        plt.figure()
-        plt.subplot(121), plt.imshow(img)
-        plt.subplot(122), plt.imshow(mask)
-
+    plt.subplot(121), plt.imshow(img)
+    plt.subplot(122), plt.imshow(mask)
+    
+    fsdfdsfds
     
     
     # determine radius of spheroid

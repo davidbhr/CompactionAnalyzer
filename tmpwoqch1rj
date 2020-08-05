@@ -173,10 +173,9 @@ def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmenta
 
     # show segmentation
     if show_segmentation:
-        plt.figure()
         plt.subplot(121), plt.imshow(img)
         plt.subplot(122), plt.imshow(mask)
-
+        stop
     
     
     # determine radius of spheroid

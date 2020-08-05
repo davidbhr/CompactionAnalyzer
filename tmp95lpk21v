@@ -25,7 +25,7 @@ from tqdm import tqdm
 import matplotlib
 import scipy.ndimage.morphology as scipy_morph
 import scipy.ndimage.measurements as scipy_meas
-from skimage.filters import gaussian, threshold_otsu, threshold_yen
+from skimage.filters import gaussian, threshold_otsu
 from skimage.morphology import remove_small_objects
 from skimage.exposure import adjust_gamma   
 from PIL import Image
@@ -137,14 +137,12 @@ def add_colorbar(vmin, vmax, cmap="rainbow", ax=None, cbar_style="not-clickpoint
     return cb0
 
 
-def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmentation = False):
+def segment_cell(img, thres=1, gaus1 = 10, gaus2=40):
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
     Args:
         img(array): Grayscale image as a Numpy array
-        thres(float): To adjust the segmentation, keep 1
-        iterations: iterations of closing steps , might increase to get more 
-        robust segmentation but less precise segmentation, by default 1
+        thres(float): To adjust the segmentation
     Returns:
         dict: Dictionary with keys: mask, radius, centroid (x/y)
     """
@@ -153,14 +151,12 @@ def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmenta
     # local gaussian   
     img = np.abs(gaussian(img, sigma=gaus1) - gaussian(img, sigma=gaus2))
     # segment cell
-    # mask = img > threshold_otsu(img) * thres    #[::-1]
-    mask = img > threshold_yen(img) * thres    #[::-1]
-    
+    mask = img > threshold_otsu(img) * thres    #[::-1]
     # remove other objects
     
-    mask = scipy_morph.binary_closing(mask, iterations=iterartions)
-    mask = remove_small_objects(mask, min_size=100)
-    mask = scipy_morph.binary_dilation(mask, iterations=iterartions)
+    mask = scipy_morph.binary_closing(mask, iterations=3)
+    mask = remove_small_objects(mask, min_size=1000)
+    mask = scipy_morph.binary_dilation(mask, iterations=3)
     mask = scipy_morph.binary_fill_holes(mask)
     
 
@@ -171,14 +167,6 @@ def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmenta
 
     mask = (labeled_mask == distance_to_center.argmin() + 1)
 
-    # show segmentation
-    if show_segmentation:
-        plt.figure()
-        plt.subplot(121), plt.imshow(img)
-        plt.subplot(122), plt.imshow(mask)
-
-    
-    
     # determine radius of spheroid
     radius = np.sqrt(np.sum(mask) / np.pi)
 
@@ -208,7 +196,7 @@ sigma_tensor = 7/scale  # sigma of applied gauss filter / window for structure t
                     # 7 um for collagen 
 edge = 40   # Cutt of pixels at the edge since values at the border cannot be trusted
 segmention_thres = 1  # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
-sigma_first_blur  = 0.5 # slight first bluring of whole image before using structure tensor
+sigma_first_blur  = 2  # slight first bluring of whole image before using structure tensor
 angle_sections = 5   # size of angle sections in degree 
 shell_width =  5/scale   # pixel width of distance shells
 

@@ -25,7 +25,7 @@ from tqdm import tqdm
 import matplotlib
 import scipy.ndimage.morphology as scipy_morph
 import scipy.ndimage.measurements as scipy_meas
-from skimage.filters import gaussian, threshold_otsu, threshold_yen
+from skimage.filters import gaussian, threshold_otsu
 from skimage.morphology import remove_small_objects
 from skimage.exposure import adjust_gamma   
 from PIL import Image
@@ -137,14 +137,12 @@ def add_colorbar(vmin, vmax, cmap="rainbow", ax=None, cbar_style="not-clickpoint
     return cb0
 
 
-def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmentation = False):
+def segment_cell(img, thres=1, gaus1 = 10, gaus2=40):
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
     Args:
         img(array): Grayscale image as a Numpy array
-        thres(float): To adjust the segmentation, keep 1
-        iterations: iterations of closing steps , might increase to get more 
-        robust segmentation but less precise segmentation, by default 1
+        thres(float): To adjust the segmentation
     Returns:
         dict: Dictionary with keys: mask, radius, centroid (x/y)
     """
@@ -153,14 +151,12 @@ def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmenta
     # local gaussian   
     img = np.abs(gaussian(img, sigma=gaus1) - gaussian(img, sigma=gaus2))
     # segment cell
-    # mask = img > threshold_otsu(img) * thres    #[::-1]
-    mask = img > threshold_yen(img) * thres    #[::-1]
-    
+    mask = img > threshold_otsu(img) * thres    #[::-1]
     # remove other objects
     
-    mask = scipy_morph.binary_closing(mask, iterations=iterartions)
-    mask = remove_small_objects(mask, min_size=100)
-    mask = scipy_morph.binary_dilation(mask, iterations=iterartions)
+    mask = scipy_morph.binary_closing(mask, iterations=3)
+    mask = remove_small_objects(mask, min_size=1000)
+    mask = scipy_morph.binary_dilation(mask, iterations=3)
     mask = scipy_morph.binary_fill_holes(mask)
     
 
@@ -171,14 +167,6 @@ def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmenta
 
     mask = (labeled_mask == distance_to_center.argmin() + 1)
 
-    # show segmentation
-    if show_segmentation:
-        plt.figure()
-        plt.subplot(121), plt.imshow(img)
-        plt.subplot(122), plt.imshow(mask)
-
-    
-    
     # determine radius of spheroid
     radius = np.sqrt(np.sum(mask) / np.pi)
 
@@ -199,7 +187,7 @@ def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmenta
 fiber_list = natsorted(glob.glob(r"test_data\fiber.tif"))   #fiber_random_c24
 cell_list = natsorted(glob.glob(r"test_data\cell.tif"))   #check that order is same to fiber
 
-scale =  0.65 # um per pixel
+scale =  1 # um per pixel
 
 
 # Set Parameters 
@@ -208,9 +196,9 @@ sigma_tensor = 7/scale  # sigma of applied gauss filter / window for structure t
                     # 7 um for collagen 
 edge = 40   # Cutt of pixels at the edge since values at the border cannot be trusted
 segmention_thres = 1  # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
-sigma_first_blur  = 0.5 # slight first bluring of whole image before using structure tensor
+sigma_first_blur  = 0.5  # slight first bluring of whole image before using structure tensor
 angle_sections = 5   # size of angle sections in degree 
-shell_width =  5/scale   # pixel width of distance shells
+shell_width = 14   # pixel width of distance shells
 
 
 # create output folder accordingly
@@ -368,8 +356,6 @@ for n,i in tqdm(enumerate(fiber_list)):
     allshellmasks = []
     dist_int = []
     dist_angle = []
-    dist_int_exclusive = []
-    dist_angle_exclusive = []
     
     # make the distance shell analysis
     for i in range(len(shells)-1):
@@ -378,19 +364,18 @@ for n,i in tqdm(enumerate(fiber_list)):
         mask_shell_lower=  (dist_surface <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])
         allshellmasks.append(mask_shell)
         # calculate mintensity and angle deviation within the growing shells (always within start shell to highest shell)
-        dist_angle.append(np.mean(angle_dev[mask_shell_lower])  ) # accumulation of lower shells
-        dist_angle_exclusive.append(np.mean(angle_dev[mask_shell])  )    # exclusively in certain shell
+        dist_angle.append(np.mean(angle_dev[mask_shell])  )
         # MAYBE TODO:  weight by coherency+Intensity   within shell instead of the pure angle ?
         # mean intensity
-        dist_int.append(np.mean(im_fiber_g[mask_shell_lower]))          # accumulation of lower shells
-        dist_int_exclusive.append(np.mean(im_fiber_g[mask_shell])  )    # exclusively in certain shell
+        dist_int.append(np.mean(im_fiber_g[mask_shell]))
+     
         
         
     # norm intensities   
     dist_int = np.array(dist_int)/ np.max(np.array(dist_int))    
     # Calculate value where ntensity drops 20%
     distintdrop = np.abs(dist_int-0.75)
-    # distance where int  drops   to 75% 
+    # distance where it drops   
     halflife_int =  midofshells[np.where(distintdrop == np.nanmin(distintdrop.min()))] [0] 
     # if decrease is not within range (minimum equals last value) then set to nan
     if halflife_int == midofshells[-1]:
@@ -405,14 +390,10 @@ for n,i in tqdm(enumerate(fiber_list)):
     # maximal orientation
     diffmax = np.max(diffdist)
     diffmax_pos = np.where(diffmax==diffdist)[0][0]
-    # difference  angle drops to 75% 
+    # difference 
     diff2 = np.abs(diffdist-(0.75*diffmax))
     diff2[:diffmax_pos] = np.nan    # only look at distances on the right side /further out 
-    halflife_ori =  midofshells[np.where(diff2 == np.nanmin(diff2))]    
-    # if decrease is not within range (minimum equals last value) then set to nan
-    if halflife_ori == midofshells[-1]:
-        halflife_ori = np.nan
-        
+    halflife_ori =  midofshells[np.where(diff2 == np.nanmin(diff2))]     
     
     # save distane arrays
     np.savetxt(os.path.join(out_list[n],"shells-mid_px.txt"), midofshells)
@@ -570,25 +551,8 @@ for n,i in tqdm(enumerate(fiber_list)):
     plt.xlabel("distance (px)")
     plt.ylabel("intensity")
     plt.tight_layout()
-    plt.savefig(os.path.join(out_list[n],"distance-shell-accum.png"), dpi=200)
-    
-    # plot distance shell analysis    
-    plt.figure(figsize=(7,3))
-    plt.subplot(121)    
-    plt.plot(midofshells,dist_angle_exclusive,"o-", c="lightgreen",label="orientation")
-    #plt.plot([halflife_ori,halflife_ori],[np.min(dist_angle),np.max(dist_angle)], c="orange", linestyle="--")
-    plt.grid()
-    plt.tight_layout()
-    plt.xlabel("distance (px)")
-    plt.ylabel("orientation")
-    plt.subplot(122)    
-    plt.plot(midofshells,dist_int_exclusive,"o-", c="plum", label="intensity")
-    plt.grid()
-    #plt.plot([halflife_int,halflife_int],[np.min(dist_int),np.max(dist_int)], c="orange", linestyle="--")
-    plt.xlabel("distance (px)")
-    plt.ylabel("intensity")
-    plt.tight_layout()
-    plt.savefig(os.path.join(out_list[n],"distance-shell-exclusive.png"), dpi=200)
+    plt.savefig(os.path.join(out_list[n],"distance-shell.png"), dpi=200)
+
    
     
      # plot overlay version 2
@@ -627,4 +591,4 @@ for n,i in tqdm(enumerate(fiber_list)):
     
     
     
-    #plt.close("all")
+    plt.close("all")

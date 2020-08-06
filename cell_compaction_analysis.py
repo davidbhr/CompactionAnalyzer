@@ -137,7 +137,7 @@ def add_colorbar(vmin, vmax, cmap="rainbow", ax=None, cbar_style="not-clickpoint
     return cb0
 
 
-def segment_cell(img, thres=1, gaus1 = 10, gaus2=40, iterartions=1,show_segmentation = False):
+def segment_cell(img, thres=1, gaus1 = 4, gaus2=40, iterartions=1,show_segmentation = False):
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
     Args:
@@ -387,7 +387,7 @@ for n,i in tqdm(enumerate(fiber_list)):
         
         
     # norm intensities   
-    dist_int = np.array(dist_int)/ np.max(np.array(dist_int))    
+    dist_int = np.array(dist_int)/ np.nanmax(np.array(dist_int))    
     # Calculate value where ntensity drops 20%
     distintdrop = np.abs(dist_int-0.75)
     # distance where int  drops   to 75% 
@@ -403,7 +403,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     # difference to 45 degree for all
     diffdist = np.abs(np.array(dist_angle)-45)  
     # maximal orientation
-    diffmax = np.max(diffdist)
+    diffmax = np.nanmax(diffdist)
     diffmax_pos = np.where(diffmax==diffdist)[0][0]
     # difference  angle drops to 75% 
     diff2 = np.abs(diffdist-(0.75*diffmax))

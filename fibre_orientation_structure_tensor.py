@@ -15,7 +15,7 @@ import numpy as np
 
 from skimage.draw import circle
 from scipy.signal import convolve2d
-
+from utilities import  convolution_fitler_with_nan
 
 def rotate_vector_field(p, r):
     '''
@@ -99,9 +99,9 @@ def get_structure_tensor_gaussian(im, sigma):
     grad_x = np.gradient(im, axis=1)
 
     # orientation tensor
-    ot_xx = gaussian(grad_x * grad_x, sigma=sigma)
-    ot_yx = gaussian(grad_y * grad_x, sigma=sigma)  # ot_yx an dot_xy are mathematically the same
-    ot_yy = gaussian(grad_y * grad_y, sigma=sigma)
+    ot_xx = convolution_fitler_with_nan(grad_x * grad_x, gaussian, sigma=sigma)
+    ot_yx = convolution_fitler_with_nan(grad_y * grad_x, gaussian, sigma=sigma)  # ot_yx an dot_xy are mathematically the same
+    ot_yy = convolution_fitler_with_nan(grad_y * grad_y, gaussian, sigma=sigma)
 
     return ot_xx, ot_yx, ot_yy
 
@@ -121,9 +121,9 @@ def get_structure_tensor_uniform(im, size):
     grad_x = np.gradient(im, axis=1)
 
     # orientation tensor
-    ot_xx = uniform_filter(grad_x * grad_x, size=(size, size))
-    ot_yx = uniform_filter(grad_y * grad_x, size=(size, size))
-    ot_yy = uniform_filter(grad_y * grad_y, size=(size, size))
+    ot_xx = convolution_fitler_with_nan(grad_x * grad_x, uniform_filter, size=(size, size))
+    ot_yx = convolution_fitler_with_nan(grad_y * grad_x, uniform_filter,  size=(size, size))
+    ot_yy = convolution_fitler_with_nan(grad_y * grad_y, uniform_filter,  size=(size, size))
 
     return ot_xx, ot_yx, ot_yy
 
@@ -433,15 +433,3 @@ if __name__ == "__main__":
     # save by fig2.savefig("example.png")
 
 
-'''
-# spatial distribution for fibre orientation
-# requires pyTFM
-import pyTFM.plotting
-im = plt.imread("/evaluation_polar_coordinates/Series001_z000_ch00.tif")[:,:,0]
-ori, max_evec, min_evec, max_eval, min_eval = analyze_local(im, sigma=8, size=0, filter_type="gaussian")
-f = np.percentile(ori,0.8)
-fig, ax =  pyTFM.plotting.show_quiver(min_evec[:, :, 0] * ori, min_evec[:, :, 1] * ori, filter=[f, 12],
-                      scale_factor=0.1,
-                      width=0.003, cbar_str="coherency", cmap="viridis")
-plt.figure();plt.imshow(im)
-'''

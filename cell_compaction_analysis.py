@@ -210,7 +210,7 @@ edge = 40   # Cutt of pixels at the edge since values at the border cannot be tr
 segmention_thres = 1  # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
 sigma_first_blur  = 0.5 # slight first bluring of whole image before using structure tensor
 angle_sections = 5   # size of angle sections in degree 
-shell_width =  5/scale   # pixel width of distance shells
+shell_width =  20/scale   # pixel width of distance shells
 
 
 # create output folder accordingly
@@ -283,7 +283,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     # Angular deviation from orietation to center vector
     angle_dev = np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) * 360/(2*np.pi)
     # weighting by coherence
-    angle_dev_weighted = (angle_dev * ori) / np.mean(ori)     # no angle values anymore but the mean later is again an angle
+    angle_dev_weighted = (angle_dev * ori) / np.nanmean(ori)     # no angle values anymore but the mean later is again an angle
     # weighting by coherence and image intensity
     im_fiber_g = im_fiber_g[edge:-edge,edge:-edge]
     # could also use non filtered image
@@ -291,9 +291,9 @@ for n,i in tqdm(enumerate(fiber_list)):
     # use a threshold in the intensity image// only coherence and orientation vectors
     # corresponding to pixels in the intesity iamage above a threshold are considered.
     weight_image = gaussian(im_fiber_g,sigma=15)
-    angle_dev_weighted2 = (angle_dev_weighted *weight_image) / np.mean(weight_image)
+    angle_dev_weighted2 = (angle_dev_weighted *weight_image) / np.nanmean(weight_image)
     # also weighting the coherency like this
-    ori_weight2 = (ori * weight_image) / np.mean(weight_image)
+    ori_weight2 = (ori * weight_image) / np.nanmean(weight_image)
     
  
     # GRADIENT towards center   
@@ -346,13 +346,13 @@ for n,i in tqdm(enumerate(fiber_list)):
             if alpha == 180:
                   mask_angle = ((angle > (alpha-ang_sec/2)) | (angle <= (-180 +ang_sec/2))) & (~segmention["mask"][edge:-edge,edge:-edge])            
             ori_angle.append(alpha)
-            ori_mean.append(np.mean(ori[mask_angle]))
-            ori_mean_weight.append(np.mean(ori_weight2[mask_angle]))
-            int_mean.append(np.mean(im_fiber_g[mask_angle]))
+            ori_mean.append(np.nanmean(ori[mask_angle]))
+            ori_mean_weight.append(np.nanmean(ori_weight2[mask_angle]))
+            int_mean.append(np.nanmean(im_fiber_g[mask_angle]))
             grad_slice.append(np.nanmean(s_norm1[mask_angle]))
             alpha_dev_slice.append(np.nanmean(angle_dev[mask_angle]))
-            alpha_dev_slice_weight.append(np.mean(angle_dev_weighted[mask_angle]))
-            alpha_dev_slice_weight2.append(np.mean(angle_dev_weighted2[mask_angle]))
+            alpha_dev_slice_weight.append(np.nanmean(angle_dev_weighted[mask_angle]))
+            alpha_dev_slice_weight2.append(np.nanmean(angle_dev_weighted2[mask_angle]))
 
 
     # translating the angles to coordinates in polar plot
@@ -360,6 +360,15 @@ for n,i in tqdm(enumerate(fiber_list)):
     angle_plotting = angle_plotting1.copy()
     angle_plotting[angle_plotting1 < 0] =  np.abs(angle_plotting[angle_plotting1 < 0])
     angle_plotting[angle_plotting1 > 0] =  np.abs(angle_plotting[angle_plotting1>0] - 2* np.pi)
+        
+    # save results 
+    np.savetxt(os.path.join(out_list[n],"angle_plotting.txt"), angle_plotting)
+    np.savetxt(os.path.join(out_list[n],"alpha_dev_slice.txt"), alpha_dev_slice)
+    np.savetxt(os.path.join(out_list[n],"alpha_dev_slice_weight.txt"), alpha_dev_slice_weight)
+    np.savetxt(os.path.join(out_list[n],"alpha_dev_slice_weight2.txt"), alpha_dev_slice_weight2)
+    np.savetxt(os.path.join(out_list[n],"alpha_ori_mean_weight.txt"), ori_mean_weight)
+    np.savetxt(os.path.join(out_list[n],"alpha_grad_slice.txt"), grad_slice)
+
 
     """
     Distance Evaluation
@@ -368,10 +377,11 @@ for n,i in tqdm(enumerate(fiber_list)):
     shells = np.arange(0, dist_surface.max(), shell_width)
     midofshells = (shells + shell_width/2)[:-1]
     allshellmasks = []
-    dist_int = []
-    dist_angle = []
-    dist_int_exclusive = []
-    dist_angle_exclusive = []
+    # intensity and angle within individual shell and accumulation of all inner shells
+    dist_int_accum = []
+    dist_angle_accum = []
+    dist_int_individ = []
+    dist_angle_individ = []
     
     # make the distance shell analysis
     for i in range(len(shells)-1):
@@ -380,18 +390,21 @@ for n,i in tqdm(enumerate(fiber_list)):
         mask_shell_lower=  (dist_surface <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])
         allshellmasks.append(mask_shell)
         # calculate mintensity and angle deviation within the growing shells (always within start shell to highest shell)
-        dist_angle.append(np.mean(angle_dev[mask_shell_lower])  ) # accumulation of lower shells
-        dist_angle_exclusive.append(np.mean(angle_dev[mask_shell])  )    # exclusively in certain shell
+        # THINK ABOUT ANGLE DEV W 2 (with int here ?)
+        dist_angle_accum.append(np.nanmean(angle_dev_weighted[mask_shell_lower])  ) # accumulation of lower shells
+        dist_angle_individ.append(np.nanmean(angle_dev_weighted[mask_shell])  )    # exclusively in certain shell
         # MAYBE TODO:  weight by coherency+Intensity   within shell instead of the pure angle ?
         # mean intensity
-        dist_int.append(np.mean(im_fiber_g[mask_shell_lower]))          # accumulation of lower shells
-        dist_int_exclusive.append(np.mean(im_fiber_g[mask_shell])  )    # exclusively in certain shell
-        
-        
+        dist_int_accum.append(np.nanmean(im_fiber_g[mask_shell_lower]))          # accumulation of lower shells
+        dist_int_individ.append(np.nanmean(im_fiber_g[mask_shell])  )    # exclusively in certain shell
+    
+
+           
     # norm intensities   
-    dist_int = np.array(dist_int)/ np.nanmax(np.array(dist_int))    
-    # Calculate value where ntensity drops 20%
-    distintdrop = np.abs(dist_int-0.75)
+    dist_int_individ_norm = np.array(dist_int_individ)/ np.nanmax(np.array(dist_int_individ))   
+    dist_int_accum_norm = np.array(dist_int_accum)/ np.nanmax(np.array(dist_int_accum))  
+    # Calculate value where ntensity drops 25%
+    distintdrop = np.abs(dist_int_individ_norm-0.75)
     # distance where int  drops   to 75% 
     halflife_int =  midofshells[np.where(distintdrop == np.nanmin(distintdrop.min()))] [0] 
     # if decrease is not within range (minimum equals last value) then set to nan
@@ -399,13 +412,13 @@ for n,i in tqdm(enumerate(fiber_list)):
         halflife_int = np.nan
   
     
-    # # Calculate value where orientation drops to 20% within maxorientation(min) to 45° (random) range 
+    # # Calculate value where orientation drops to 75% within maxorientation(min) to 45° (random) range 
     # difference to 45 degree instead of min-max range    
     # calculate halflife of maximal orientation over distance
     # difference to 45 degree for all
-    diffdist = np.abs(np.array(dist_angle)-45)  
+    diffdist = np.array(dist_angle_individ)-45
     # maximal orientation
-    diffmax = np.nanmax(diffdist)
+    diffmax = np.nanmin(diffdist)
     diffmax_pos = np.where(diffmax==diffdist)[0][0]
     # difference  angle drops to 75% 
     diff2 = np.abs(diffdist-(0.75*diffmax))
@@ -418,8 +431,10 @@ for n,i in tqdm(enumerate(fiber_list)):
     
     # save distane arrays
     np.savetxt(os.path.join(out_list[n],"shells-mid_px.txt"), midofshells)
-    np.savetxt(os.path.join(out_list[n],"dist_int.txt"), dist_int)
-    np.savetxt(os.path.join(out_list[n],"dist_angle.txt"), dist_angle)
+    np.savetxt(os.path.join(out_list[n],"dist_int_individ.txt"), dist_int_individ)
+    np.savetxt(os.path.join(out_list[n],"dist_angle_individ.txt"), dist_angle_individ)
+    np.savetxt(os.path.join(out_list[n],"dist_int_accum.txt"), dist_int_accum)
+    np.savetxt(os.path.join(out_list[n],"dist_angle_accum.txt"), dist_angle_accum)
     np.savetxt(os.path.join(out_list[n],"distdrop25_ori_px.txt"), [halflife_ori])
     np.savetxt(os.path.join(out_list[n],"distdrop25_int_px.txt"), [halflife_int])   
     try:
@@ -503,7 +518,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     plt.savefig(os.path.join(out_list[n],"orientation_triple.png"), dpi=200)
     
     
-    f = np.percentile(ori,0.75)
+    f = np.nanpercentile(ori,0.75)
     fig5, ax5 = show_quiver (min_evec[:,:,0] * ori, min_evec[:,:,1] * ori, filter=[f, 15], scale_ratio=0.1,width=0.003, cbar_str="coherency", cmap="viridis")
     ax5.plot(center_small[0],center_small[1],"o")
     plt.savefig(os.path.join(out_list[n],"coh_quiver.png"), dpi=200)
@@ -559,38 +574,40 @@ for n,i in tqdm(enumerate(fiber_list)):
      # plot distance shell analysis    
     plt.figure(figsize=(7,3))
     plt.subplot(121)    
-    plt.plot(midofshells,dist_angle,"o-", c="lightgreen",label="orientation")
-    plt.plot([halflife_ori,halflife_ori],[np.min(dist_angle),np.max(dist_angle)], c="orange", linestyle="--")
+    plt.plot(midofshells,dist_angle_individ,"o-", c="lightgreen",label="orientation")
+    plt.plot([halflife_ori,halflife_ori],[np.min(dist_angle_individ),np.max(dist_angle_individ)], c="orange", linestyle="--")
     plt.grid()
     plt.tight_layout()
     plt.xlabel("distance (px)")
     plt.ylabel("orientation")
     plt.subplot(122)    
-    plt.plot(midofshells,dist_int,"o-", c="plum", label="intensity")
+    plt.plot(midofshells,dist_int_individ_norm,"o-", c="plum", label="intensity")
     plt.grid()
-    plt.plot([halflife_int,halflife_int],[np.min(dist_int),np.max(dist_int)], c="orange", linestyle="--")
+    plt.plot([halflife_int,halflife_int],[np.min(dist_int_individ_norm),np.max(dist_int_individ_norm)], c="orange", linestyle="--")
     plt.xlabel("distance (px)")
     plt.ylabel("intensity")
     plt.tight_layout()
-    plt.savefig(os.path.join(out_list[n],"distance-shell-accum.png"), dpi=200)
+    plt.savefig(os.path.join(out_list[n],"distance-shell-individ.png"), dpi=200)
+    
+    
     
     # plot distance shell analysis    
     plt.figure(figsize=(7,3))
     plt.subplot(121)    
-    plt.plot(midofshells,dist_angle_exclusive,"o-", c="lightgreen",label="orientation")
+    plt.plot(midofshells,dist_angle_accum,"o-", c="lightgreen",label="orientation")
     #plt.plot([halflife_ori,halflife_ori],[np.min(dist_angle),np.max(dist_angle)], c="orange", linestyle="--")
     plt.grid()
     plt.tight_layout()
     plt.xlabel("distance (px)")
     plt.ylabel("orientation")
     plt.subplot(122)    
-    plt.plot(midofshells,dist_int_exclusive,"o-", c="plum", label="intensity")
+    plt.plot(midofshells,dist_int_accum_norm,"o-", c="plum", label="intensity")
     plt.grid()
     #plt.plot([halflife_int,halflife_int],[np.min(dist_int),np.max(dist_int)], c="orange", linestyle="--")
     plt.xlabel("distance (px)")
     plt.ylabel("intensity")
     plt.tight_layout()
-    plt.savefig(os.path.join(out_list[n],"distance-shell-exclusive.png"), dpi=200)
+    plt.savefig(os.path.join(out_list[n],"distance-shell-accum.png"), dpi=200)
    
     
      # plot overlay version 2

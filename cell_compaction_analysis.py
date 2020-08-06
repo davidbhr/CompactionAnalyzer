@@ -242,9 +242,11 @@ for n,i in tqdm(enumerate(fiber_list)):
     segmention = segment_cell(im_cell_n, thres= segmention_thres, gaus1 = 11, gaus2=20)    # thres 1 equals normal otsu threshold
     center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
     
-    # Maybe ToDo : set segmention to nan for effects close to cell -maybe not since more problems ..
-    #im_fiber_g[segmention["mask"]] = np.nan
+    # set segmention mask to nan to avoid effects within cell  (maybe not needed if signal below cell makes sense)
+    im_fiber_g_forstructure = im_fiber_g.copy()
+    im_fiber_g_forstructure[segmention["mask"]] = np.nan
     #plt.imshow(im_fiber_g)
+    
     
     """
     Structure tensor
@@ -252,7 +254,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     # Structure Tensor Orientation
 
     # get structure tensor
-    ori, max_evec, min_evec, max_eval, min_eval = analyze_local(im_fiber_g, sigma=sigma_tensor, size=0, filter_type="gaussian")
+    ori, max_evec, min_evec, max_eval, min_eval = analyze_local(im_fiber_g_forstructure, sigma=sigma_tensor, size=0, filter_type="gaussian")
     # cut off edges as specified
     ori, max_evec, min_evec, max_eval, min_eval = ori[edge:-edge,edge:-edge], max_evec[edge:-edge,edge:-edge], min_evec[edge:-edge,edge:-edge], \
                                                   max_eval[edge:-edge,edge:-edge], min_eval[edge:-edge,edge:-edge]

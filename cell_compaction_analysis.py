@@ -438,7 +438,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     np.savetxt(os.path.join(out_list[n],"distdrop25_ori_px.txt"), [halflife_ori])
     np.savetxt(os.path.join(out_list[n],"distdrop25_int_px.txt"), [halflife_int])   
     try:
-        np.savetxt(os.path.join(out_list[n],"meanangle_within10shells.txt"), [dist_angle[9]]) 
+        np.savetxt(os.path.join(out_list[n],"meanangle_within10shells.txt"), [dist_angle_accum[9]]) 
     except:
         pass
 

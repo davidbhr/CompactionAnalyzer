@@ -137,6 +137,45 @@ def add_colorbar(vmin, vmax, cmap="rainbow", ax=None, cbar_style="not-clickpoint
     return cb0
 
 
+def custom_mask(img,show_segmentation=True):
+    """
+    Image segmentation function to create a custom polygon mask, and evalute radius and position of the masked object.
+    Need to use %matplotlib qt in jupyter notebook
+    Args:
+        img(array): Grayscale image as a Numpy array
+    Returns:
+        dict: Dictionary with keys: mask, radius, centroid (x/y)
+    """
+    from roipoly import RoiPoly
+    # need to install RoiPoly package via pip to use this function  
+    height = img.shape[0]
+    width  = img.shape[1]
+    # click polygon mask interactive
+    plt.ion()
+    plt.imshow(img, extent=[0, width, height, 0])
+    plt.text(0.5, 1.05,'Click Polygon Mask with left click, finish with right click',  fontsize=12,
+         horizontalalignment='center',
+         verticalalignment='center',c='darkred', transform= plt.gca().transAxes)#     transform = ax.transAxes)
+    my_roi = RoiPoly(color='r')
+    # Extract mask and segementation details
+    #mask = np.flipud(my_roi.get_mask(img))   # flip mask due to imshow 
+    mask = (my_roi.get_mask(img))
+    # determine radius of spheroid
+    radius = np.sqrt(np.sum(mask) / np.pi)
+    # determine center of mass
+    cy, cx = scipy_meas.center_of_mass(mask)
+    # hide pop-up windows   
+    plt.ioff()
+    # return dictionary containing mask information
+    # # show segmentation
+    # if show_segmentation:
+    #     plt.figure()
+    #     plt.subplot(121), plt.imshow(img)
+    #     plt.subplot(122), plt.imshow(mask)    
+    return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)} 
+
+
+
 def segment_cell(img, thres=1, gaus1 = 4, gaus2=40, iterartions=1,show_segmentation = False):
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
@@ -211,7 +250,7 @@ segmention_thres = 1  # for cell segemetntion, thres 1 equals normal otsu thresh
 sigma_first_blur  = 0.5 # slight first bluring of whole image before using structure tensor
 angle_sections = 5   # size of angle sections in degree 
 shell_width =  20/scale   # pixel width of distance shells
-
+manual_segmention = False
 
 # create output folder accordingly
 #out_list = [os.path.join("angle_eval","2-angle",cell_list[i].split(os.sep)[0], os.path.basename(cell_list[i])[:-4]) for i in range(len(cell_list))]
@@ -238,21 +277,23 @@ for n,i in tqdm(enumerate(fiber_list)):
     im_fiber_n = normalize(im_fiber, norm1, norm2)  
     im_fiber_g = gaussian(im_fiber_n, sigma=sigma_first_blur)     # blur fiber image slightly (test with local gauss - similar)
     
-    # segment cell
-    segmention = segment_cell(im_cell_n, thres= segmention_thres, gaus1 = 11, gaus2=20)    # thres 1 equals normal otsu threshold
+    # segment cell (either manual or automatically)
+    if manual_segmention:
+        segmention = custom_mask(im_cell_n)
+    else:
+        segmention = segment_cell(im_cell_n, thres= segmention_thres, gaus1 = 11, gaus2=20)    # thres 1 equals normal otsu threshold
+    
+    # center incropped image (to avoid edge effects)
     center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
     
     # set segmention mask to nan to avoid effects within cell  (maybe not needed if signal below cell makes sense)
     im_fiber_g_forstructure = im_fiber_g.copy()
     im_fiber_g_forstructure[segmention["mask"]] = np.nan
-    #plt.imshow(im_fiber_g)
-    
-    
+ 
     """
     Structure tensor
     """
     # Structure Tensor Orientation
-
     # get structure tensor
     ori, max_evec, min_evec, max_eval, min_eval = analyze_local(im_fiber_g_forstructure, sigma=sigma_tensor, size=0, filter_type="gaussian")
     # cut off edges as specified

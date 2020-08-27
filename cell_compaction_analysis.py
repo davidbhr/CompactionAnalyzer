@@ -297,8 +297,9 @@ for n,i in tqdm(enumerate(fiber_list)):
     # get structure tensor
     ori, max_evec, min_evec, max_eval, min_eval = analyze_local(im_fiber_g_forstructure, sigma=sigma_tensor, size=0, filter_type="gaussian")
     # cut off edges as specified
-    ori, max_evec, min_evec, max_eval, min_eval = ori[edge:-edge,edge:-edge], max_evec[edge:-edge,edge:-edge], min_evec[edge:-edge,edge:-edge], \
-                                                  max_eval[edge:-edge,edge:-edge], min_eval[edge:-edge,edge:-edge]
+     if edge is not 0:
+        ori, max_evec, min_evec, max_eval, min_eval = ori[edge:-edge,edge:-edge], max_evec[edge:-edge,edge:-edge], min_evec[edge:-edge,edge:-edge], \
+                                                      max_eval[edge:-edge,edge:-edge], min_eval[edge:-edge,edge:-edge]
     """
     coordinates
     """

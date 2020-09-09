@@ -297,7 +297,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     # get structure tensor
     ori, max_evec, min_evec, max_eval, min_eval = analyze_local(im_fiber_g_forstructure, sigma=sigma_tensor, size=0, filter_type="gaussian")
     # cut off edges as specified
-     if edge is not 0:
+    if edge is not 0:
         ori, max_evec, min_evec, max_eval, min_eval = ori[edge:-edge,edge:-edge], max_evec[edge:-edge,edge:-edge], min_evec[edge:-edge,edge:-edge], \
                                                       max_eval[edge:-edge,edge:-edge], min_eval[edge:-edge,edge:-edge]
     """
@@ -358,9 +358,11 @@ for n,i in tqdm(enumerate(fiber_list)):
     coh_total = np.nanmean(ori[(~segmention["mask"][edge:-edge,edge:-edge]) ])
     coh_total2 = np.nanmean(ori_weight2[(~segmention["mask"][edge:-edge, edge:-edge])])
     # save to txt file
-    values = [coh_total ,coh_total2, alpha_dev_total1, alpha_dev_total2, alpha_dev_total3]
+    values = [coh_total ,coh_total2, alpha_dev_total1, alpha_dev_total2, alpha_dev_total3, 
+              2*np.cos(alpha_dev_total1*np.pi/180)-1, 2*np.cos(alpha_dev_total2*np.pi/180)-1, 2*np.cos(alpha_dev_total3*np.pi/180)-1]
     strings = ["mean_coh.txt", "mean_coh_w_int.txt", "mean_angle.txt",
-      "mean_angle_we_coh.txt", "mean_angle_we_coh_int.txt"]
+      "mean_angle_we_coh.txt", "mean_angle_we_coh_int.txt", 
+      "2cos-1_mean.txt","2cos-1_mean_we_coh.txt", "2cos-1_we_coh_int.txt"]
     for i,v in enumerate(values):
         np.savetxt(os.path.join(out_list[n],strings[i]), [v] ) 
         

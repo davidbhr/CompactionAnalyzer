@@ -238,7 +238,7 @@ def segment_cell(img, thres=1, gaus1 = 4, gaus2=40, iterartions=1,show_segmentat
 fiber_list = natsorted(glob.glob(r"test_data\fiber.tif"))   #fiber_random_c24
 cell_list = natsorted(glob.glob(r"test_data\cell.tif"))   #check that order is same to fiber
 
-scale =  0.65 # um per pixel
+scale =  0.318 # um per pixel
 
 
 # Set Parameters 

@@ -422,13 +422,21 @@ for n,i in tqdm(enumerate(fiber_list)):
     midofshells = (shells + shell_width/2)[:-1]
     allshellmasks = []
     # intensity and angle within individual shell and accumulation of all inner shells
+    # distance shells parallel to surface
     dist_int_accum = []
     dist_angle_accum = []
     dist_int_individ = []
     dist_angle_individ = []
+    # distance shells as circles around center
+    dist_int_accum_center = []
+    dist_angle_accum_center = []
+    dist_int_individ_center = []
+    dist_angle_individ_center = []
+
     
     # make the distance shell analysis
     for i in range(len(shells)-1):
+        # distance shells parallel to surface
         # mask of individual shells and accumulation of all points closer to the correponding cell
         mask_shell = (dist_surface > (shells[i])) & (dist_surface <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])  
         mask_shell_lower=  (dist_surface <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])
@@ -441,12 +449,26 @@ for n,i in tqdm(enumerate(fiber_list)):
         # mean intensity
         dist_int_accum.append(np.nanmean(im_fiber_g[mask_shell_lower]))          # accumulation of lower shells
         dist_int_individ.append(np.nanmean(im_fiber_g[mask_shell])  )    # exclusively in certain shell
-    
+        
+        # distance shells as circles around center
+        mask_shell_center = (distance > (shells[i])) & (distance <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])  
+        mask_shell_lower_center=  (distance <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])
+        # calculate mintensity and angle deviation within the growing shells (always within start shell to highest shell)
+        # THINK ABOUT ANGLE DEV W 2 (with int here ?)
+        dist_angle_accum_center.append(np.nanmean(angle_dev_weighted[mask_shell_lower_center])  ) # accumulation of lower shells
+        dist_angle_individ_center.append(np.nanmean(angle_dev_weighted[mask_shell_center])  )    # exclusively in certain shell
+        # MAYBE TODO:  weight by coherency+Intensity   within shell instead of the pure angle ?
+        # mean intensity
+        dist_int_accum_center.append(np.nanmean(im_fiber_g[mask_shell_lower_center]))          # accumulation of lower shells
+        dist_int_individ_center.append(np.nanmean(im_fiber_g[mask_shell_center])  )    # exclusively in certain shell
+        
 
-           
+        
     # norm intensities   
     dist_int_individ_norm = np.array(dist_int_individ)/ np.nanmax(np.array(dist_int_individ))   
     dist_int_accum_norm = np.array(dist_int_accum)/ np.nanmax(np.array(dist_int_accum))  
+    dist_int_individ_norm_center = np.array(dist_int_individ_center)/ np.nanmax(np.array(dist_int_individ_center))   
+    dist_int_accum_norm_center = np.array(dist_int_accum_center)/ np.nanmax(np.array(dist_int_accum_center)) 
     # Calculate value where ntensity drops 25%
     distintdrop = np.abs(dist_int_individ_norm-0.75)
     # distance where int  drops   to 75% 
@@ -480,7 +502,12 @@ for n,i in tqdm(enumerate(fiber_list)):
     np.savetxt(os.path.join(out_list[n],"dist_int_accum.txt"), dist_int_accum)
     np.savetxt(os.path.join(out_list[n],"dist_angle_accum.txt"), dist_angle_accum)
     np.savetxt(os.path.join(out_list[n],"distdrop25_ori_px.txt"), [halflife_ori])
-    np.savetxt(os.path.join(out_list[n],"distdrop25_int_px.txt"), [halflife_int])   
+    np.savetxt(os.path.join(out_list[n],"distdrop25_int_px.txt"), [halflife_int])
+    np.savetxt(os.path.join(out_list[n],"dist_int_individ_center.txt"), dist_int_individ_center)
+    np.savetxt(os.path.join(out_list[n],"dist_angle_individ_center.txt"), dist_angle_individ_center)
+    np.savetxt(os.path.join(out_list[n],"dist_int_accum_center.txt"), dist_int_accum_center)
+    np.savetxt(os.path.join(out_list[n],"dist_angle_accum_center.txt"), dist_angle_accum_center)
+    
     try:
         np.savetxt(os.path.join(out_list[n],"meanangle_within10shells.txt"), [dist_angle_accum[9]]) 
     except:
@@ -633,8 +660,24 @@ for n,i in tqdm(enumerate(fiber_list)):
     plt.tight_layout()
     plt.savefig(os.path.join(out_list[n],"distance-shell-individ.png"), dpi=200)
     
-    
-    
+    # plot distance shell analysis    
+    plt.figure(figsize=(7,3))
+    plt.subplot(121)    
+    plt.plot(midofshells,dist_angle_individ_center,"o-", c="lightgreen",label="orientation")
+    plt.plot([halflife_ori,halflife_ori],[np.min(dist_angle_individ_center),np.max(dist_angle_individ_center)], c="orange", linestyle="--")
+    plt.grid()
+    plt.tight_layout()
+    plt.xlabel("distance (px)")
+    plt.ylabel("orientation")
+    plt.subplot(122)    
+    plt.plot(midofshells,dist_int_individ_norm_center,"o-", c="plum", label="intensity")
+    plt.grid()
+    plt.plot([halflife_int,halflife_int],[np.min(dist_int_individ_norm_center),np.max(dist_int_individ_norm_center)], c="orange", linestyle="--")
+    plt.xlabel("distance (px)")
+    plt.ylabel("intensity")
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_list[n],"distance-shell-individ_center.png"), dpi=200)
+        
     # plot distance shell analysis    
     plt.figure(figsize=(7,3))
     plt.subplot(121)    

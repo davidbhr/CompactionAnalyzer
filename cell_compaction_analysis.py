@@ -355,6 +355,9 @@ for n,i in tqdm(enumerate(fiber_list)):
     alpha_dev_total1 = np.nanmean(angle_dev[(~segmention["mask"][edge:-edge,edge:-edge])])
     alpha_dev_total2 = np.nanmean(angle_dev_weighted[(~segmention["mask"][edge:-edge, edge:-edge])])
     alpha_dev_total3 = np.nanmean(angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])])
+    cos_dev_total1 = np.nanmean(np.cos(2*angle_dev[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
+    cos_dev_total2 = np.nanmean(np.cos(2*angle_dev_weighted[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
+    cos_dev_total3 = np.nanmean(np.cos(2*angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
     coh_total = np.nanmean(ori[(~segmention["mask"][edge:-edge,edge:-edge]) ])
     coh_total2 = np.nanmean(ori_weight2[(~segmention["mask"][edge:-edge, edge:-edge])])
     # save to txt file
@@ -362,7 +365,7 @@ for n,i in tqdm(enumerate(fiber_list)):
               2*np.cos(alpha_dev_total1*np.pi/180)-1, 2*np.cos(alpha_dev_total2*np.pi/180)-1, 2*np.cos(alpha_dev_total3*np.pi/180)-1]
     strings = ["mean_coh.txt", "mean_coh_w_int.txt", "mean_angle.txt",
       "mean_angle_we_coh.txt", "mean_angle_we_coh_int.txt", 
-      "2cos-1_mean.txt","2cos-1_mean_we_coh.txt", "2cos-1_we_coh_int.txt"]
+      "cos2a_mean.txt","cos2a_mean_we_coh.txt", "cos2a_we_coh_int.txt"]
     for i,v in enumerate(values):
         np.savetxt(os.path.join(out_list[n],strings[i]), [v] ) 
         

@@ -249,7 +249,7 @@ edge = 40   # Cutt of pixels at the edge since values at the border cannot be tr
 segmention_thres = 1  # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
 sigma_first_blur  = 0.5 # slight first bluring of whole image before using structure tensor
 angle_sections = 5   # size of angle sections in degree 
-shell_width =  20/scale   # pixel width of distance shells
+shell_width =  5/scale   # pixel width of distance shells
 manual_segmention = False
 
 # create output folder accordingly
@@ -467,11 +467,11 @@ for n,i in tqdm(enumerate(fiber_list)):
         
 
         
-    # norm intensities   
-    dist_int_individ_norm = np.array(dist_int_individ)/ np.nanmax(np.array(dist_int_individ))   
-    dist_int_accum_norm = np.array(dist_int_accum)/ np.nanmax(np.array(dist_int_accum))  
-    dist_int_individ_norm_center = np.array(dist_int_individ_center)/ np.nanmax(np.array(dist_int_individ_center))   
-    dist_int_accum_norm_center = np.array(dist_int_accum_center)/ np.nanmax(np.array(dist_int_accum_center)) 
+    # norm intensities   (Baseline: mean intensity of the 2 outmost shells)
+    dist_int_individ_norm = np.array(dist_int_individ)/ np.nanmean(np.array(dist_int_individ[-2:]))    
+    dist_int_accum_norm = np.array(dist_int_accum)/ np.nanmean(np.array(dist_int_accum[-2:]))    
+    dist_int_individ_norm_center = np.array(dist_int_individ_center)/ np.nanmean(np.array(dist_int_accum[-2:])) 
+    dist_int_accum_norm_center = np.array(dist_int_accum_center)/ np.nanmean(np.array(dist_int_accum[-2:])) 
     # Calculate value where ntensity drops 25%
     distintdrop = np.abs(dist_int_individ_norm-0.75)
     # distance where int  drops   to 75% 
@@ -479,8 +479,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     # if decrease is not within range (minimum equals last value) then set to nan
     if halflife_int == midofshells[-1]:
         halflife_int = np.nan
-  
-    
+
     # # Calculate value where orientation drops to 75% within maxorientation(min) to 45° (random) range 
     # difference to 45 degree instead of min-max range    
     # calculate halflife of maximal orientation over distance
@@ -736,4 +735,4 @@ for n,i in tqdm(enumerate(fiber_list)):
     
     
     
-    #plt.close("all")
+    plt.close("all")

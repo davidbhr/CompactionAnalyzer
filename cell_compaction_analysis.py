@@ -509,7 +509,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     np.savetxt(os.path.join(out_list[n],"dist_angle_individ_center.txt"), dist_angle_individ_center)
     np.savetxt(os.path.join(out_list[n],"dist_int_accum_center.txt"), dist_int_accum_center)
     np.savetxt(os.path.join(out_list[n],"dist_angle_accum_center.txt"), dist_angle_accum_center)
-    np.savetxt(os.path.join(out_list[n],"dist_int_individ_center_norm.txt"), dist_int_individ_norm)
+    np.savetxt(os.path.join(out_list[n],"dist_int_individ_norm.txt"), dist_int_individ_norm)
     np.savetxt(os.path.join(out_list[n],"dist_int_accum_norm.txt"), dist_int_accum_norm)
     np.savetxt(os.path.join(out_list[n],"dist_int_individ_norm_center.txt"), dist_int_individ_norm_center)
     np.savetxt(os.path.join(out_list[n],"dist_int_accum_norm_center.txt"), dist_int_accum_norm_center)

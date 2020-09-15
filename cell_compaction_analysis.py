@@ -511,8 +511,8 @@ for n,i in tqdm(enumerate(fiber_list)):
     np.savetxt(os.path.join(out_list[n],"dist_angle_accum_center.txt"), dist_angle_accum_center)
     np.savetxt(os.path.join(out_list[n],"dist_int_individ_norm.txt"), dist_int_individ_norm)
     np.savetxt(os.path.join(out_list[n],"dist_int_accum_norm.txt"), dist_int_accum_norm)
-    np.savetxt(os.path.join(out_list[n],"dist_int_individ_norm_center.txt"), dist_int_individ_norm_center)
-    np.savetxt(os.path.join(out_list[n],"dist_int_accum_norm_center.txt"), dist_int_accum_norm_center)
+    np.savetxt(os.path.join(out_list[n],"dist_int_individ_norm_center.txt"), dist_int_individ_center_norm)
+    np.savetxt(os.path.join(out_list[n],"dist_int_accum_norm_center.txt"), dist_int_accum_center_norm)
     
     
     try:
@@ -677,9 +677,9 @@ for n,i in tqdm(enumerate(fiber_list)):
     plt.xlabel("distance (px)")
     plt.ylabel("orientation")
     plt.subplot(122)    
-    plt.plot(midofshells,dist_int_individ_norm_center,"o-", c="plum", label="intensity")
+    plt.plot(midofshells,dist_int_individ_center_norm,"o-", c="plum", label="intensity")
     plt.grid()
-    plt.plot([halflife_int,halflife_int],[np.min(dist_int_individ_norm_center),np.max(dist_int_individ_norm_center)], c="orange", linestyle="--")
+    plt.plot([halflife_int,halflife_int],[np.min(dist_int_individ_center_norm),np.max(dist_int_individ_center_norm)], c="orange", linestyle="--")
     plt.xlabel("distance (px)")
     plt.ylabel("intensity")
     plt.tight_layout()

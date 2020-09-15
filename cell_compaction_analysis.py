@@ -470,8 +470,8 @@ for n,i in tqdm(enumerate(fiber_list)):
     # norm intensities   (Baseline: mean intensity of the 2 outmost shells)
     dist_int_individ_norm = np.array(dist_int_individ)/ np.nanmean(np.array(dist_int_individ[-2:]))    
     dist_int_accum_norm = np.array(dist_int_accum)/ np.nanmean(np.array(dist_int_accum[-2:]))    
-    dist_int_individ_norm_center = np.array(dist_int_individ_center)/ np.nanmean(np.array(dist_int_accum[-2:])) 
-    dist_int_accum_norm_center = np.array(dist_int_accum_center)/ np.nanmean(np.array(dist_int_accum[-2:])) 
+    dist_int_individ_center_norm = np.array(dist_int_individ_center)/ np.nanmean(np.array(dist_int_individ_center[-2:])) 
+    dist_int_accum_center_norm = np.array(dist_int_accum_center)/ np.nanmean(np.array(dist_int_accum_center[-2:])) 
     # Calculate value where ntensity drops 25%
     distintdrop = np.abs(dist_int_individ_norm-0.75)
     # distance where int  drops   to 75% 

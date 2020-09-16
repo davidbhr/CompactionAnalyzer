@@ -176,12 +176,14 @@ def custom_mask(img,show_segmentation=True):
 
 
 
-def segment_cell(img, thres=1, gaus1 = 4, gaus2=40, iterartions=1,show_segmentation = False):
+
+def segment_cell(img, thres=1, gaus1 = 8, gaus2=80, iterartions=1,show_segmentation = True, segmention="otsu"):   
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
     Args:
         img(array): Grayscale image as a Numpy array
         thres(float): To adjust the segmentation, keep 1
+        segmention: use "otsu" or "yen"  as segmentation method
         iterations: iterations of closing steps , might increase to get more 
         robust segmentation but less precise segmentation, by default 1
     Returns:
@@ -192,13 +194,15 @@ def segment_cell(img, thres=1, gaus1 = 4, gaus2=40, iterartions=1,show_segmentat
     # local gaussian   
     img = np.abs(gaussian(img, sigma=gaus1) - gaussian(img, sigma=gaus2))
     # segment cell
-    # mask = img > threshold_otsu(img) * thres    #[::-1]
-    mask = img > threshold_yen(img) * thres    #[::-1]
+    if segmention == "yen":
+        mask = img > threshold_yen(img) * thres
+    if segmention == "otsu":
+        mask = img > threshold_otsu(img) * thres  
     
     # remove other objects
     
     mask = scipy_morph.binary_closing(mask, iterations=iterartions)
-    mask = remove_small_objects(mask, min_size=100)
+    mask = remove_small_objects(mask, min_size=1000)
     mask = scipy_morph.binary_dilation(mask, iterations=iterartions)
     mask = scipy_morph.binary_fill_holes(mask)
     
@@ -281,7 +285,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     if manual_segmention:
         segmention = custom_mask(im_cell_n)
     else:
-        segmention = segment_cell(im_cell_n, thres= segmention_thres, gaus1 = 11, gaus2=20)    # thres 1 equals normal otsu threshold
+        segmention = segment_cell(im_cell_n, thres= segmention_thres)    # thres 1 equals normal otsu threshold
     
     # center incropped image (to avoid edge effects)
     center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)

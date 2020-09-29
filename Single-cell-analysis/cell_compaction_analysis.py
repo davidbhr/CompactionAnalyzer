@@ -366,7 +366,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     coh_total2 = np.nanmean(ori_weight2[(~segmention["mask"][edge:-edge, edge:-edge])])
     # save to txt file
     values = [coh_total ,coh_total2, alpha_dev_total1, alpha_dev_total2, alpha_dev_total3, 
-              2*np.cos(alpha_dev_total1*np.pi/180)-1, 2*np.cos(alpha_dev_total2*np.pi/180)-1, 2*np.cos(alpha_dev_total3*np.pi/180)-1]
+                  cos_dev_total1,cos_dev_total2,cos_dev_total3]
     strings = ["mean_coh.txt", "mean_coh_w_int.txt", "mean_angle.txt",
       "mean_angle_we_coh.txt", "mean_angle_we_coh_int.txt", 
       "cos2a_mean.txt","cos2a_mean_we_coh.txt", "cos2a_we_coh_int.txt"]

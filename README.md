@@ -1,2 +1,2 @@
-# Cell-compaction-analysis 
-Evaluates strength of tissue compaction by evaluating the fiber orientation. 
+# Cellular Compaction Analyzer 
+Evaluates strength of tissue compaction in fibrous matrices by evaluating the fiber directionality towards cells. 

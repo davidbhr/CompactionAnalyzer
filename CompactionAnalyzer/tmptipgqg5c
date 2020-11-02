@@ -11,15 +11,37 @@ Needs an Image of the cell and one image of the fibers (e.g. maximum projection 
 
 """
 
+import matplotlib.pyplot as plt
+from skimage.filters import gaussian
+# from scipy.ndimage.filters import uniform_filter
+import os
+import copy
+import numpy as np
+# from skimage.draw import circle
+# from scipy.signal import convolve2d
+# from StructureTensor import *
+import glob as glob
+from tqdm import tqdm
+import matplotlib
+import scipy.ndimage.morphology as scipy_morph
+import scipy.ndimage.measurements as scipy_meas
 
+from skimage.morphology import remove_small_objects
+# from skimage.exposure import adjust_gamma   
+# from PIL import Image
+# from copy import copy
+import imageio
+from skimage import color
+from scipy.ndimage.morphology import distance_transform_edt
+from natsort import natsorted
 from CompactionAnalyzer.CompactionFunctions import *
 from CompactionAnalyzer.utilities import *
-from CompactionAnalyzer.StructureTensor import *
-from CompactionAnalyzer.plotting import *
+
 
 # maxprojection Data
 # read in list of cells and list of fibers to evaluate (must be in same order)
 # use glob.glob or individual list of paths []    
+
 fiber_list = natsorted(glob.glob(r"..\TestData\fiber.tif"))   #fiber_random_c24
 cell_list = natsorted(glob.glob(r"..\TestData\cell.tif"))   #check that order is same to fiber
 
@@ -27,6 +49,7 @@ cell_list = natsorted(glob.glob(r"..\TestData\cell.tif"))   #check that order is
 # create output folder accordingly
 #out_list = [os.path.join("angle_eval","2-angle",cell_list[i].split(os.sep)[0], os.path.basename(cell_list[i])[:-4]) for i in range(len(cell_list))]
 out_list = [os.path.join("analysis",cell_list[i].split(os.sep)[0], os.path.basename(cell_list[i])[:-4]) for i in range(len(cell_list))]
+
 
 
 scale =  0.318 # um per pixel
@@ -42,6 +65,9 @@ sigma_first_blur  = 0.5 # slight first bluring of whole image before using struc
 angle_sections = 5   # size of angle sections in degree 
 shell_width =  5/scale   # pixel width of distance shells
 manual_segmention = False
+
+
+
 
 
 
@@ -70,7 +96,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     else:
         segmention = segment_cell(im_cell_n, thres= segmention_thres, gaus1 = 8, gaus2=80)    # thres 1 equals normal otsu threshold
     
-    # center of the new cropped image (to avoid edge effects)
+    # center incropped image (to avoid edge effects)
     center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
     
     # set segmention mask to nan to avoid effects within cell  (maybe not needed if signal below cell makes sense)
@@ -101,7 +127,9 @@ for n,i in tqdm(enumerate(fiber_list)):
     dy_norm = (dy/distance)
     dist_surface = distance_transform_edt(~segmention["mask"])[edge:-edge,edge:-edge] # dist to surface
 
-
+    
+   
+    
     
     """
     total image analysis
@@ -145,30 +173,14 @@ for n,i in tqdm(enumerate(fiber_list)):
     cos_dev_total3 = np.nanmean(np.cos(2*angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
     coh_total = np.nanmean(ori[(~segmention["mask"][edge:-edge,edge:-edge]) ])
     coh_total2 = np.nanmean(ori_weight2[(~segmention["mask"][edge:-edge, edge:-edge])])
-          
-    # create excel sheet with results for total image   
-    # initialize result dictionary
-    results_total = {'Mean Coherency': [], 'Mean Coherency (weighted by intensity)': [], 'Mean Angle': [],
-               'Mean Angle (weighted by intensity)': [], 'Mean Angle (weighted by intensity and coherency)': [], 'Orientation': [],
-               'Orientation  (weighted by intensity)': [], 'Orientation (weighted by intensity and coherency)': [], }       
-    results_total['Mean Coherency'].append(coh_total)
-    results_total['Mean Coherency (weighted by intensity)'].append(coh_total2)
-    results_total['Mean Angle'].append(alpha_dev_total1)
-    results_total['Mean Angle (weighted by intensity)'].append(alpha_dev_total2)
-    results_total['Mean Angle (weighted by intensity and coherency)'].append(alpha_dev_total3)
-    results_total['Orientation'].append(cos_dev_total1)
-    results_total['Orientation  (weighted by intensity)'].append(cos_dev_total2)
-    results_total['Orientation (weighted by intensity and coherency)'].append(cos_dev_total3)
-    
-    excel_total = pd.DataFrame.from_dict(results_total)
-    excel_total.columns = ['Mean Coherency', 'Mean Coherency (weighted by intensity)',
-                           'Mean Angle','Mean Angle (weighted by intensity)',
-                           'Mean Angle (weighted by intensity and coherency)',
-                           'Orientation', 'Orientation  (weighted by intensity)', 
-                           'Orientation (weighted by intensity and coherency)']
-      
-    excel_total.to_excel(os.path.join(out_list[n],"results_total.xlsx"))
-        
+    # save to txt file
+    values = [coh_total ,coh_total2, alpha_dev_total1, alpha_dev_total2, alpha_dev_total3, 
+                  cos_dev_total1,cos_dev_total2,cos_dev_total3]
+    strings = ["mean_coh.txt", "mean_coh_w_int.txt", "mean_angle.txt",
+      "mean_angle_we_coh.txt", "mean_angle_we_coh_int.txt", 
+      "cos2a_mean.txt","cos2a_mean_we_coh.txt", "cos2a_we_coh_int.txt"]
+    for i,v in enumerate(values):
+        np.savetxt(os.path.join(out_list[n],strings[i]), [v] ) 
         
 
    
@@ -184,13 +196,6 @@ for n,i in tqdm(enumerate(fiber_list)):
     alpha_dev_slice = []
     alpha_dev_slice_weight = []
     alpha_dev_slice_weight2 = []
-    
-    # initialize result dictionary
-    results_angle = {'Angles': [], 'Mean Coherency (weighted by intensity)': [], 'Mean Angle': [],
-               'Mean Angle (weighted by intensity)': [], 'Mean Angle (weighted by intensity and coherency)': [], 'Orientation': [],
-               'Orientation  (weighted by intensity)': [], 'Orientation (weighted by intensity and coherency)': [], }      
-    
-    results_angle['Angles'].append(coh_total)
     
     # make the angle analysis in sections
     ang_sec = angle_sections
@@ -223,32 +228,6 @@ for n,i in tqdm(enumerate(fiber_list)):
     np.savetxt(os.path.join(out_list[n],"alpha_dev_slice_weight2.txt"), alpha_dev_slice_weight2)
     np.savetxt(os.path.join(out_list[n],"alpha_ori_mean_weight.txt"), ori_mean_weight)
     np.savetxt(os.path.join(out_list[n],"alpha_grad_slice.txt"), grad_slice)
-
-
-    # create excel sheet with results for angle analysis    
-
-    results_total['Mean Coherency'].append(coh_total)
-    results_total['Mean Coherency (weighted by intensity)'].append(coh_total2)
-    results_total['Mean Angle'].append(alpha_dev_total1)
-    results_total['Mean Angle (weighted by intensity)'].append(alpha_dev_total2)
-    results_total['Mean Angle (weighted by intensity and coherency)'].append(alpha_dev_total3)
-    results_total['Orientation'].append(cos_dev_total1)
-    results_total['Orientation  (weighted by intensity)'].append(cos_dev_total2)
-    results_total['Orientation (weighted by intensity and coherency)'].append(cos_dev_total3)
-    
-    excel_total = pd.DataFrame.from_dict(results_total)
-    excel_total.columns = ['Mean Coherency', 'Mean Coherency (weighted by intensity)',
-                           'Mean Angle','Mean Angle (weighted by intensity)',
-                           'Mean Angle (weighted by intensity and coherency)',
-                           'Orientation', 'Orientation  (weighted by intensity)', 
-                           'Orientation (weighted by intensity and coherency)']
-      
-    excel_total.to_excel(os.path.join(out_list[n],"results_total.xlsx"))
-
-
-
-
-
 
 
     """
@@ -439,7 +418,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     # plot max +seg
     fig7= plt.figure() 
     my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
-    cmap =  plt.get_cmap('Greys')#copy()
+    cmap =  copy(plt.get_cmap('Greys'))
     # everything under vmin gets transparent (all zeros in mask)
     cmap.set_under('k', alpha=0)
     #everything else visible
@@ -454,7 +433,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     
     # plot overlay
     my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
-    cmap =  plt.get_cmap('Greys')#copy()
+    cmap =  copy(plt.get_cmap('Greys'))
     # everything under vmin gets transparent (all zeros in mask)
     cmap.set_under('k', alpha=0)
     #everything else visible
@@ -474,7 +453,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     cmap_list = ["Greens","Greys","Reds","Oranges","Blues","PuBu","GnBu"]
     for s in  range(len(allshellmasks)):
         my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
-        cmap =  plt.get_cmap(cmap_list[s%len(cmap_list)])#copy()
+        cmap =  copy(plt.get_cmap(cmap_list[s%len(cmap_list)]))
         # everything under vmin gets transparent (all zeros in mask)
         cmap.set_under('k', alpha=1)
         #everything else visible
@@ -540,7 +519,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     
      # plot overlay version 2
     my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
-    cmap = plt.get_cmap('Greys')# copy(plt.get_cmap('Greys'))
+    cmap =  copy(plt.get_cmap('Greys'))
     # everything under vmin gets transparent (all zeros in mask)
     cmap.set_under('k', alpha=0)
     #everything else visible

@@ -1,6 +1,17 @@
 import numpy as np
 import os
-from skimage.filters import gaussian
+#from skimage.filters import gaussian
+from skimage import io
+
+def load_stack(stack_list):
+    z = len(stack_list)
+    img_example = io.imread(stack_list[0], as_gray=True)
+    h,w = np.shape(img_example)
+    tiffarray=np.zeros((h,w,z))
+    for n,img in enumerate(stack_list):
+        tiffarray[:,:,n]=  (io.imread(stack_list[n], as_gray=True))  #normalize
+    return tiffarray    
+        
 
 def flatten_dict(*args):
     ret_list = [i for i in range(len(args))]
@@ -26,23 +37,6 @@ def make_iterable(value):
         return [value]
     else:
         return value
-
-def normalize(image, lb=0.1, ub=99.9):
-    '''
-    nomralizies image to  a range from 0 and 1 and cuts of extrem values
-    e.g. lower tehn 0.1 percentile and higher then 99.9m percentile
-
-    :param image:
-    :param lb: percentile of lower bound for filter
-    :param ub: percentile of upper bound for filter
-    :return:
-    '''
-
-    image = image - np.percentile(image, lb)  # 1 Percentile
-    image = image / np.percentile(image, ub)  # norm to 99 Percentile
-    image[image < 0] = 0.0
-    image[image > 1] = 1.0
-    return image
 
 
 

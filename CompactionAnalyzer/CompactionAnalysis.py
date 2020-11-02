@@ -189,8 +189,15 @@ for n,i in tqdm(enumerate(fiber_list)):
     results_angle = {'Angles': [], 'Mean Coherency (weighted by intensity)': [], 'Mean Angle': [],
                'Mean Angle (weighted by intensity)': [], 'Mean Angle (weighted by intensity and coherency)': [], 'Orientation': [],
                'Orientation  (weighted by intensity)': [], 'Orientation (weighted by intensity and coherency)': [], }      
-    
-    results_angle['Angles'].append(coh_total)
+        # save results 
+    np.savetxt(os.path.join(out_list[n],"angle_plotting.txt"), angle_plotting)
+    np.savetxt(os.path.join(out_list[n],"alpha_dev_slice.txt"), alpha_dev_slice)
+    np.savetxt(os.path.join(out_list[n],"alpha_dev_slice_weight.txt"), alpha_dev_slice_weight)
+    np.savetxt(os.path.join(out_list[n],"alpha_dev_slice_weight2.txt"), alpha_dev_slice_weight2)
+    np.savetxt(os.path.join(out_list[n],"alpha_ori_mean_weight.txt"), ori_mean_weight)
+    np.savetxt(os.path.join(out_list[n],"alpha_grad_slice.txt"), grad_slice)
+
+   # results_angle['Angles'].append(coh_total)
     
     # make the angle analysis in sections
     ang_sec = angle_sections
@@ -215,7 +222,9 @@ for n,i in tqdm(enumerate(fiber_list)):
     angle_plotting = angle_plotting1.copy()
     angle_plotting[angle_plotting1 < 0] =  np.abs(angle_plotting[angle_plotting1 < 0])
     angle_plotting[angle_plotting1 > 0] =  np.abs(angle_plotting[angle_plotting1>0] - 2* np.pi)
-        
+    results_angle['Angles'].append(angle_plotting)  
+    
+    
     # save results 
     np.savetxt(os.path.join(out_list[n],"angle_plotting.txt"), angle_plotting)
     np.savetxt(os.path.join(out_list[n],"alpha_dev_slice.txt"), alpha_dev_slice)

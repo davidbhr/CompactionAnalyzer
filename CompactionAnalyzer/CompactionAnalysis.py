@@ -11,7 +11,7 @@ Needs an Image of the cell and one image of the fibers (e.g. maximum projection 
 
 """
 
-
+import numpy as np
 from CompactionAnalyzer.CompactionFunctions import *
 from CompactionAnalyzer.utilities import *
 from CompactionAnalyzer.StructureTensor import *
@@ -175,84 +175,66 @@ for n,i in tqdm(enumerate(fiber_list)):
     """
     Angular sections
     """
-    ori_angle = []
-    ori_mean = []
-    ori_mean_weight = []
-    int_mean = []
-    proj_angle = []
-    grad_slice = []
-    alpha_dev_slice = []
-    alpha_dev_slice_weight = []
-    alpha_dev_slice_weight2 = []
     
     # initialize result dictionary
-    results_angle = {'Angles': [], 'Mean Coherency (weighted by intensity)': [], 'Mean Angle': [],
-               'Mean Angle (weighted by intensity)': [], 'Mean Angle (weighted by intensity and coherency)': [], 'Orientation': [],
-               'Orientation  (weighted by intensity)': [], 'Orientation (weighted by intensity and coherency)': [], }      
-        # save results 
-    np.savetxt(os.path.join(out_list[n],"angle_plotting.txt"), angle_plotting)
-    np.savetxt(os.path.join(out_list[n],"alpha_dev_slice.txt"), alpha_dev_slice)
-    np.savetxt(os.path.join(out_list[n],"alpha_dev_slice_weight.txt"), alpha_dev_slice_weight)
-    np.savetxt(os.path.join(out_list[n],"alpha_dev_slice_weight2.txt"), alpha_dev_slice_weight2)
-    np.savetxt(os.path.join(out_list[n],"alpha_ori_mean_weight.txt"), ori_mean_weight)
-    np.savetxt(os.path.join(out_list[n],"alpha_grad_slice.txt"), grad_slice)
+    results_angle = {'Angles': [], 'Angle Deviation': [], 'Angle Deviation (weighted by intensity)': [], 
+                     'Angle Deviation (weighted by intensity and coherency)': [],
+                     'Orientation': [], 'Orientation (weighted by intensity)': [], 
+                     'Orientation (weighted by intensity and coherency)': [], 
+                     'Coherency (weighted by intensity)': [],'Coherency': [], 
+                     'Gradient': [],'Mean Intensity': []                  
+                     }      
 
-   # results_angle['Angles'].append(coh_total)
-    
+
     # make the angle analysis in sections
-    ang_sec = angle_sections
-    for alpha in range(-180, 180, ang_sec):
-            mask_angle = (angle > (alpha-ang_sec/2)) & (angle <= (alpha+ang_sec/2)) & (~segmention["mask"][edge:-edge,edge:-edge])
+    #ang_sec = angle_sections
+    ori_angle = []
+
+    for alpha in range(-180, 180, angle_sections):
+            mask_angle = (angle > (alpha-angle_sections/2)) & (angle <= (alpha+angle_sections/2)) & (~segmention["mask"][edge:-edge,edge:-edge])
             if alpha == -180:
-                  mask_angle = ((angle > (180-ang_sec/2)) | (angle <= (alpha+ang_sec/2))) & (~segmention["mask"][edge:-edge,edge:-edge])
+                  mask_angle = ((angle > (180-angle_sections/2)) | (angle <= (alpha+angle_sections/2))) & (~segmention["mask"][edge:-edge,edge:-edge])
             if alpha == 180:
-                  mask_angle = ((angle > (alpha-ang_sec/2)) | (angle <= (-180 +ang_sec/2))) & (~segmention["mask"][edge:-edge,edge:-edge])            
+                  mask_angle = ((angle > (alpha-angle_sections/2)) | (angle <= (-180 +angle_sections/2))) & (~segmention["mask"][edge:-edge,edge:-edge])            
             ori_angle.append(alpha)
-            ori_mean.append(np.nanmean(ori[mask_angle]))
-            ori_mean_weight.append(np.nanmean(ori_weight2[mask_angle]))
-            int_mean.append(np.nanmean(im_fiber_g[mask_angle]))
-            grad_slice.append(np.nanmean(s_norm1[mask_angle]))
-            alpha_dev_slice.append(np.nanmean(angle_dev[mask_angle]))
-            alpha_dev_slice_weight.append(np.nanmean(angle_dev_weighted[mask_angle]))
-            alpha_dev_slice_weight2.append(np.nanmean(angle_dev_weighted2[mask_angle]))
+            
+            
+            angle_plotting1 = alpha * np.pi / 180
+    #         if angle_plotting1 < 0:
+                
+    # angle_plotting[angle_plotting1 < 0] =  np.abs(angle_plotting[angle_plotting1 < 0])
+    # angle_plotting[angle_plotting1 > 0] =  np.abs(angle_plotting[angle_plotting1>0] - 2* np.pi)
+            
+            results_angle['Angles'].append(angle_plotting1)      
+            results_angle['Coherency'].append(np.nanmean(ori[mask_angle]))
+            results_angle['Coherency (weighted by intensity)'].append(np.nanmean(ori_weight2[mask_angle]))
+            results_angle['Mean Intensity'].append(np.nanmean(im_fiber_g[mask_angle]))
+            results_angle['Gradient'].append(np.nanmean(s_norm1[mask_angle]))
+            results_angle['Angle Deviation'].append(np.nanmean(angle_dev[mask_angle]))
+            results_angle['Angle Deviation (weighted by intensity)'].append(np.nanmean(angle_dev_weighted[mask_angle]))
+            results_angle['Angle Deviation (weighted by intensity and coherency)'].append(np.nanmean(angle_dev_weighted2[mask_angle]))
+            results_angle['Orientation'].append(np.nanmean(np.cos(2*angle_dev[mask_angle]*np.pi/180)))
+            results_angle['Orientation (weighted by intensity)'].append(np.nanmean(np.cos(2*angle_dev_weighted[mask_angle]*np.pi/180)))
+            results_angle['Orientation (weighted by intensity and coherency)'].append(np.nanmean(np.cos(2*angle_dev_weighted2[mask_angle]*np.pi/180)))
 
 
     # translating the angles to coordinates in polar plot
-    angle_plotting1 = (np.array(ori_angle) * np.pi / 180)
-    angle_plotting = angle_plotting1.copy()
-    angle_plotting[angle_plotting1 < 0] =  np.abs(angle_plotting[angle_plotting1 < 0])
-    angle_plotting[angle_plotting1 > 0] =  np.abs(angle_plotting[angle_plotting1>0] - 2* np.pi)
-    results_angle['Angles'].append(angle_plotting)  
-    
-    
-    # save results 
-    np.savetxt(os.path.join(out_list[n],"angle_plotting.txt"), angle_plotting)
-    np.savetxt(os.path.join(out_list[n],"alpha_dev_slice.txt"), alpha_dev_slice)
-    np.savetxt(os.path.join(out_list[n],"alpha_dev_slice_weight.txt"), alpha_dev_slice_weight)
-    np.savetxt(os.path.join(out_list[n],"alpha_dev_slice_weight2.txt"), alpha_dev_slice_weight2)
-    np.savetxt(os.path.join(out_list[n],"alpha_ori_mean_weight.txt"), ori_mean_weight)
-    np.savetxt(os.path.join(out_list[n],"alpha_grad_slice.txt"), grad_slice)
+    # angle_plotting1 = (np.array(ori_angle) * np.pi / 180)
+    # angle_plotting = angle_plotting1.copy()
+    # angle_plotting[angle_plotting1 < 0] =  np.abs(angle_plotting[angle_plotting1 < 0])
+    # angle_plotting[angle_plotting1 > 0] =  np.abs(angle_plotting[angle_plotting1>0] - 2* np.pi)
+    # results_angle['Angles'].append([a for a in angle_plotting])  
 
 
-    # create excel sheet with results for angle analysis    
-
-    results_total['Mean Coherency'].append(coh_total)
-    results_total['Mean Coherency (weighted by intensity)'].append(coh_total2)
-    results_total['Mean Angle'].append(alpha_dev_total1)
-    results_total['Mean Angle (weighted by intensity)'].append(alpha_dev_total2)
-    results_total['Mean Angle (weighted by intensity and coherency)'].append(alpha_dev_total3)
-    results_total['Orientation'].append(cos_dev_total1)
-    results_total['Orientation  (weighted by intensity)'].append(cos_dev_total2)
-    results_total['Orientation (weighted by intensity and coherency)'].append(cos_dev_total3)
-    
-    excel_total = pd.DataFrame.from_dict(results_total)
-    excel_total.columns = ['Mean Coherency', 'Mean Coherency (weighted by intensity)',
-                           'Mean Angle','Mean Angle (weighted by intensity)',
-                           'Mean Angle (weighted by intensity and coherency)',
-                           'Orientation', 'Orientation  (weighted by intensity)', 
-                           'Orientation (weighted by intensity and coherency)']
-      
-    excel_total.to_excel(os.path.join(out_list[n],"results_total.xlsx"))
+    # create excel sheet with results for angle analysis       
+    excel_angles= pd.DataFrame.from_dict(results_angle)
+    excel_angles.columns = ['Angles', 'Angle Deviation', 'Angle Deviation (weighted by intensity)', 
+                     'Angle Deviation (weighted by intensity and coherency)',
+                     'Orientation', 'Orientation  (weighted by intensity)', 
+                     'Orientation (weighted by intensity and coherency)', 
+                     'Coherency (weighted by intensity)','Coherency', 
+                     'Gradient','Mean Intensity'  ]  
+    excel_angles.to_excel(os.path.join(out_list[n],"results_angles.xlsx"))
 
 
 

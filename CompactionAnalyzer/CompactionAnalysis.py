@@ -29,21 +29,21 @@ cell_list = natsorted(glob.glob(r"..\TestData\cell.tif"))   #check that order is
 out_list = [os.path.join("analysis",cell_list[i].split(os.sep)[0], os.path.basename(cell_list[i])[:-4]) for i in range(len(cell_list))]
 
 
-scale =  0.318 # um per pixel
-
 
 # Set Parameters 
-sigma_tensor = 7/scale  # sigma of applied gauss filter / window for structure tensor analysis in px
-                    # should be in the order of the objects to analyze !! 
-                    # 7 um for collagen 
-edge = 40   # Cutt of pixels at the edge since values at the border cannot be trusted
-segmention_thres = 1  # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
-sigma_first_blur  = 0.5 # slight first bluring of whole image before using structure tensor
-angle_sections = 5   # size of angle sections in degree 
-shell_width =  5/scale   # pixel width of distance shells
+scale =  0.318                  # imagescale as um per pixel
+sigma_tensor = 7/scale          # sigma of applied gauss filter / window for structure tensor analysis in px
+                                # should be in the order of the objects to analyze !! 
+                                # 7 um for collagen 
+edge = 40                       # Cutt of pixels at the edge since values at the border cannot be trusted
+segmention_thres = 1            # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
+sigma_first_blur  = 0.5         # slight first bluring of whole image before using structure tensor
+angle_sections = 5              # size of angle sections in degree 
+shell_width =  5/scale          # pixel width of distance shells
 manual_segmention = False
-
-
+plotting = True                     # creates and saves plots additionally to excel files 
+norm1,norm2 = 5,95              # contrast spreading" by setting all values below norm1-percentile to zero and
+                                # all values above norm2-percentile to 1
 
 
 
@@ -55,10 +55,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     # load images
     im_cell  = color.rgb2gray(imageio.imread(cell_list[n]))
     im_fiber = color.rgb2gray(imageio.imread(fiber_list[n]))
-    #"contrast spreading" by setting all values below norm1-percentile to zero and
-    # # all values above norm2-percentile to 1
-    norm1 = 5
-    norm2 = 95
+
     # # applying normalizing/ contrast spreading
     im_cell_n = normalize(im_cell, norm1, norm2)
     im_fiber_n = normalize(im_fiber, norm1, norm2)  
@@ -161,12 +158,12 @@ for n,i in tqdm(enumerate(fiber_list)):
     results_total['Orientation (weighted by intensity and coherency)'].append(cos_dev_total3)
     
     excel_total = pd.DataFrame.from_dict(results_total)
-    excel_total.columns = ['Mean Coherency', 'Mean Coherency (weighted by intensity)',
-                           'Mean Angle','Mean Angle (weighted by intensity)',
-                           'Mean Angle (weighted by intensity and coherency)',
-                           'Orientation', 'Orientation  (weighted by intensity)', 
-                           'Orientation (weighted by intensity and coherency)']
-      
+    # Not necesseray anymore
+    # excel_total.columns = ['Mean Coherency', 'Mean Coherency (weighted by intensity)',
+    #                        'Mean Angle','Mean Angle (weighted by intensity)',
+    #                        'Mean Angle (weighted by intensity and coherency)',
+    #                        'Orientation', 'Orientation  (weighted by intensity)', 
+    #                        'Orientation (weighted by intensity and coherency)']  
     excel_total.to_excel(os.path.join(out_list[n],"results_total.xlsx"))
         
         
@@ -177,7 +174,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     """
     
     # initialize result dictionary
-    results_angle = {'Angles': [], 'Angle Deviation': [], 'Angle Deviation (weighted by intensity)': [], 
+    results_angle = {'Angles': [], 'Angles Plotting': [], 'Angle Deviation': [], 'Angle Deviation (weighted by intensity)': [], 
                      'Angle Deviation (weighted by intensity and coherency)': [],
                      'Orientation': [], 'Orientation (weighted by intensity)': [], 
                      'Orientation (weighted by intensity and coherency)': [], 
@@ -185,27 +182,21 @@ for n,i in tqdm(enumerate(fiber_list)):
                      'Gradient': [],'Mean Intensity': []                  
                      }      
 
-
     # make the angle analysis in sections
-    #ang_sec = angle_sections
-    ori_angle = []
-
     for alpha in range(-180, 180, angle_sections):
             mask_angle = (angle > (alpha-angle_sections/2)) & (angle <= (alpha+angle_sections/2)) & (~segmention["mask"][edge:-edge,edge:-edge])
             if alpha == -180:
                   mask_angle = ((angle > (180-angle_sections/2)) | (angle <= (alpha+angle_sections/2))) & (~segmention["mask"][edge:-edge,edge:-edge])
             if alpha == 180:
                   mask_angle = ((angle > (alpha-angle_sections/2)) | (angle <= (-180 +angle_sections/2))) & (~segmention["mask"][edge:-edge,edge:-edge])            
-            ori_angle.append(alpha)
-            
-            
-            angle_plotting1 = alpha * np.pi / 180
-    #         if angle_plotting1 < 0:
-                
-    # angle_plotting[angle_plotting1 < 0] =  np.abs(angle_plotting[angle_plotting1 < 0])
-    # angle_plotting[angle_plotting1 > 0] =  np.abs(angle_plotting[angle_plotting1>0] - 2* np.pi)
-            
-            results_angle['Angles'].append(angle_plotting1)      
+                  
+            # save angle data
+            angle_current = alpha * np.pi / 180
+            results_angle['Angles'].append(angle_current)  
+            if angle_current>0:
+                results_angle['Angles Plotting'].append(np.abs(angle_current)-(2*np.pi))  
+            else:
+                results_angle['Angles Plotting'].append(np.abs(angle_current))  
             results_angle['Coherency'].append(np.nanmean(ori[mask_angle]))
             results_angle['Coherency (weighted by intensity)'].append(np.nanmean(ori_weight2[mask_angle]))
             results_angle['Mean Intensity'].append(np.nanmean(im_fiber_g[mask_angle]))
@@ -216,139 +207,133 @@ for n,i in tqdm(enumerate(fiber_list)):
             results_angle['Orientation'].append(np.nanmean(np.cos(2*angle_dev[mask_angle]*np.pi/180)))
             results_angle['Orientation (weighted by intensity)'].append(np.nanmean(np.cos(2*angle_dev_weighted[mask_angle]*np.pi/180)))
             results_angle['Orientation (weighted by intensity and coherency)'].append(np.nanmean(np.cos(2*angle_dev_weighted2[mask_angle]*np.pi/180)))
-
-
-    # translating the angles to coordinates in polar plot
-    # angle_plotting1 = (np.array(ori_angle) * np.pi / 180)
-    # angle_plotting = angle_plotting1.copy()
-    # angle_plotting[angle_plotting1 < 0] =  np.abs(angle_plotting[angle_plotting1 < 0])
-    # angle_plotting[angle_plotting1 > 0] =  np.abs(angle_plotting[angle_plotting1>0] - 2* np.pi)
-    # results_angle['Angles'].append([a for a in angle_plotting])  
-
-
+   
     # create excel sheet with results for angle analysis       
     excel_angles= pd.DataFrame.from_dict(results_angle)
-    excel_angles.columns = ['Angles', 'Angle Deviation', 'Angle Deviation (weighted by intensity)', 
-                     'Angle Deviation (weighted by intensity and coherency)',
-                     'Orientation', 'Orientation  (weighted by intensity)', 
-                     'Orientation (weighted by intensity and coherency)', 
-                     'Coherency (weighted by intensity)','Coherency', 
-                     'Gradient','Mean Intensity'  ]  
     excel_angles.to_excel(os.path.join(out_list[n],"results_angles.xlsx"))
-
-
-
-
-
 
 
     """
     Distance Evaluation
     """
 
+    
+     # initialize result dictionary
+    results_distance = {'Shell_mid (px)': [], 'Shell_mid (µm)': [],'Mask_shell': [], 'Intensity (accumulated)': [], 
+                        'Intensity (individual)': [], 'Intensity Norm (individual)': [],
+                        'Intensity Norm (accumulated)': [],  'Angle (accumulated)': [],  'Angle (individual)': [],  
+                        'Orientation (accumulated)': [], 'Orientation (individual)': [], 
+                        'Angle (individual)': [], 'Mask_shell_center': [], 
+                        'Intensity disttocenter (accumulated)': [], 
+                        'Intensity disttocenter (individual)': [], 'Intensity Norm disttocenter (individual)': [], 
+                        'Intensity Norm disttocenter (accumulated)': [], 
+                        'Angle disttocenter (accumulated)': [],  'Angle disttocenter (individual)': [],  
+                        'Orientation disttocenter (accumulated)': [], 'Orientation disttocenter (individual)': [], 
+                        'Angle disttocenter (individual)': []            
+                     }      
+
+
+    # shell distances
     shells = np.arange(0, dist_surface.max(), shell_width)
     midofshells = (shells + shell_width/2)[:-1]
-    allshellmasks = []
-    # intensity and angle within individual shell and accumulation of all inner shells
-    # distance shells parallel to surface
-    dist_int_accum = []
-    dist_angle_accum = []
-    dist_int_individ = []
-    dist_angle_individ = []
-    # distance shells as circles around center
-    dist_int_accum_center = []
-    dist_angle_accum_center = []
-    dist_int_individ_center = []
-    dist_angle_individ_center = []
+    results_distance['Shell_mid (px)'].extend(list(midofshells) )
+    results_distance['Shell_mid (µm)'].extend([i*scale for i in midofshells])
 
     
     # make the distance shell analysis
     for i in range(len(shells)-1):
+        
         # distance shells parallel to surface
         # mask of individual shells and accumulation of all points closer to the correponding cell
         mask_shell = (dist_surface > (shells[i])) & (dist_surface <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])  
         mask_shell_lower=  (dist_surface <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])
-        allshellmasks.append(mask_shell)
+        results_distance['Mask_shell'].append(mask_shell)
         # calculate mintensity and angle deviation within the growing shells (always within start shell to highest shell)
         # THINK ABOUT ANGLE DEV W 2 (with int here ?)
-        dist_angle_accum.append(np.nanmean(angle_dev_weighted[mask_shell_lower])  ) # accumulation of lower shells
-        dist_angle_individ.append(np.nanmean(angle_dev_weighted[mask_shell])  )    # exclusively in certain shell
+        results_distance['Angle (accumulated)'].append(np.nanmean(angle_dev_weighted[mask_shell_lower])  ) # accumulation of lower shells
+        results_distance['Angle (individual)'].append(np.nanmean(angle_dev_weighted[mask_shell])  )    # exclusively in certain shell
+        results_distance['Orientation (accumulated)'].append(np.cos(2*np.nanmean(angle_dev_weighted[mask_shell_lower]*np.pi/180))  ) # accumulation of lower shells
+        results_distance['Orientation (individual)'].append(np.cos(2*np.nanmean(angle_dev_weighted[mask_shell]*np.pi/180))  )    # exclusively in certain shell
         # MAYBE TODO:  weight by coherency+Intensity   within shell instead of the pure angle ?
         # mean intensity
-        dist_int_accum.append(np.nanmean(im_fiber_g[mask_shell_lower]))          # accumulation of lower shells
-        dist_int_individ.append(np.nanmean(im_fiber_g[mask_shell])  )    # exclusively in certain shell
+        results_distance['Intensity (accumulated)'].append(np.nanmean(im_fiber_g[mask_shell_lower]))          # accumulation of lower shells
+        results_distance['Intensity (individual)'].append(np.nanmean(im_fiber_g[mask_shell])  )    # exclusively in certain shell
+        
         
         # distance shells as circles around center
         mask_shell_center = (distance > (shells[i])) & (distance <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])  
         mask_shell_lower_center=  (distance <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])
+        results_distance['Mask_shell_center'].append(mask_shell_center)
         # calculate mintensity and angle deviation within the growing shells (always within start shell to highest shell)
         # THINK ABOUT ANGLE DEV W 2 (with int here ?)
-        dist_angle_accum_center.append(np.nanmean(angle_dev_weighted[mask_shell_lower_center])  ) # accumulation of lower shells
-        dist_angle_individ_center.append(np.nanmean(angle_dev_weighted[mask_shell_center])  )    # exclusively in certain shell
+        results_distance['Angle disttocenter (accumulated)'].append(np.nanmean(angle_dev_weighted[mask_shell_lower_center])  ) # accumulation of lower shells
+        results_distance['Angle disttocenter (individual)'].append(np.nanmean(angle_dev_weighted[mask_shell_center])  )    # exclusively in certain shell
         # MAYBE TODO:  weight by coherency+Intensity   within shell instead of the pure angle ?
+        results_distance['Orientation disttocenter (accumulated)'].append(np.nanmean(np.cos(2*angle_dev_weighted[mask_shell_lower_center]*np.pi/180))  ) # accumulation of lower shells
+        results_distance['Orientation disttocenter (individual)'].append(np.nanmean(np.cos(2*angle_dev_weighted[mask_shell_center]*np.pi/180))  )    # exclusively in certain shell
         # mean intensity
-        dist_int_accum_center.append(np.nanmean(im_fiber_g[mask_shell_lower_center]))          # accumulation of lower shells
-        dist_int_individ_center.append(np.nanmean(im_fiber_g[mask_shell_center])  )    # exclusively in certain shell
+        results_distance['Intensity disttocenter (accumulated)'].append(np.nanmean(im_fiber_g[mask_shell_lower_center]))          # accumulation of lower shells
+        results_distance['Intensity disttocenter (individual)'].append(np.nanmean(im_fiber_g[mask_shell_center])  )    # exclusively in certain shell
         
 
-        
+    # create excel sheet with results for angle analysis       
+       
     # norm intensities   (Baseline: mean intensity of the 2 outmost shells)
-    dist_int_individ_norm = np.array(dist_int_individ)/ np.nanmean(np.array(dist_int_individ[-2:]))    
-    dist_int_accum_norm = np.array(dist_int_accum)/ np.nanmean(np.array(dist_int_accum[-2:]))    
-    dist_int_individ_center_norm = np.array(dist_int_individ_center)/ np.nanmean(np.array(dist_int_individ_center[-2:])) 
-    dist_int_accum_center_norm = np.array(dist_int_accum_center)/ np.nanmean(np.array(dist_int_accum_center[-2:])) 
-    # Calculate value where ntensity drops 25%
-    distintdrop = np.abs(dist_int_individ_norm-0.75)
-    # distance where int  drops   to 75% 
-    halflife_int =  midofshells[np.where(distintdrop == np.nanmin(distintdrop.min()))] [0] 
-    # if decrease is not within range (minimum equals last value) then set to nan
-    if halflife_int == midofshells[-1]:
-        halflife_int = np.nan
+    norm_individ_int = np.array(results_distance['Intensity (individual)']/np.nanmean(np.array(results_distance['Intensity (individual)'][-2:])))
+    results_distance['Intensity Norm (individual)'].extend( list(norm_individ_int) )  
+    norm_accum_int = np.array(results_distance['Intensity (accumulated)'])/ np.nanmean(np.array(results_distance['Intensity (accumulated)'][-2:]))
+    results_distance['Intensity Norm (accumulated)'].extend(list(norm_accum_int) )  
+    
+    # norm intensities   (Baseline: mean intensity of the 2 outmost shells)
+    # now distance shells are calculatedt spherical around center instead of surface shells
+    norm_individ_int_c = np.array(results_distance['Intensity disttocenter (individual)']/np.nanmean(np.array(results_distance['Intensity disttocenter (individual)'][-2:])))
+    results_distance['Intensity Norm disttocenter (individual)'].extend( list(norm_individ_int_c) )  
+    norm_accum_int_c = np.array(results_distance['Intensity disttocenter (accumulated)'])/ np.nanmean(np.array(results_distance['Intensity disttocenter (accumulated)'][-2:]))
+    results_distance['Intensity Norm disttocenter (accumulated)'].extend(list(norm_accum_int_c) )  
+    
+    # create excel sheet with results for angle analysis       
+    excel_distance =  pd.DataFrame.from_dict(results_distance)
+    excel_distance.to_excel(os.path.join(out_list[n],"results_distance.xlsx"))
+    
+    
 
-    # # Calculate value where orientation drops to 75% within maxorientation(min) to 45° (random) range 
-    # difference to 45 degree instead of min-max range    
-    # calculate halflife of maximal orientation over distance
-    # difference to 45 degree for all
-    diffdist = np.array(dist_angle_individ)-45
-    # maximal orientation
-    diffmax = np.nanmin(diffdist)
-    diffmax_pos = np.where(diffmax==diffdist)[0][0]
-    # difference  angle drops to 75% 
-    diff2 = np.abs(diffdist-(0.75*diffmax))
-    diff2[:diffmax_pos] = np.nan    # only look at distances on the right side /further out 
-    halflife_ori =  midofshells[np.where(diff2 == np.nanmin(diff2))]    
-    # if decrease is not within range (minimum equals last value) then set to nan
-    if halflife_ori == midofshells[-1]:
-        halflife_ori = np.nan
+    # Halflife values - Leave for now..
+    #
+    # # Calculate value where ntensity drops 25%
+    # distintdrop = np.abs(np.array(results_distance['Intensity Norm (individual)'])-0.75)
+    # # distance where int  drops   to 75% 
+    # halflife_int =  midofshells[np.where(distintdrop  == np.nanmin(distintdrop))[1]]
+    # # if decrease is not within range (minimum equals last value) then set to nan
+    # if halflife_int == midofshells[-1]:
+    #     halflife_int = np.nan
+    # # # Calculate value where orientation drops to 75% within maxorientation(min) to 45° (random) range 
+    # # difference to 45 degree instead of min-max range    
+    # # calculate halflife of maximal orientation over distance
+    # # difference to 45 degree for all
+    # diffdist = np.array(dist_angle_individ)-45
+    # # maximal orientation
+    # diffmax = np.nanmin(diffdist)
+    # diffmax_pos = np.where(diffmax==diffdist)[0][0]
+    # # difference  angle drops to 75% 
+    # diff2 = np.abs(diffdist-(0.75*diffmax))
+    # diff2[:diffmax_pos] = np.nan    # only look at distances on the right side /further out 
+    # halflife_ori =  midofshells[np.where(diff2 == np.nanmin(diff2))]    
+    # # if decrease is not within range (minimum equals last value) then set to nan
+    # if halflife_ori == midofshells[-1]:
+    #     halflife_ori = np.nan
+        # try:
+    #     np.savetxt(os.path.join(out_list[n],"meanangle_within10shells.txt"), [dist_angle_accum[9]]) 
+    # except:
+    #     pass
+
+
+    """
+    Plott results
+    """
+    
+    if plotting:
         
-    
-    # save distane arrays
-    np.savetxt(os.path.join(out_list[n],"shells-mid_px.txt"), midofshells)
-    np.savetxt(os.path.join(out_list[n],"dist_int_individ.txt"), dist_int_individ)
-    np.savetxt(os.path.join(out_list[n],"dist_angle_individ.txt"), dist_angle_individ)
-    np.savetxt(os.path.join(out_list[n],"dist_int_accum.txt"), dist_int_accum)
-    np.savetxt(os.path.join(out_list[n],"dist_angle_accum.txt"), dist_angle_accum)
-    np.savetxt(os.path.join(out_list[n],"distdrop25_ori_px.txt"), [halflife_ori])
-    np.savetxt(os.path.join(out_list[n],"distdrop25_int_px.txt"), [halflife_int])
-    np.savetxt(os.path.join(out_list[n],"dist_int_individ_center.txt"), dist_int_individ_center)
-    np.savetxt(os.path.join(out_list[n],"dist_angle_individ_center.txt"), dist_angle_individ_center)
-    np.savetxt(os.path.join(out_list[n],"dist_int_accum_center.txt"), dist_int_accum_center)
-    np.savetxt(os.path.join(out_list[n],"dist_angle_accum_center.txt"), dist_angle_accum_center)
-    np.savetxt(os.path.join(out_list[n],"dist_int_individ_norm.txt"), dist_int_individ_norm)
-    np.savetxt(os.path.join(out_list[n],"dist_int_accum_norm.txt"), dist_int_accum_norm)
-    np.savetxt(os.path.join(out_list[n],"dist_int_individ_norm_center.txt"), dist_int_individ_center_norm)
-    np.savetxt(os.path.join(out_list[n],"dist_int_accum_norm_center.txt"), dist_int_accum_center_norm)
-    
-    
-    try:
-        np.savetxt(os.path.join(out_list[n],"meanangle_within10shells.txt"), [dist_angle_accum[9]]) 
-    except:
-        pass
-
-    
-    """
-    save plots here
-    """
+            
     
     # angle deviation no weights
     plt.figure();plt.imshow(angle_dev); plt.colorbar()

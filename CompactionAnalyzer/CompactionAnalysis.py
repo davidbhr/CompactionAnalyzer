@@ -129,6 +129,10 @@ for n,i in tqdm(enumerate(fiber_list)):
     s_around_center = ((grad_x * dx_norm_a) + (grad_y * dy_norm_a))**2
     s_norm1 = (s_around_center - s_to_center)/(grad_x**2 + grad_y**2)
     #s_norm2 = (s_around_center - s_to_center)/(s_around_center + s_to_center)
+        
+    
+
+    
     
     
     # save values for total image analysis
@@ -148,6 +152,28 @@ for n,i in tqdm(enumerate(fiber_list)):
     results_total = {'Mean Coherency': [], 'Mean Coherency (weighted by intensity)': [], 'Mean Angle': [],
                'Mean Angle (weighted by intensity)': [], 'Mean Angle (weighted by intensity and coherency)': [], 'Orientation': [],
                'Orientation  (weighted by intensity)': [], 'Orientation (weighted by intensity and coherency)': [], }       
+    results_map = {'Angle Map': [], 'Angle Map (weighted by intensity)': [],'Angle Map (weighted by intensity and coherency)': [],
+                   'Orientation Map': [], 'Orientation Map (weighted by intensity)': [],'Orientation Map (weighted by intensity and coherency)': [],
+                   'Coherency Map': [],'Coherency Map (weighted by intensity)': [], 
+                   'Fiber Image' : [], 'Segmentation' : []}
+                   
+    results_map['Angle Map'].append(angle_dev[(~segmention["mask"][edge:-edge,edge:-edge])])
+    results_map['Angle Map (weighted by intensity)'].append(angle_dev_weighted[(~segmention["mask"][edge:-edge,edge:-edge])])
+    results_map['Angle Map (weighted by intensity and coherency)'].append(angle_dev_weighted2[(~segmention["mask"][edge:-edge,edge:-edge])])
+    results_map['Orientation Map'].append(np.cos(2*angle_dev[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
+    results_map['Orientation Map (weighted by intensity)'].append(np.cos(2*angle_dev_weighted[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
+    results_map['Orientation Map (weighted by intensity and coherency)'].append(np.cos(2*angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
+    results_map['Fiber Image'].append(normalize(im_fiber_n[edge:-edge,edge:-edge]))
+    results_map['Segmentation'].append(segmention["mask"][edge:-edge,edge:-edge])
+    results_map['Coherency Map'].append(ori[(~segmention["mask"][edge:-edge,edge:-edge]) ])
+    results_map['Coherency Map (weighted by intensity)'].append(ori_weight2[(~segmention["mask"][edge:-edge, edge:-edge])])
+    
+    
+
+
+
+
+    
     results_total['Mean Coherency'].append(coh_total)
     results_total['Mean Coherency (weighted by intensity)'].append(coh_total2)
     results_total['Mean Angle'].append(alpha_dev_total1)
@@ -158,14 +184,9 @@ for n,i in tqdm(enumerate(fiber_list)):
     results_total['Orientation (weighted by intensity and coherency)'].append(cos_dev_total3)
     
     excel_total = pd.DataFrame.from_dict(results_total)
-    # Not necesseray anymore
-    # excel_total.columns = ['Mean Coherency', 'Mean Coherency (weighted by intensity)',
-    #                        'Mean Angle','Mean Angle (weighted by intensity)',
-    #                        'Mean Angle (weighted by intensity and coherency)',
-    #                        'Orientation', 'Orientation  (weighted by intensity)', 
-    #                        'Orientation (weighted by intensity and coherency)']  
     excel_total.to_excel(os.path.join(out_list[n],"results_total.xlsx"))
-        
+    excel_map = pd.DataFrame.from_dict(results_map)
+    excel_map.to_excel(os.path.join(out_list[n],"results_map.xlsx"))   
         
 
    
@@ -331,9 +352,12 @@ for n,i in tqdm(enumerate(fiber_list)):
     Plott results
     """
     
-    if plotting:
+ #   if plotting:
         
             
+    results_distance['Intensity Norm disttocenter (accumulated)']
+    
+    
     
     # angle deviation no weights
     plt.figure();plt.imshow(angle_dev); plt.colorbar()

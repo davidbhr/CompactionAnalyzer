@@ -11,7 +11,27 @@ def load_stack(stack_list):
     for n,img in enumerate(stack_list):
         tiffarray[:,:,n]=  (io.imread(stack_list[n], as_gray=True))  #normalize
     return tiffarray    
-        
+    
+def generate_output_folder(output_main, cell_list_string, cell_list):
+ """
+ generate the same folder structure as in cell_list but located in the output_main  
+  output_main: base folder for output files
+  cell_list_string: cell list before calling glob 
+  cell_list: cell list after calling glob
+  
+"""
+   
+    # get base path (before * in glob - even works without any *)
+    base = os.path.split(cell_list[:cell_list.find("*")])[0]
+    # get the rest of the path
+    rest_paths =[os.path.split(os.path.relpath(p, base))[0] for p in cell_list]
+    # get the file name
+    names = [os.path.splitext(os.path.split(p)[1])[0] for p in cell_list]
+    # put together accordingly in the output_main folder
+    out_list = [os.path.join(output_main,rest_path, name) for name, rest_path in zip(names, rest_paths)]
+    
+    return out_list
+    
 
 def flatten_dict(*args):
     ret_list = [i for i in range(len(args))]

@@ -19,16 +19,36 @@ from CompactionAnalyzer.plotting import *
 
 # maxprojection Data
 # read in list of cells and list of fibers to evaluate (must be in same order)
-# use glob.glob or individual list of paths []    
-fiber_list = natsorted(glob.glob(r"..\TestData\fiber.tif"))   #fiber_random_c24
-cell_list = natsorted(glob.glob(r"..\TestData\cell.tif"))   #check that order is same to fiber
+# use glob.glob or individual list of paths []   
+fiber_list_string =  r"..\TestData\*\fiber.tif"
+cell_list_string =  r"..\TestData\*\cell.tif"
+
+# read in images
+fiber_list = natsorted(glob.glob(fiber_list))   #fiber_random_c24
+cell_list = natsorted(glob.glob(cell_list))   #check that order is same to fiber
+
+# Generate output folder automatically
+# can be done manual as ["output/conditionx/cell1", "output/conditiony/cell2", ...]
+out_list = generate_output_folder("Analysis_output", cell_list_string, cell_list)
 
 
-# create output folder accordingly
-#out_list = [os.path.join("angle_eval","2-angle",cell_list[i].split(os.sep)[0], os.path.basename(cell_list[i])[:-4]) for i in range(len(cell_list))]
-out_list = [os.path.join("analysis",cell_list[i].split(os.sep)[0], os.path.basename(cell_list[i])[:-4]) for i in range(len(cell_list))]
 
 
+# # generate output
+# base = os.path.split(s[:s.find("*")])[0]
+# rest_paths =[os.path.split(os.path.relpath(p, base))[0] for p in cell_list]
+# names = [os.path.splitext(os.path.split(p)[1])[0] for p in cell_list]
+# # create output folder accordingly
+# #out_list = [os.path.join("angle_eval","2-angle",cell_list[i].split(os.sep)[0], os.path.basename(cell_list[i])[:-4]) for i in range(len(cell_list))]
+# # out_list = [os.path.join("analysis", cell_list[i].split(os.sep)[0], os.path.basename(cell_list[i])[:-4]) for i in range(len(cell_list))]
+# out_list = [os.path.join("analysis",rest_path, name) for name, rest_path in zip(names, rest_paths)]
+
+
+
+
+
+rest = os.path.split(rest)[0]
+name = os.path.splitext(os.path.split(s)[1])[0]
 
 # Set Parameters 
 scale =  0.318                  # imagescale as um per pixel
@@ -41,7 +61,8 @@ sigma_first_blur  = 0.5         # slight first bluring of whole image before usi
 angle_sections = 5              # size of angle sections in degree 
 shell_width =  5/scale          # pixel width of distance shells
 manual_segmention = False
-plotting = True                     # creates and saves plots additionally to excel files 
+plotting = True                 # creates and saves plots additionally to excel files 
+SaveNumpy = True             # saves numpy arrays for later analysis - might create lots of data
 norm1,norm2 = 5,95              # contrast spreading" by setting all values below norm1-percentile to zero and
                                 # all values above norm2-percentile to 1
 
@@ -152,28 +173,7 @@ for n,i in tqdm(enumerate(fiber_list)):
     results_total = {'Mean Coherency': [], 'Mean Coherency (weighted by intensity)': [], 'Mean Angle': [],
                'Mean Angle (weighted by intensity)': [], 'Mean Angle (weighted by intensity and coherency)': [], 'Orientation': [],
                'Orientation  (weighted by intensity)': [], 'Orientation (weighted by intensity and coherency)': [], }       
-    results_map = {'Angle Map': [], 'Angle Map (weighted by intensity)': [],'Angle Map (weighted by intensity and coherency)': [],
-                   'Orientation Map': [], 'Orientation Map (weighted by intensity)': [],'Orientation Map (weighted by intensity and coherency)': [],
-                   'Coherency Map': [],'Coherency Map (weighted by intensity)': [], 
-                   'Fiber Image' : [], 'Segmentation' : []}
-                   
-    results_map['Angle Map'].append(angle_dev[(~segmention["mask"][edge:-edge,edge:-edge])])
-    results_map['Angle Map (weighted by intensity)'].append(angle_dev_weighted[(~segmention["mask"][edge:-edge,edge:-edge])])
-    results_map['Angle Map (weighted by intensity and coherency)'].append(angle_dev_weighted2[(~segmention["mask"][edge:-edge,edge:-edge])])
-    results_map['Orientation Map'].append(np.cos(2*angle_dev[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
-    results_map['Orientation Map (weighted by intensity)'].append(np.cos(2*angle_dev_weighted[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
-    results_map['Orientation Map (weighted by intensity and coherency)'].append(np.cos(2*angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
-    results_map['Fiber Image'].append(normalize(im_fiber_n[edge:-edge,edge:-edge]))
-    results_map['Segmentation'].append(segmention["mask"][edge:-edge,edge:-edge])
-    results_map['Coherency Map'].append(ori[(~segmention["mask"][edge:-edge,edge:-edge]) ])
-    results_map['Coherency Map (weighted by intensity)'].append(ori_weight2[(~segmention["mask"][edge:-edge, edge:-edge])])
-    
-    
-
-
-
-
-    
+   
     results_total['Mean Coherency'].append(coh_total)
     results_total['Mean Coherency (weighted by intensity)'].append(coh_total2)
     results_total['Mean Angle'].append(alpha_dev_total1)
@@ -185,11 +185,9 @@ for n,i in tqdm(enumerate(fiber_list)):
     
     excel_total = pd.DataFrame.from_dict(results_total)
     excel_total.to_excel(os.path.join(out_list[n],"results_total.xlsx"))
-    excel_map = pd.DataFrame.from_dict(results_map)
-    excel_map.to_excel(os.path.join(out_list[n],"results_map.xlsx"))   
-        
 
-   
+ 
+
     """
     Angular sections
     """
@@ -346,6 +344,31 @@ for n,i in tqdm(enumerate(fiber_list)):
     #     np.savetxt(os.path.join(out_list[n],"meanangle_within10shells.txt"), [dist_angle_accum[9]]) 
     # except:
     #     pass
+
+
+    if SaveNumpy:
+        #create output folder if not existing
+        numpy_out = os.path.join(out_list[n], "NumpyArrays" )
+        if not os.path.exists(numpy_out):
+            os.makedirs(numpy_out)
+            
+        np.save(os.path.join(numpy_out, "Angle Map.npy" ),angle_dev[(~segmention["mask"][edge:-edge,edge:-edge])] )    
+        np.save(os.path.join(numpy_out, "Angle Map (weighted by intensity).npy" ),angle_dev_weighted[(~segmention["mask"][edge:-edge,edge:-edge])] )    
+        np.save(os.path.join(numpy_out, "Angle Map (weighted by intensity and coherency).npy" ),angle_dev_weighted2[(~segmention["mask"][edge:-edge,edge:-edge])] )    
+        np.save(os.path.join(numpy_out, "Orientation Map.npy" ),np.cos(2*angle_dev[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180) )    
+        np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity).npy" ),np.cos(2*angle_dev_weighted[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180) )    
+        np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity and coherency).npy" ),np.cos(2*angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180) )    
+        np.save(os.path.join(numpy_out, "Fiber Image Crop.npy" ),normalize(im_fiber_n[edge:-edge,edge:-edge]) )    
+        np.save(os.path.join(numpy_out, "Segmentation Crop.npy" ),segmention["mask"][edge:-edge,edge:-edge] )  
+        np.save(os.path.join(numpy_out, "Coherency Map.npy" ),ori )  
+        np.save(os.path.join(numpy_out, "Coherency Map (weighted by intensity).npy" ),ori_weight2)  
+        np.save(os.path.join(numpy_out, "Vector_min_ax0.npy"),min_evec[:,:,0])  
+        np.save(os.path.join(numpy_out, "Vector_min_ax1.npy"),min_evec[:,:,1])   
+        np.save(os.path.join(numpy_out, "Center_cropped_ax0,1.npy"),[center_small[0],center_small[1]])   
+        np.save(os.path.join(numpy_out, "mask_surface_shells.npy"),results_distance['Mask_shell'])                                                                                   
+        np.save(os.path.join(numpy_out, "mask_spherical_shells.npy"),results_distance['Mask_shell_center'])   
+                                                       
+    
 
 
     """

@@ -105,5 +105,27 @@ def show_quiver(fx, fy, filter=[0, 1], scale_ratio=0.4, headwidth=None, headleng
     return fig, ax
 
 
-# def quiver_plot()
+      
+def plot_angle_dev(angle_map,vec0,vec1,coherency_map,path_png,label="Angle Deviation",dpi=300):
+     # angle deviation no weights
+    fig =plt.figure();plt.imshow(angle_map); cbar =plt.colorbar()
+    mx = vec0 * coherency_map
+    my = vec1 * coherency_map
+    mx, my, x, y = filter_values(mx, my, abs_filter=0,
+                                   f_dist=15)  #
+    plt.quiver(x, y, mx*300, my*300,scale=1,scale_units="xy", angles="xy")
+    plt.tight_layout()
+    plt.axis('off'); cbar.set_label(label,fontsize=12)
+    plt.savefig(path_png, dpi=dpi); plt.tight_layout()
+    return fig
+    
+def plot_coherency(coherency,path_png,label="Coherency",dpi=300):
+     # angle deviation no weights
+    fig =plt.figure();plt.imshow(coherency); cbar =plt.colorbar()
+    plt.tight_layout()
+    plt.axis('off'); cbar.set_label(label,fontsize=12)
+    plt.savefig(path_png, dpi=dpi); plt.tight_layout()
+    return fig
+     
+    
 

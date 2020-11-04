@@ -12,43 +12,30 @@ Needs an Image of the cell and one image of the fibers (e.g. maximum projection 
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 from CompactionAnalyzer.CompactionFunctions import *
 from CompactionAnalyzer.utilities import *
 from CompactionAnalyzer.StructureTensor import *
 from CompactionAnalyzer.plotting import *
 
+
 # maxprojection Data
-# read in list of cells and list of fibers to evaluate (must be in same order)
+# read in list of cells and list of fibers to evaluate 
 # use glob.glob or individual list of paths []   
 fiber_list_string =  r"..\TestData\*\fiber.tif"
 cell_list_string =  r"..\TestData\*\cell.tif"
 
-# read in images
-fiber_list = natsorted(glob.glob(fiber_list))   #fiber_random_c24
-cell_list = natsorted(glob.glob(cell_list))   #check that order is same to fiber
-
-# Generate output folder automatically
-# can be done manual as ["output/conditionx/cell1", "output/conditiony/cell2", ...]
-out_list = generate_output_folder("Analysis_output", cell_list_string, cell_list)
+# read in images (must be in same order)
+fiber_list = natsorted(glob.glob(fiber_list_string))   #fiber_random_c24
+cell_list = natsorted(glob.glob(cell_list_string))   #check that order is same to fiber
 
 
+# Generate output folder automatically in 
+# can also be done manual as e.g. ["output/conditionx/cell1", "output/conditiony/cell2"]
+output_folder = "Analysis_output"
+out_list = generate_output_folder(output_folder, cell_list_string, cell_list)
 
 
-# # generate output
-# base = os.path.split(s[:s.find("*")])[0]
-# rest_paths =[os.path.split(os.path.relpath(p, base))[0] for p in cell_list]
-# names = [os.path.splitext(os.path.split(p)[1])[0] for p in cell_list]
-# # create output folder accordingly
-# #out_list = [os.path.join("angle_eval","2-angle",cell_list[i].split(os.sep)[0], os.path.basename(cell_list[i])[:-4]) for i in range(len(cell_list))]
-# # out_list = [os.path.join("analysis", cell_list[i].split(os.sep)[0], os.path.basename(cell_list[i])[:-4]) for i in range(len(cell_list))]
-# out_list = [os.path.join("analysis",rest_path, name) for name, rest_path in zip(names, rest_paths)]
-
-
-
-
-
-rest = os.path.split(rest)[0]
-name = os.path.splitext(os.path.split(s)[1])[0]
 
 # Set Parameters 
 scale =  0.318                  # imagescale as um per pixel
@@ -108,7 +95,6 @@ for n,i in tqdm(enumerate(fiber_list)):
     """
     coordinates
     """
-    
     # Calculate Angle + Distances 
     y,x = np.indices(ori.shape)
     dx = x - center_small[0]
@@ -124,7 +110,6 @@ for n,i in tqdm(enumerate(fiber_list)):
     """
     total image analysis
     """
-
     # Angular deviation from orietation to center vector
     angle_dev = np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) * 360/(2*np.pi)
     # weighting by coherence
@@ -151,10 +136,6 @@ for n,i in tqdm(enumerate(fiber_list)):
     s_norm1 = (s_around_center - s_to_center)/(grad_x**2 + grad_y**2)
     #s_norm2 = (s_around_center - s_to_center)/(s_around_center + s_to_center)
         
-    
-
-    
-    
     
     # save values for total image analysis
     # Total Value for complete image (without the mask)
@@ -186,7 +167,6 @@ for n,i in tqdm(enumerate(fiber_list)):
     excel_total = pd.DataFrame.from_dict(results_total)
     excel_total.to_excel(os.path.join(out_list[n],"results_total.xlsx"))
 
- 
 
     """
     Angular sections
@@ -213,7 +193,7 @@ for n,i in tqdm(enumerate(fiber_list)):
             angle_current = alpha * np.pi / 180
             results_angle['Angles'].append(angle_current)  
             if angle_current>0:
-                results_angle['Angles Plotting'].append(np.abs(angle_current)-(2*np.pi))  
+                results_angle['Angles Plotting'].append(np.abs(angle_current-(2*np.pi)))  
             else:
                 results_angle['Angles Plotting'].append(np.abs(angle_current))  
             results_angle['Coherency'].append(np.nanmean(ori[mask_angle]))
@@ -235,7 +215,6 @@ for n,i in tqdm(enumerate(fiber_list)):
     """
     Distance Evaluation
     """
-
     
      # initialize result dictionary
     results_distance = {'Shell_mid (px)': [], 'Shell_mid (µm)': [],'Mask_shell': [], 'Intensity (accumulated)': [], 
@@ -314,7 +293,6 @@ for n,i in tqdm(enumerate(fiber_list)):
     excel_distance =  pd.DataFrame.from_dict(results_distance)
     excel_distance.to_excel(os.path.join(out_list[n],"results_distance.xlsx"))
     
-    
 
     # Halflife values - Leave for now..
     #
@@ -345,19 +323,19 @@ for n,i in tqdm(enumerate(fiber_list)):
     # except:
     #     pass
 
-
     if SaveNumpy:
         #create output folder if not existing
         numpy_out = os.path.join(out_list[n], "NumpyArrays" )
         if not os.path.exists(numpy_out):
             os.makedirs(numpy_out)
             
-        np.save(os.path.join(numpy_out, "Angle Map.npy" ),angle_dev[(~segmention["mask"][edge:-edge,edge:-edge])] )    
-        np.save(os.path.join(numpy_out, "Angle Map (weighted by intensity).npy" ),angle_dev_weighted[(~segmention["mask"][edge:-edge,edge:-edge])] )    
-        np.save(os.path.join(numpy_out, "Angle Map (weighted by intensity and coherency).npy" ),angle_dev_weighted2[(~segmention["mask"][edge:-edge,edge:-edge])] )    
-        np.save(os.path.join(numpy_out, "Orientation Map.npy" ),np.cos(2*angle_dev[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180) )    
-        np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity).npy" ),np.cos(2*angle_dev_weighted[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180) )    
-        np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity and coherency).npy" ),np.cos(2*angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180) )    
+      
+        np.save(os.path.join(numpy_out, "Angle Map.npy" ),angle_dev )    
+        np.save(os.path.join(numpy_out, "Angle Map (weighted by intensity).npy" ),angle_dev_weighted)    
+        np.save(os.path.join(numpy_out, "Angle Map (weighted by intensity and coherency).npy" ),angle_dev_weighted2 )    
+        np.save(os.path.join(numpy_out, "Orientation Map.npy" ),np.cos(2*angle_dev*np.pi/180) )    
+        np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity).npy" ),np.cos(2*angle_dev_weighted*np.pi/180) )    
+        np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity and coherency).npy" ),np.cos(2*angle_dev_weighted2*np.pi/180) )    
         np.save(os.path.join(numpy_out, "Fiber Image Crop.npy" ),normalize(im_fiber_n[edge:-edge,edge:-edge]) )    
         np.save(os.path.join(numpy_out, "Segmentation Crop.npy" ),segmention["mask"][edge:-edge,edge:-edge] )  
         np.save(os.path.join(numpy_out, "Coherency Map.npy" ),ori )  
@@ -375,58 +353,57 @@ for n,i in tqdm(enumerate(fiber_list)):
     Plott results
     """
     
- #   if plotting:
+    if plotting:
+        #create output folder if not existing
+        figures = os.path.join(out_list[n],"Figures")
+        if not os.path.exists(figures):
+            os.makedirs(figures)
+
+        # plot orientation and angle deviation maps together with orientation structure 
+        plot_angle_dev(angle_map = angle_dev, 
+                       vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
+                       path_png= os.path.join(figures,"Angle_deviation.png"),label="Angle Deviation")
+        plot_angle_dev(angle_map = angle_dev_weighted2, 
+                       vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
+                       path_png= os.path.join(figures,"Angle_deviation_weighted.png"),label="Angle Deviation")
+        plot_angle_dev(angle_map = np.cos(2*angle_dev_weighted2*np.pi/180) ,  
+                       vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
+                       path_png= os.path.join(figures,"Orientation_weighted.png"),label="Orientation")
+
+        # pure coherency and pure orientation
+        plot_coherency(ori,path_png= os.path.join(figures,"coherency_noquiver.png"))
+        plot_coherency(np.cos(2*angle_dev_weighted2*np.pi/180),
+                       path_png= os.path.join(figures,"Orientation_weighted_noquiver.png"),
+                       label="Orientation")
         
-            
-    results_distance['Intensity Norm disttocenter (accumulated)']
-    
-    
-    
-    # angle deviation no weights
-    plt.figure();plt.imshow(angle_dev); plt.colorbar()
-    mx = min_evec[:,:,0] * ori
-    my = min_evec[:,:,1] * ori
-    mx, my, x, y = filter_values(mx, my, abs_filter=0,
-                                   f_dist=15)  #
-    plt.quiver(x, y, mx*300, my*300,scale=1,scale_units="xy", angles="xy")
-    plt.savefig(os.path.join(out_list[n],"angle_dev_quiv.png"), dpi=200)
-    
-     # angle deviation weights intensity + coherency
-    plt.figure();plt.imshow(angle_dev_weighted2); plt.colorbar()
-    mx = min_evec[:,:,0] * ori
-    my = min_evec[:,:,1] * ori
-    mx, my, x, y = filter_values(mx, my, abs_filter=0,
-                                   f_dist=15)  #
-    plt.quiver(x, y, mx*300, my*300,scale=1,scale_units="xy", angles="xy")
-    plt.savefig(os.path.join(out_list[n],"angle_dev_quiv_weight_i_c.png"), dpi=200)
-    
-    # pure coherency
-    plt.figure();plt.imshow(ori); plt.colorbar();  
-    plt.savefig(os.path.join(out_list[n],"coherency.png"), dpi=200)
-    
-     # Angular deviation from orietation to center vector
-    #angle_dev= np.arccos(np.abs(dx_norm*min_evec[:,:,1][edge:-edge,edge:-edge] + dy_norm*min_evec[:,:,0][edge:-edge,edge:-edge] ))  *360/(2*np.pi)
-    plt.figure();plt.imshow(angle_dev, origin="upper", cmap="viridis");plt.colorbar(); plt.savefig(os.path.join(out_list[n],"angle_dev.png"), dpi=200)
+        
+        # Polar plots
+        
+        
+        def plot_polar(angle_plotting, something, path_png,label="something",dpi=300,
+                       something2 = None, something3 = None, label2 = None, label3 =None):
+            fig = plt.figure;ax1 = plt.subplot(111, projection="polar")
+            ax1.plot(angle_plotting, something, label=label , linewidth=2, c = "C0")
+            if something2:
+                ax1.plot(angle_plotting, something2, label=label2 , linewidth=2, c = "C1")
+            if something3:
+                ax1.plot(angle_plotting, something3, label=label3 , linewidth=2, c = "C2")    
+            plt.tight_layout();plt.legend(fontsize=12);plt.savefig(path_png, dpi=dpi)
+            return fig
+        
+        plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
+                   path_png= os.path.join(figures,"polar_coherency_weighted.png"), label = "Coherency (weighted)")
+        
+                
+        plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
+                   path_png= os.path.join(figures,"polar_coherency_double.png"), label = "Coherency (weighted)",
+                   something2 = results_angle['Coherency'], label2 = "Coherency")
+        
+        plot_polar(results_angle['Angles Plotting'], results_angle['Mean Intensity'],
+                   path_png= os.path.join(figures,"polar_intensity.png"), label = "Mean Intensity")
+        
 
-    # test to appreciate how the angles work in plot
-    # a = np.linspace(np.pi, np.pi * 2, len(angle_plotting))
-    # b = np.linspace(0, 1, len(angle_plotting))
-    # plt.figure()
-    # ax = plt.subplot(111, projection="polar")
-    # ax.plot(angle_plotting, b, label="angle_plotting")
-    # ax.plot((np.array(ori_angle) * np.pi / 180), b, label="ori_angle directly")
-    # plt.legend()
-    # plt.title("illustration of how angles in the polar plot work")
-    
-    
-    
-
-
-    plt.figure(figsize=(5,5))
-    axs1 = plt.subplot(111, projection="polar")
-    axs1.plot(angle_plotting, ori_mean_weight, label="Allignment Collagen" , linewidth=2, c = "C0")
-    plt.savefig(os.path.join(out_list[n],"orientation_w.png"), dpi=200)
- 
+         
     # Triple plot
     plt.figure(figsize=(20,6))
     axs1 = plt.subplot(131, projection="polar")

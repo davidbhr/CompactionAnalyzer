@@ -172,3 +172,61 @@ def plot_triple(results_angle, results_total, path_png ,dpi=300):
            plt.savefig(path_png, dpi=dpi)
            return fig
 
+def quiv_coherency_center(vec0,vec1,center0,center1,coherency_map, path_png, dpi=200):
+    f = np.nanpercentile(coherency_map,0.75)
+    fig5, ax5 = show_quiver (vec0 * coherency_map, vec1 * coherency_map, filter=[f, 15], scale_ratio=0.1,width=0.003, 
+                             cbar_str="Coherency", cmap="viridis")
+    ax5.plot(center0,center1,"o")
+    plt.savefig(os.path.join(out_list[n],"coh_quiver.png"), dpi=200)
+    plt.tight_layout();plt.savefig(path_png, dpi=dpi)
+    return fig5
+
+def plot_fiber_seg(fiber_image,c0,c1,segmention, path_png,dpi=200 ):
+    fig7= plt.figure() 
+    my_norm = matplotlib.colors.Normalize(vmin=0.9999, vmax=1, clip=False)  
+    cmap =  plt.get_cmap('Greys')#copy()
+    # everything under vmin gets transparent (all zeros in mask)
+    cmap.set_under('k', alpha=0)
+    #everything else visible
+    cmap.set_over('k', alpha=1)
+    # plot mask and center
+    plt.imshow(fiber_image, origin="upper")
+    plt.imshow(segmention, cmap=cmap, norm = my_norm, origin="upper")
+    plt.scatter(c0,c1, c= "w");plt.axis('off')
+    plt.tight_layout() ;plt.savefig(path_png, dpi=dpi)
+    return fig7
+
+def plot_overlay(fiber_image , c0,c1, vec0,vec1, coherency_map,
+                       segmention,path_png,dpi=200 ):
+            fig=plt.figure();f = np.nanpercentile(coherency_map,0.75)
+            # plot overlay
+            my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
+            cmap =  plt.get_cmap('Greys')#copy()
+            # everything under vmin gets transparent (all zeros in mask)
+            cmap.set_under('k', alpha=0)
+            #everything else visible
+            cmap.set_over('k', alpha=1)
+            # plot mask and center
+            show_quiver (vec0 * coherency_map, vec1 * coherency_map, filter=[f, 15],alpha=0 , scale_ratio=0.1,width=0.002, plot_cbar=False, cbar_str="coherency", cmap="viridis")
+            plt.imshow(fiber_image, origin="upper")
+            plt.imshow(segmention, cmap=cmap, norm = my_norm, origin="upper")
+            plt.scatter(c0,c1, c= "w")
+            plt.tight_layout() ;plt.savefig(path_png, dpi=dpi)
+            return fig       
+        
+def plot_shells(shell_masks,path_png,dpi=200 ):
+    fig =  plt.figure()
+    cmap_list = ["Greens","Greys","Reds","Oranges","Blues","PuBu","GnBu"]
+    for s in  range(len(shell_masks)):
+        my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
+        cmap =  plt.get_cmap(cmap_list[s%len(cmap_list)])#copy()
+        # everything under vmin gets transparent (all zeros in mask)
+        cmap.set_under('k', alpha=1)
+        #everything else visible
+        cmap.set_over('k', alpha=0)
+        # plot mask and center
+        plt.imshow(shell_masks[-s], cmap = cmap ,  origin="upper", alpha= 0.2 ) 
+    plt.tight_layout(); plt.axis("off");plt.savefig(path_png, dpi=dpi)
+    return fig
+    
+        

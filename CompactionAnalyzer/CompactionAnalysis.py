@@ -23,8 +23,8 @@ from CompactionAnalyzer.plotting import *
 # maxprojection Data
 # read in list of cells and list of fibers to evaluate 
 #  glob.glob is used for individual list of paths [] from these strings  
-fiber_list_string =  r"..\TestData\*\fiber.tif"
-cell_list_string =  r"..\TestData\*\cell.tif"
+fiber_list_string =  r"..\TestData\*\Fiber.tif"
+cell_list_string =  r"..\TestData\*\Cell.tif"
 
 
 # Generate input and output listt automatically
@@ -34,8 +34,7 @@ output_folder = "Analysis_output" # base path to store results
 fiber_list,cell_list, out_list = generate_lists(fiber_list_string, cell_list_string, output_main =output_folder)
 
 
-
-# To do make function fo the total rest of the script !!!!!!!!!!
+# ToDO make function fo the total rest of the script !!!!!!!!!!
 
 
 # Set Parameters 
@@ -44,7 +43,9 @@ sigma_tensor = 7/scale          # sigma of applied gauss filter / window for str
                                 # should be in the order of the objects to analyze !! 
                                 # 7 um for collagen 
 edge = 40                       # Cutt of pixels at the edge since values at the border cannot be trusted
-segmention_thres = 1            # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
+segmention_thres = 1.0          # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
+seg_gaus1, seg_gaus2 = 8,80   
+show_segmentation = False    
 sigma_first_blur  = 0.5         # slight first bluring of whole image before using structure tensor
 angle_sections = 5              # size of angle sections in degree 
 shell_width =  5/scale          # pixel width of distance shells (px-value=um-value/scale)
@@ -52,8 +53,9 @@ manual_segmention = False
 plotting = True                 # creates and saves plots additionally to excel files 
 dpi = 200                       # resolution of plots to be stored
 SaveNumpy = True               # saves numpy arrays for later analysis - might create lots of data
-norm1,norm2 = 5,95              # contrast spreading" by setting all values below norm1-percentile to zero and
-                                # all values above norm2-percentile to 1
+norm1,norm2 = 1,99              # contrast spreading" by setting all values below norm1-percentile to zero and
+                                 # all values above norm2-percentile to 1
+                          
 
 
 
@@ -62,20 +64,23 @@ for n,i in tqdm(enumerate(fiber_list)):
     #create output folder if not existing
     if not os.path.exists(out_list[n]):
         os.makedirs(out_list[n])
+         
     # load images
     im_cell  = color.rgb2gray(imageio.imread(cell_list[n]))
     im_fiber = color.rgb2gray(imageio.imread(fiber_list[n]))
-
+    
     # # applying normalizing/ contrast spreading
     im_cell_n = normalize(im_cell, norm1, norm2)
     im_fiber_n = normalize(im_fiber, norm1, norm2)  
     im_fiber_g = gaussian(im_fiber_n, sigma=sigma_first_blur)     # blur fiber image slightly (test with local gauss - similar)
     
+ 
     # segment cell (either manual or automatically)
     if manual_segmention:
         segmention = custom_mask(im_cell_n)
     else:
-        segmention = segment_cell(im_cell_n, thres= segmention_thres, gaus1 = 8, gaus2=80)    # thres 1 equals normal otsu threshold
+        segmention = segment_cell(im_cell_n, thres= segmention_thres, gaus1 = seg_gaus1, gaus2=seg_gaus2,
+                                  show_segmentation = show_segmentation)    # thres 1 equals normal otsu threshold
     
     # center of the new cropped image (to avoid edge effects)
     center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
@@ -375,8 +380,7 @@ for n,i in tqdm(enumerate(fiber_list)):
         plot_coherency(ori,path_png= os.path.join(figures,"coherency_noquiver.png"))
         plot_coherency(np.cos(2*angle_dev_weighted2*np.pi/180),
                        path_png= os.path.join(figures,"Orientation_weighted_noquiver.png"),
-                       label="Orientation",dpi=dpi)
-          
+                       label="Orientation",dpi=dpi) 
         # Polar plots        
         plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
                    path_png= os.path.join(figures,"polar_coherency_weighted.png"), label = "Coherency (weighted)",dpi=dpi)
@@ -398,154 +402,119 @@ for n,i in tqdm(enumerate(fiber_list)):
         # summarizing triple plot
         plot_triple(results_angle,results_total , path_png= os.path.join(figures,"Triple_plot.png") ,dpi=dpi)
    
-        # quiver plots with center overlay
-        jhgjhg
+        # quiver plots with center overlay   
+        quiv_coherency_center(vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
+                         center0=center_small[0],center1 = center_small[1],
+                       path_png= os.path.join(figures,"quiv_coherency_center.png") )
+         
+        # image fiber + segmention
+        plot_fiber_seg(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
+                       c0=center_small[0],c1=center_small[1],
+                       segmention=segmention["mask"][edge:-edge,edge:-edge], 
+                       path_png=os.path.join(figures,"fiber_segemention.png"),dpi=200 )
     
+        # plot overlay 
+        plot_overlay(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
+                       c0=center_small[0],c1=center_small[1], vec0=min_evec[:,:,0],
+                       vec1=min_evec[:,:,1], coherency_map=ori,
+                       segmention=segmention["mask"][edge:-edge,edge:-edge], 
+                       path_png=os.path.join(figures,"overlay.png"),dpi=200 )
+        
+        ### DISTANCE PLOTS
+        # plot shells
+        plot_shells(results_distance['Mask_shell'],path_png=os.path.join(figures,"shells.png"),dpi=200 )
+    
+        # Distance analysis
+   
+        
+    #  # plot distance shell analysis    
+    # plt.figure(figsize=(7,3))
+    # plt.subplot(121)    
+    # plt.plot(midofshells,dist_angle_individ,"o-", c="lightgreen",label="orientation")
+    # plt.plot([halflife_ori,halflife_ori],[np.min(dist_angle_individ),np.max(dist_angle_individ)], c="orange", linestyle="--")
+    # plt.grid()
+    # plt.tight_layout()
+    # plt.xlabel("distance (px)")
+    # plt.ylabel("orientation")
+    # plt.subplot(122)    
+    # plt.plot(midofshells,dist_int_individ_norm,"o-", c="plum", label="intensity")
+    # plt.grid()
+    # plt.plot([halflife_int,halflife_int],[np.min(dist_int_individ_norm),np.max(dist_int_individ_norm)], c="orange", linestyle="--")
+    # plt.xlabel("distance (px)")
+    # plt.ylabel("intensity")
+    # plt.tight_layout()
+    # plt.savefig(os.path.join(out_list[n],"distance-shell-individ.png"), dpi=200)
+    
+    # # plot distance shell analysis    
+    # plt.figure(figsize=(7,3))
+    # plt.subplot(121)    
+    # plt.plot(midofshells,dist_angle_individ_center,"o-", c="lightgreen",label="orientation")
+    # plt.plot([halflife_ori,halflife_ori],[np.min(dist_angle_individ_center),np.max(dist_angle_individ_center)], c="orange", linestyle="--")
+    # plt.grid()
+    # plt.tight_layout()
+    # plt.xlabel("distance (px)")
+    # plt.ylabel("orientation")
+    # plt.subplot(122)    
+    # plt.plot(midofshells,dist_int_individ_center_norm,"o-", c="plum", label="intensity")
+    # plt.grid()
+    # plt.plot([halflife_int,halflife_int],[np.min(dist_int_individ_center_norm),np.max(dist_int_individ_center_norm)], c="orange", linestyle="--")
+    # plt.xlabel("distance (px)")
+    # plt.ylabel("intensity")
+    # plt.tight_layout()
+    # plt.savefig(os.path.join(out_list[n],"distance-shell-individ_center.png"), dpi=200)
+        
+    # # plot distance shell analysis    
+    # plt.figure(figsize=(7,3))
+    # plt.subplot(121)    
+    # plt.plot(midofshells,dist_angle_accum,"o-", c="lightgreen",label="orientation")
+    # #plt.plot([halflife_ori,halflife_ori],[np.min(dist_angle),np.max(dist_angle)], c="orange", linestyle="--")
+    # plt.grid()
+    # plt.tight_layout()
+    # plt.xlabel("distance (px)")
+    # plt.ylabel("orientation")
+    # plt.subplot(122)    
+    # plt.plot(midofshells,dist_int_accum_norm,"o-", c="plum", label="intensity")
+    # plt.grid()
+    # #plt.plot([halflife_int,halflife_int],[np.min(dist_int),np.max(dist_int)], c="orange", linestyle="--")
+    # plt.xlabel("distance (px)")
+    # plt.ylabel("intensity")
+    # plt.tight_layout()
+    # plt.savefig(os.path.join(out_list[n],"distance-shell-accum.png"), dpi=200)
    
     
-    
-    
-    f = np.nanpercentile(ori,0.75)
-    fig5, ax5 = show_quiver (min_evec[:,:,0] * ori, min_evec[:,:,1] * ori, filter=[f, 15], scale_ratio=0.1,width=0.003, cbar_str="coherency", cmap="viridis")
-    ax5.plot(center_small[0],center_small[1],"o")
-    plt.savefig(os.path.join(out_list[n],"coh_quiver.png"), dpi=200)
-    
-    
-    # plot max +seg
-    fig7= plt.figure() 
-    my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
-    cmap =  plt.get_cmap('Greys')#copy()
-    # everything under vmin gets transparent (all zeros in mask)
-    cmap.set_under('k', alpha=0)
-    #everything else visible
-    cmap.set_over('k', alpha=1)
-    # plot mask and center
-    plt.imshow(normalize(im_fiber_n[edge:-edge,edge:-edge]), origin="upper")
-    plt.imshow(segmention["mask"][edge:-edge,edge:-edge], cmap=cmap, norm = my_norm, origin="upper")
-    center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
-    plt.scatter(center_small[0],center_small[1], c= "w")
-    plt.tight_layout()
-    plt.savefig(os.path.join(out_list[n],"seg-max.png"), dpi=200)
-    
-    # plot overlay
-    my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
-    cmap =  plt.get_cmap('Greys')#copy()
-    # everything under vmin gets transparent (all zeros in mask)
-    cmap.set_under('k', alpha=0)
-    #everything else visible
-    cmap.set_over('k', alpha=1)
-    # plot mask and center
-    show_quiver (min_evec[:,:,0] * ori, min_evec[:,:,1] * ori, filter=[f, 15],alpha=0 , scale_ratio=0.1,width=0.002, plot_cbar=False, cbar_str="coherency", cmap="viridis")
-    plt.imshow(normalize(im_fiber_n[edge:-edge,edge:-edge]), origin="upper")
-    plt.imshow(segmention["mask"][edge:-edge,edge:-edge], cmap=cmap, norm = my_norm, origin="upper")
-    center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
-    plt.scatter(center_small[0],center_small[1], c= "w")
-    plt.tight_layout()
-    plt.savefig(os.path.join(out_list[n],"struc-tens-o.png"), dpi=200)
-    
-    
-    # plot shells
-    plt.figure()
-    cmap_list = ["Greens","Greys","Reds","Oranges","Blues","PuBu","GnBu"]
-    for s in  range(len(allshellmasks)):
-        my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
-        cmap =  plt.get_cmap(cmap_list[s%len(cmap_list)])#copy()
-        # everything under vmin gets transparent (all zeros in mask)
-        cmap.set_under('k', alpha=1)
-        #everything else visible
-        cmap.set_over('k', alpha=0)
-        # plot mask and center
-        plt.imshow(allshellmasks[-s], cmap = cmap ,  origin="upper", alpha= 0.2 ) #- 0.2* s/len(allshellmasks) )
-    plt.savefig(os.path.join(out_list[n],"shells.png"), dpi=200)   
-        
-     # plot distance shell analysis    
-    plt.figure(figsize=(7,3))
-    plt.subplot(121)    
-    plt.plot(midofshells,dist_angle_individ,"o-", c="lightgreen",label="orientation")
-    plt.plot([halflife_ori,halflife_ori],[np.min(dist_angle_individ),np.max(dist_angle_individ)], c="orange", linestyle="--")
-    plt.grid()
-    plt.tight_layout()
-    plt.xlabel("distance (px)")
-    plt.ylabel("orientation")
-    plt.subplot(122)    
-    plt.plot(midofshells,dist_int_individ_norm,"o-", c="plum", label="intensity")
-    plt.grid()
-    plt.plot([halflife_int,halflife_int],[np.min(dist_int_individ_norm),np.max(dist_int_individ_norm)], c="orange", linestyle="--")
-    plt.xlabel("distance (px)")
-    plt.ylabel("intensity")
-    plt.tight_layout()
-    plt.savefig(os.path.join(out_list[n],"distance-shell-individ.png"), dpi=200)
-    
-    # plot distance shell analysis    
-    plt.figure(figsize=(7,3))
-    plt.subplot(121)    
-    plt.plot(midofshells,dist_angle_individ_center,"o-", c="lightgreen",label="orientation")
-    plt.plot([halflife_ori,halflife_ori],[np.min(dist_angle_individ_center),np.max(dist_angle_individ_center)], c="orange", linestyle="--")
-    plt.grid()
-    plt.tight_layout()
-    plt.xlabel("distance (px)")
-    plt.ylabel("orientation")
-    plt.subplot(122)    
-    plt.plot(midofshells,dist_int_individ_center_norm,"o-", c="plum", label="intensity")
-    plt.grid()
-    plt.plot([halflife_int,halflife_int],[np.min(dist_int_individ_center_norm),np.max(dist_int_individ_center_norm)], c="orange", linestyle="--")
-    plt.xlabel("distance (px)")
-    plt.ylabel("intensity")
-    plt.tight_layout()
-    plt.savefig(os.path.join(out_list[n],"distance-shell-individ_center.png"), dpi=200)
-        
-    # plot distance shell analysis    
-    plt.figure(figsize=(7,3))
-    plt.subplot(121)    
-    plt.plot(midofshells,dist_angle_accum,"o-", c="lightgreen",label="orientation")
-    #plt.plot([halflife_ori,halflife_ori],[np.min(dist_angle),np.max(dist_angle)], c="orange", linestyle="--")
-    plt.grid()
-    plt.tight_layout()
-    plt.xlabel("distance (px)")
-    plt.ylabel("orientation")
-    plt.subplot(122)    
-    plt.plot(midofshells,dist_int_accum_norm,"o-", c="plum", label="intensity")
-    plt.grid()
-    #plt.plot([halflife_int,halflife_int],[np.min(dist_int),np.max(dist_int)], c="orange", linestyle="--")
-    plt.xlabel("distance (px)")
-    plt.ylabel("intensity")
-    plt.tight_layout()
-    plt.savefig(os.path.join(out_list[n],"distance-shell-accum.png"), dpi=200)
-   
-    
-     # plot overlay version 2
-    my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
-    cmap = plt.get_cmap('Greys')# copy(plt.get_cmap('Greys'))
-    # everything under vmin gets transparent (all zeros in mask)
-    cmap.set_under('k', alpha=0)
-    #everything else visible
-    cmap.set_over('k', alpha=1)
-    # plot mask and center
-    show_quiver (min_evec[:,:,0] * ori, min_evec[:,:,1] * ori, filter=[0, 8],alpha=0 , scale_ratio=0.1,width=0.0012, plot_cbar=False, cbar_str="coherency", cmap="viridis")
-    plt.imshow(normalize(im_fiber_n[edge:-edge,edge:-edge]), origin="upper")
-    plt.imshow(segmention["mask"][edge:-edge,edge:-edge], cmap=cmap, norm = my_norm, origin="upper")
-    center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
-    plt.scatter(center_small[0],center_small[1], c= "w")
-    plt.tight_layout()
-    plt.savefig(os.path.join(out_list[n],"struc-tens-o2.png"), dpi=200)
-    
-    plt.figure()
-    plt.imshow(im_cell_n)
-    plt.savefig(os.path.join(out_list[n],"cell-raw.png"), dpi=200)
-    
-    
-    # fig7= plt.figure() 
+    #  # plot overlay version 2
     # my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
-    # cmap =  copy(plt.get_cmap('Greys'))
+    # cmap = plt.get_cmap('Greys')# copy(plt.get_cmap('Greys'))
     # # everything under vmin gets transparent (all zeros in mask)
     # cmap.set_under('k', alpha=0)
     # #everything else visible
     # cmap.set_over('k', alpha=1)
     # # plot mask and center
-    # plt.subplot(121)
-    # plt.imshow(dist_surface, cmap=cmap, norm = my_norm, origin="upper")
-    # plt.subplot(122)
+    # show_quiver (min_evec[:,:,0] * ori, min_evec[:,:,1] * ori, filter=[0, 8],alpha=0 , scale_ratio=0.1,width=0.0012, plot_cbar=False, cbar_str="coherency", cmap="viridis")
     # plt.imshow(normalize(im_fiber_n[edge:-edge,edge:-edge]), origin="upper")
+    # plt.imshow(segmention["mask"][edge:-edge,edge:-edge], cmap=cmap, norm = my_norm, origin="upper")
+    # center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
+    # plt.scatter(center_small[0],center_small[1], c= "w")
+    # plt.tight_layout()
+    # plt.savefig(os.path.join(out_list[n],"struc-tens-o2.png"), dpi=200)
+    
+    # plt.figure()
+    # plt.imshow(im_cell_n)
+    # plt.savefig(os.path.join(out_list[n],"cell-raw.png"), dpi=200)
+    
+    
+    # # fig7= plt.figure() 
+    # # my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
+    # # cmap =  copy(plt.get_cmap('Greys'))
+    # # # everything under vmin gets transparent (all zeros in mask)
+    # # cmap.set_under('k', alpha=0)
+    # # #everything else visible
+    # # cmap.set_over('k', alpha=1)
+    # # # plot mask and center
+    # # plt.subplot(121)
+    # # plt.imshow(dist_surface, cmap=cmap, norm = my_norm, origin="upper")
+    # # plt.subplot(122)
+    # # plt.imshow(normalize(im_fiber_n[edge:-edge,edge:-edge]), origin="upper")
     
     
     

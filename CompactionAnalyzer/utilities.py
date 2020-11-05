@@ -92,3 +92,23 @@ def convolution_fitler_with_nan(arr1, function, **kwargs):
 
     return filter_final
 
+def create_circular_mask(h, w, center=None, radius=None):
+    # following 
+    # https://stackoverflow.com/questions/44865023/how-can-i-create-a-circular-mask-for-a-numpy-array
+    if center is None: # use the middle of the image
+        center = (int(w/2), int(h/2))
+    if radius is None: # use the smallest distance between the center and image walls
+        radius = min(center[0], center[1], w-center[0], h-center[1])
+
+    Y, X = np.ogrid[:h, :w]
+    dist_from_center = np.sqrt((X - center[0])**2 + (Y-center[1])**2)
+
+    mask = dist_from_center <= radius
+    
+    # EXAMPLE CODE TO CREATE A white blob in image of same shape as fiber image
+    # from PIL import Image
+    # fiber = plt.imread(r"U:\Dropbox\software-github\CompactionAnalyzer\TestData\Random1\Fiber.tif")
+    # mask = create_circular_mask(fiber.shape[0],fiber.shape[1],radius=60).astype("uint8")
+    # img = Image.fromarray(mask*256)
+    # img.save("cell_rand.tif")
+    return mask

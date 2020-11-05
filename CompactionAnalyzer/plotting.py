@@ -127,5 +127,14 @@ def plot_coherency(coherency,path_png,label="Coherency",dpi=300):
     plt.savefig(path_png, dpi=dpi); plt.tight_layout()
     return fig
      
-    
+def plot_polar(angle_plotting, something, path_png,label="something",dpi=300,
+               something2 = None, something3 = None, label2 = None, label3 =None):
+    fig = plt.figure;ax1 = plt.subplot(111, projection="polar")
+    ax1.plot(angle_plotting, something, label=label , linewidth=2, c = "C0")
+    if something2:
+        ax1.plot(angle_plotting, something2, label=label2 , linewidth=2, c = "C1")
+    if something3:
+        ax1.plot(angle_plotting, something3, label=label3 , linewidth=2, c = "C2")    
+    plt.tight_layout();plt.legend(fontsize=12);plt.savefig(path_png, dpi=dpi)
+    return fig    
 

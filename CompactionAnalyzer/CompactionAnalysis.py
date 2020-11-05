@@ -12,6 +12,7 @@ Needs an Image of the cell and one image of the fibers (e.g. maximum projection 
 """
 
 import numpy as np
+import os
 import matplotlib.pyplot as plt
 from CompactionAnalyzer.CompactionFunctions import *
 from CompactionAnalyzer.utilities import *
@@ -21,20 +22,20 @@ from CompactionAnalyzer.plotting import *
 
 # maxprojection Data
 # read in list of cells and list of fibers to evaluate 
-# use glob.glob or individual list of paths []   
+#  glob.glob is used for individual list of paths [] from these strings  
 fiber_list_string =  r"..\TestData\*\fiber.tif"
 cell_list_string =  r"..\TestData\*\cell.tif"
 
-# read in images (must be in same order)
-fiber_list = natsorted(glob.glob(fiber_list_string))   #fiber_random_c24
-cell_list = natsorted(glob.glob(cell_list_string))   #check that order is same to fiber
+
+# Generate input and output listt automatically
+# fiber_list, cell_list and out_list can also be created manual 
+# as e.g. out_list=["output/conditionx/cell1", "output/conditiony/cell2"] etc...
+output_folder = "Analysis_output" # base path to store results
+fiber_list,cell_list, out_list = generate_lists(fiber_list_string, cell_list_string, output_main =output_folder)
 
 
-# Generate output folder automatically in 
-# can also be done manual as e.g. ["output/conditionx/cell1", "output/conditiony/cell2"]
-output_folder = "Analysis_output"
-out_list = generate_output_folder(output_folder, cell_list_string, cell_list)
 
+# To do make function fo the total rest of the script !!!!!!!!!!
 
 
 # Set Parameters 
@@ -46,7 +47,7 @@ edge = 40                       # Cutt of pixels at the edge since values at the
 segmention_thres = 1            # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
 sigma_first_blur  = 0.5         # slight first bluring of whole image before using structure tensor
 angle_sections = 5              # size of angle sections in degree 
-shell_width =  5/scale          # pixel width of distance shells
+shell_width =  5/scale          # pixel width of distance shells (px-value=um-value/scale)
 manual_segmention = False
 plotting = True                 # creates and saves plots additionally to excel files 
 SaveNumpy = True             # saves numpy arrays for later analysis - might create lots of data
@@ -375,22 +376,8 @@ for n,i in tqdm(enumerate(fiber_list)):
         plot_coherency(np.cos(2*angle_dev_weighted2*np.pi/180),
                        path_png= os.path.join(figures,"Orientation_weighted_noquiver.png"),
                        label="Orientation")
-        
-        
-        # Polar plots
-        
-        
-        def plot_polar(angle_plotting, something, path_png,label="something",dpi=300,
-                       something2 = None, something3 = None, label2 = None, label3 =None):
-            fig = plt.figure;ax1 = plt.subplot(111, projection="polar")
-            ax1.plot(angle_plotting, something, label=label , linewidth=2, c = "C0")
-            if something2:
-                ax1.plot(angle_plotting, something2, label=label2 , linewidth=2, c = "C1")
-            if something3:
-                ax1.plot(angle_plotting, something3, label=label3 , linewidth=2, c = "C2")    
-            plt.tight_layout();plt.legend(fontsize=12);plt.savefig(path_png, dpi=dpi)
-            return fig
-        
+          
+        # Polar plots        
         plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
                    path_png= os.path.join(figures,"polar_coherency_weighted.png"), label = "Coherency (weighted)")
         

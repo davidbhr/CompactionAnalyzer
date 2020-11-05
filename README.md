@@ -22,4 +22,6 @@ The package can be installed by cloning this repository or downloading the repos
 
 ### Multicellular Compaction Assay
 
-..Jointforces     see ..
+Also used to quantify Multicellular Compaction instead of single cells. This might have advantage same shape and no movement and can be done with same analysis
+
+Furthermore, also direct measurement of contractile forces by using **Jointforces** can resolve contractility of tumor spheroids and drug responses.

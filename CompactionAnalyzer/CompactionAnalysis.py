@@ -50,7 +50,8 @@ angle_sections = 5              # size of angle sections in degree
 shell_width =  5/scale          # pixel width of distance shells (px-value=um-value/scale)
 manual_segmention = False
 plotting = True                 # creates and saves plots additionally to excel files 
-SaveNumpy = True             # saves numpy arrays for later analysis - might create lots of data
+dpi = 200                       # resolution of plots to be stored
+SaveNumpy = True               # saves numpy arrays for later analysis - might create lots of data
 norm1,norm2 = 5,95              # contrast spreading" by setting all values below norm1-percentile to zero and
                                 # all values above norm2-percentile to 1
 
@@ -153,16 +154,16 @@ for n,i in tqdm(enumerate(fiber_list)):
     # create excel sheet with results for total image   
     # initialize result dictionary
     results_total = {'Mean Coherency': [], 'Mean Coherency (weighted by intensity)': [], 'Mean Angle': [],
-               'Mean Angle (weighted by intensity)': [], 'Mean Angle (weighted by intensity and coherency)': [], 'Orientation': [],
-               'Orientation  (weighted by intensity)': [], 'Orientation (weighted by intensity and coherency)': [], }       
+               'Mean Angle (weighted by coherency)': [], 'Mean Angle (weighted by intensity and coherency)': [], 'Orientation': [],
+               'Orientation  (weighted by coherency)': [], 'Orientation (weighted by intensity and coherency)': [], }       
    
     results_total['Mean Coherency'].append(coh_total)
     results_total['Mean Coherency (weighted by intensity)'].append(coh_total2)
     results_total['Mean Angle'].append(alpha_dev_total1)
-    results_total['Mean Angle (weighted by intensity)'].append(alpha_dev_total2)
+    results_total['Mean Angle (weighted by coherency)'].append(alpha_dev_total2)
     results_total['Mean Angle (weighted by intensity and coherency)'].append(alpha_dev_total3)
     results_total['Orientation'].append(cos_dev_total1)
-    results_total['Orientation  (weighted by intensity)'].append(cos_dev_total2)
+    results_total['Orientation  (weighted by coherency)'].append(cos_dev_total2)
     results_total['Orientation (weighted by intensity and coherency)'].append(cos_dev_total3)
     
     excel_total = pd.DataFrame.from_dict(results_total)
@@ -174,9 +175,9 @@ for n,i in tqdm(enumerate(fiber_list)):
     """
     
     # initialize result dictionary
-    results_angle = {'Angles': [], 'Angles Plotting': [], 'Angle Deviation': [], 'Angle Deviation (weighted by intensity)': [], 
+    results_angle = {'Angles': [], 'Angles Plotting': [], 'Angle Deviation': [], 'Angle Deviation (weighted by coherency)': [], 
                      'Angle Deviation (weighted by intensity and coherency)': [],
-                     'Orientation': [], 'Orientation (weighted by intensity)': [], 
+                     'Orientation': [], 'Orientation (weighted by coherency)': [], 
                      'Orientation (weighted by intensity and coherency)': [], 
                      'Coherency (weighted by intensity)': [],'Coherency': [], 
                      'Gradient': [],'Mean Intensity': []                  
@@ -202,10 +203,10 @@ for n,i in tqdm(enumerate(fiber_list)):
             results_angle['Mean Intensity'].append(np.nanmean(im_fiber_g[mask_angle]))
             results_angle['Gradient'].append(np.nanmean(s_norm1[mask_angle]))
             results_angle['Angle Deviation'].append(np.nanmean(angle_dev[mask_angle]))
-            results_angle['Angle Deviation (weighted by intensity)'].append(np.nanmean(angle_dev_weighted[mask_angle]))
+            results_angle['Angle Deviation (weighted by coherency)'].append(np.nanmean(angle_dev_weighted[mask_angle]))
             results_angle['Angle Deviation (weighted by intensity and coherency)'].append(np.nanmean(angle_dev_weighted2[mask_angle]))
             results_angle['Orientation'].append(np.nanmean(np.cos(2*angle_dev[mask_angle]*np.pi/180)))
-            results_angle['Orientation (weighted by intensity)'].append(np.nanmean(np.cos(2*angle_dev_weighted[mask_angle]*np.pi/180)))
+            results_angle['Orientation (weighted by coherency)'].append(np.nanmean(np.cos(2*angle_dev_weighted[mask_angle]*np.pi/180)))
             results_angle['Orientation (weighted by intensity and coherency)'].append(np.nanmean(np.cos(2*angle_dev_weighted2[mask_angle]*np.pi/180)))
    
     # create excel sheet with results for angle analysis       
@@ -296,7 +297,6 @@ for n,i in tqdm(enumerate(fiber_list)):
     
 
     # Halflife values - Leave for now..
-    #
     # # Calculate value where ntensity drops 25%
     # distintdrop = np.abs(np.array(results_distance['Intensity Norm (individual)'])-0.75)
     # # distance where int  drops   to 75% 
@@ -363,58 +363,46 @@ for n,i in tqdm(enumerate(fiber_list)):
         # plot orientation and angle deviation maps together with orientation structure 
         plot_angle_dev(angle_map = angle_dev, 
                        vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-                       path_png= os.path.join(figures,"Angle_deviation.png"),label="Angle Deviation")
+                       path_png= os.path.join(figures,"Angle_deviation.png"),label="Angle Deviation",dpi=dpi)
         plot_angle_dev(angle_map = angle_dev_weighted2, 
                        vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-                       path_png= os.path.join(figures,"Angle_deviation_weighted.png"),label="Angle Deviation")
+                       path_png= os.path.join(figures,"Angle_deviation_weighted.png"),label="Angle Deviation",dpi=dpi)
         plot_angle_dev(angle_map = np.cos(2*angle_dev_weighted2*np.pi/180) ,  
                        vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-                       path_png= os.path.join(figures,"Orientation_weighted.png"),label="Orientation")
+                       path_png= os.path.join(figures,"Orientation_weighted.png"),label="Orientation",dpi=dpi)
 
         # pure coherency and pure orientation
         plot_coherency(ori,path_png= os.path.join(figures,"coherency_noquiver.png"))
         plot_coherency(np.cos(2*angle_dev_weighted2*np.pi/180),
                        path_png= os.path.join(figures,"Orientation_weighted_noquiver.png"),
-                       label="Orientation")
+                       label="Orientation",dpi=dpi)
           
         # Polar plots        
         plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
-                   path_png= os.path.join(figures,"polar_coherency_weighted.png"), label = "Coherency (weighted)")
+                   path_png= os.path.join(figures,"polar_coherency_weighted.png"), label = "Coherency (weighted)",dpi=dpi)
         
                 
         plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
                    path_png= os.path.join(figures,"polar_coherency_double.png"), label = "Coherency (weighted)",
-                   something2 = results_angle['Coherency'], label2 = "Coherency")
+                   something2 = results_angle['Coherency'], label2 = "Coherency",dpi=dpi)
         
         plot_polar(results_angle['Angles Plotting'], results_angle['Mean Intensity'],
-                   path_png= os.path.join(figures,"polar_intensity.png"), label = "Mean Intensity")
+                   path_png= os.path.join(figures,"polar_intensity.png"), label = "Mean Intensity",dpi=dpi)
         
-
-         
-    # Triple plot
-    plt.figure(figsize=(20,6))
-    axs1 = plt.subplot(131, projection="polar")
-    axs1.plot(angle_plotting, ori_mean, label="Allignment Collagen" )
-    axs1.plot(angle_plotting, ori_mean_weight, label="Allignment Collagen weighted with intesity" )
-    #axs1.plot(angle_plotting,  int_mean, c = "C1" , label="Intensity Collagen")
-    plt.legend(fontsize=12)
-    ax2 = plt.subplot(132, projection="polar")
-    ax2.plot(angle_plotting, alpha_dev_slice , label="no weights")
-    ax2.plot(angle_plotting, alpha_dev_slice_weight , label="coherence weighting")
-    ax2.plot(angle_plotting, alpha_dev_slice_weight2, label="coherence and intensity weighting")
-    #ax.set_rlim(bottom=90, top=0)  # put allignet values further out for visualization
-    plt.legend(fontsize=12)
-    strings = ["mean coherency", "mean_coherency\nweighted by intensity", "mean angle",
-               "mean angle weighted\nby coherency", "mean angle weighted\nby coherency and intensity"]
-    values = [coh_total ,coh_total2, alpha_dev_total1, alpha_dev_total2, alpha_dev_total3]
-    values = [[str(np.round(x,4))] for x in values]
-    table_text = [[strings[i], values[i]] for i in range(len(values))]
-    ax3 = plt.subplot(133)
-    ax3.axis('tight')
-    ax3.axis('off')
-    ax3.table(cellText = values, rowLabels=strings,bbox=[0.6,0.2,0.7,0.9])
-    #plt.tight_layout()
-    plt.savefig(os.path.join(out_list[n],"orientation_triple.png"), dpi=200)
+        plot_polar(results_angle['Angles Plotting'], results_angle['Orientation (weighted by intensity and coherency)'],
+                           path_png= os.path.join(figures,"Orientation_weighted.png"), label = "Orientation",dpi=dpi)
+        
+        plot_polar(results_angle['Angles Plotting'], results_angle['Orientation'],
+                           path_png= os.path.join(figures,"Orientation.png"), label = "Orientation",dpi=dpi)
+        
+        # summarizing triple plot
+        plot_triple(results_angle,results_total , path_png= os.path.join(figures,"Triple_plot.png") ,dpi=dpi)
+   
+        # quiver plots with center overlay
+        jhgjhg
+    
+   
+    
     
     
     f = np.nanpercentile(ori,0.75)

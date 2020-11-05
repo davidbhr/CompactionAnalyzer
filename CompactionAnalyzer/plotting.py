@@ -129,7 +129,7 @@ def plot_coherency(coherency,path_png,label="Coherency",dpi=300):
      
 def plot_polar(angle_plotting, something, path_png,label="something",dpi=300,
                something2 = None, something3 = None, label2 = None, label3 =None):
-    fig = plt.figure;ax1 = plt.subplot(111, projection="polar")
+    fig = plt.figure();ax1 = plt.subplot(111, projection="polar")
     ax1.plot(angle_plotting, something, label=label , linewidth=2, c = "C0")
     if something2:
         ax1.plot(angle_plotting, something2, label=label2 , linewidth=2, c = "C1")
@@ -137,4 +137,38 @@ def plot_polar(angle_plotting, something, path_png,label="something",dpi=300,
         ax1.plot(angle_plotting, something3, label=label3 , linewidth=2, c = "C2")    
     plt.tight_layout();plt.legend(fontsize=12);plt.savefig(path_png, dpi=dpi)
     return fig    
+
+def plot_triple(results_angle, results_total, path_png ,dpi=300):
+           # Triple plot
+           fig = plt.figure(figsize=(20,6))
+           axs1 = plt.subplot(131, projection="polar")
+           axs1.plot(results_angle['Angles Plotting'],  results_angle['Coherency'], label="Coherency" )
+           axs1.plot(results_angle['Angles Plotting'],  results_angle['Coherency (weighted by intensity)'], label="Coherency (weighted)" )
+           plt.legend(fontsize=12)
+           ax2 = plt.subplot(132, projection="polar")
+           ax2.plot(results_angle['Angles Plotting'], results_angle['Orientation'] , label="Orientation")
+           ax2.plot(results_angle['Angles Plotting'], results_angle['Orientation (weighted by intensity and coherency)'] , label="Orientation weighed") 
+     
+           plt.legend(fontsize=12)
+           strings = ["Mean Coherency", "Mean Coherency\nweighted by intensity", "Mean Angle",
+                      "Mean Angle weighted\nby coherency", "Mean Angle weighted\nby coherency and intensity",
+                      "Mean Orientation",
+                      "Mean Orientation weighted\nby coherency",
+                      "Mean Orientation weighted\nby coherency and intensity"]
+           values = [results_total['Mean Coherency'][0] , results_total['Mean Coherency (weighted by intensity)'][0], 
+                     results_total['Mean Angle'][0],
+                     results_total['Mean Angle (weighted by coherency)'][0],
+                     results_total['Mean Angle (weighted by intensity and coherency)'][0],
+                     results_total['Orientation'][0],
+                     results_total['Orientation  (weighted by coherency)'][0],
+                     results_total['Orientation (weighted by intensity and coherency)'][0],  
+                     ]
+           values = [[str(np.round(x,4))] for x in values]
+           table_text = [[strings[i], values[i]] for i in range(len(values))]
+           ax3 = plt.subplot(133);ax3.axis('tight'); ax3.axis('off')
+           table = ax3.table(cellText = values, rowLabels=strings,bbox=[0.6,0.2,0.7,0.9])
+           table.set_fontsize(11)
+           #plt.tight_layout()
+           plt.savefig(path_png, dpi=dpi)
+           return fig
 

@@ -160,7 +160,7 @@ def plot_triple(results_angle, results_total, path_png ,dpi=300):
                      results_total['Mean Angle (weighted by coherency)'][0],
                      results_total['Mean Angle (weighted by intensity and coherency)'][0],
                      results_total['Orientation'][0],
-                     results_total['Orientation  (weighted by coherency)'][0],
+                     results_total['Orientation (weighted by coherency)'][0],
                      results_total['Orientation (weighted by intensity and coherency)'][0],  
                      ]
            values = [[str(np.round(x,4))] for x in values]
@@ -177,7 +177,6 @@ def quiv_coherency_center(vec0,vec1,center0,center1,coherency_map, path_png, dpi
     fig5, ax5 = show_quiver (vec0 * coherency_map, vec1 * coherency_map, filter=[f, 15], scale_ratio=0.1,width=0.003, 
                              cbar_str="Coherency", cmap="viridis")
     ax5.plot(center0,center1,"o")
-    plt.savefig(os.path.join(out_list[n],"coh_quiver.png"), dpi=200)
     plt.tight_layout();plt.savefig(path_png, dpi=dpi)
     return fig5
 
@@ -197,7 +196,7 @@ def plot_fiber_seg(fiber_image,c0,c1,segmention, path_png,dpi=200 ):
     return fig7
 
 def plot_overlay(fiber_image , c0,c1, vec0,vec1, coherency_map,
-                       segmention,path_png,dpi=200 ):
+                       segmention,path_png,dpi=200, show_n = 15 ):
             fig=plt.figure();f = np.nanpercentile(coherency_map,0.75)
             # plot overlay
             my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
@@ -207,7 +206,7 @@ def plot_overlay(fiber_image , c0,c1, vec0,vec1, coherency_map,
             #everything else visible
             cmap.set_over('k', alpha=1)
             # plot mask and center
-            show_quiver (vec0 * coherency_map, vec1 * coherency_map, filter=[f, 15],alpha=0 , scale_ratio=0.1,width=0.002, plot_cbar=False, cbar_str="coherency", cmap="viridis")
+            show_quiver (vec0 * coherency_map, vec1 * coherency_map, filter=[f, show_n],alpha=0 , scale_ratio=0.1,width=0.002, plot_cbar=False, cbar_str="coherency", cmap="viridis")
             plt.imshow(fiber_image, origin="upper")
             plt.imshow(segmention, cmap=cmap, norm = my_norm, origin="upper")
             plt.scatter(c0,c1, c= "w")
@@ -229,4 +228,15 @@ def plot_shells(shell_masks,path_png,dpi=200 ):
     plt.tight_layout(); plt.axis("off");plt.savefig(path_png, dpi=dpi)
     return fig
     
-        
+ # Distance analysis
+def plot_distance(results_distance,path_png,string_plot = "Orientation (individual)", ylabel=None, dpi=200, ylim=None):
+    if not ylabel:
+         ylabel= string_plot
+    fig = plt.figure()
+    plt.plot(results_distance['Shell_mid (µm)'],results_distance[string_plot],"o-", c="lightgreen",label="Orientation")
+    plt.grid(); plt.xlabel("Distance (µm)"); plt.ylabel(ylabel)
+    plt.tight_layout();plt.savefig(path_png, dpi=dpi)
+    if ylim:
+        plt.ylim(ylim)
+    return fig
+           

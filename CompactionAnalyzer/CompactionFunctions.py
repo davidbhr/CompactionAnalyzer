@@ -205,7 +205,7 @@ def StuctureAnalysisMain(fiber_list,
     None.
 
     """
-
+    plt.ioff()
     
     # loop thorugh cells
     for n,i in tqdm(enumerate(fiber_list)):
@@ -597,6 +597,137 @@ def StuctureAnalysisMain(fiber_list,
 
 
 
+
+
+def SummarizeResultsTotal(data, output_folder= None):
+    if not output_folder:
+        output_folder=os.path.join(data,"CombinedFiles")
+     #create output folder if not existing
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)    
+    
+    list_total = glob.glob(data+"\\**\\results_total.xlsx", recursive=True)
+
+    
+    
+    # initialize a combining result total dictionary for all cells
+    results_total_combined = { 'Path':[], 'Mean Angle (weighted by coherency)': [], 'Mean Angle (weighted by intensity and coherency)': [], 
+               'Orientation (weighted by coherency)': [], 'Orientation (weighted by intensity and coherency)': [], 
+               'Overall weighted Oriantation (mean all cells)': [],
+               'Overall weighted Oriantation (std all cells)': []} 
+    
+    for i, path in enumerate(list_total):
+       results_total_combined['Orientation (weighted by coherency)'].append(float(pd.read_excel(list_total[i])['Orientation (weighted by coherency)']))
+       results_total_combined['Orientation (weighted by intensity and coherency)'].append(float(pd.read_excel(list_total[i])['Orientation (weighted by intensity and coherency)']))
+       results_total_combined['Mean Angle (weighted by coherency)'].append(float(pd.read_excel(list_total[i])['Mean Angle (weighted by coherency)']))
+       results_total_combined['Mean Angle (weighted by intensity and coherency)'].append(float(pd.read_excel(list_total[i])['Mean Angle (weighted by intensity and coherency)']))
+       results_total_combined['Path'].append(str(list_total[i]))
+       
+    ovreall_orientation = np.nanmean(results_total_combined['Orientation (weighted by intensity and coherency)'])  
+    ovreall_orientation_std = np.nanstd(results_total_combined['Orientation (weighted by intensity and coherency)'])  
+    results_total_combined['Overall weighted Oriantation (mean all cells)'].extend([ovreall_orientation]*len(list_total))
+    results_total_combined['Overall weighted Oriantation (std all cells)'].extend([ovreall_orientation_std]*len(list_total))
+    
+        
+     # create excel sheet with results for angle analysis       
+    excel_total_combined =  pd.DataFrame.from_dict(results_total_combined)
+    excel_total_combined.to_excel(os.path.join(output_folder,"results_total_combined.xlsx"))
+    
+    
+    return results_total_combined
+
+
+
+def SummarizeResultsDistance(data, output_folder= None, dpi=200):
+    plt.ioff()
+    if not output_folder:
+        output_folder=os.path.join(data,"CombinedFiles")
+     #create output folder if not existing
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)   
+    
+    list_distance = glob.glob(data+"\\**\\results_distance.xlsx", recursive=True)    
+     # initialize a combining distance result dictionary for all cells
+    results_distance_combined = { 'Path':[], 'Shell_mid (µm)': [], 'Intensity': [],
+                              'Intensity Norm': [], 'Orientation': [],
+                              'Angle': []} 
+
+    # find maximum length (different distances in images depending on cell positon - but all should have same scaling)       
+    find_max =  [np.array(pd.read_excel(list_distance[i])['Shell_mid (µm)']) for i, path in enumerate(list_distance)]
+    max_length = np.max([len(i) for i in find_max])
+    
+    # make matrix according to longest cell and fill rest with np.nan 
+    distances = np.empty([len(list_distance),max_length])
+    distances[:] = np.nan
+    # fill the matrix with data
+    for n,i in enumerate(list_distance):
+        length = len(pd.read_excel(list_distance[n])['Shell_mid (µm)'])
+        distances[n,:length] = pd.read_excel(list_distance[n])['Shell_mid (µm)']  
+    results_distance_combined['Shell_mid (µm)'].extend(np.nanmean(distances, axis=0)  )
+    
+    
+    # make matrix according to longest cell and fill rest with np.nan 
+    intensity = np.empty([len(list_distance),max_length])
+    intensity[:] = np.nan
+    # fill the matrix with data
+    for n,i in enumerate(list_distance):
+        length = len(pd.read_excel(list_distance[n])['Intensity (individual)'])
+        intensity[n,:length] = pd.read_excel(list_distance[n])['Intensity (individual)']  
+    results_distance_combined['Intensity'].extend(np.nanmean(intensity, axis=0)  )
+    
+    # make matrix according to longest cell and fill rest with np.nan 
+    intensity_norm = np.empty([len(list_distance),max_length])
+    intensity_norm[:] = np.nan
+    # fill the matrix with data
+    for n,i in enumerate(list_distance):
+        length = len(pd.read_excel(list_distance[n])['Intensity Norm (individual)'])
+        intensity_norm[n,:length] = pd.read_excel(list_distance[n])['Intensity Norm (individual)']  
+    results_distance_combined['Intensity Norm'].extend(np.nanmean(intensity_norm, axis=0)  )
+    
+    # make matrix according to longest cell and fill rest with np.nan 
+    angle = np.empty([len(list_distance),max_length])
+    angle[:] = np.nan
+    # fill the matrix with data
+    for n,i in enumerate(list_distance):
+        length = len(pd.read_excel(list_distance[n])['Angle (individual)'])
+        angle[n,:length] = pd.read_excel(list_distance[n])['Angle (individual)']  
+    results_distance_combined['Angle'].extend(np.nanmean(angle, axis=0)  )
+
+    # make matrix according to longest cell and fill rest with np.nan 
+    Orientation = np.empty([len(list_distance),max_length])
+    Orientation[:] = np.nan
+    # fill the matrix with data
+    for n,i in enumerate(list_distance):
+        length = len(pd.read_excel(list_distance[n])['Orientation (individual)'])
+        Orientation[n,:length] = pd.read_excel(list_distance[n])['Orientation (individual)']  
+    results_distance_combined['Orientation'].extend(np.nanmean(Orientation, axis=0)  )
+    
+    # append path names
+    results_distance_combined['Path'].extend([str(data)]*max_length)
+    
+    
+    # plot intensity and orientation averaged over all cells over distance 
+    plot_distance(results_distance_combined,string_plot = "Intensity",
+              path_png=os.path.join(output_folder,"Dist_Intensity_allcells.png"),dpi=dpi)
+    
+   
+    # plot intensity and orientation averaged over all cells over distance 
+    plot_distance(results_distance_combined,string_plot = "Intensity Norm",
+              path_png=os.path.join(output_folder,"Dist_Intensity_Norm_allcells.png"),dpi=dpi)
+    
+    # plot intensity and orientation averaged over all cells over distance 
+    plot_distance(results_distance_combined,string_plot = "Orientation",
+              path_png=os.path.join(output_folder,"Dist_Orientation_allcells.png"),dpi=dpi)
+    
+        # plot intensity and orientation averaged over all cells over distance 
+    plot_distance(results_distance_combined,string_plot = "Angle",
+              path_png=os.path.join(output_folder,"Angle_allcells.png"),dpi=dpi)
+    
+    # create excel sheet with results for angle analysis       
+    excel_distance_combined =  pd.DataFrame.from_dict(results_distance_combined)
+    excel_distance_combined.to_excel(os.path.join(output_folder,"results_distance_combined.xlsx"))
+
+    plt.close("all")
 
 
 

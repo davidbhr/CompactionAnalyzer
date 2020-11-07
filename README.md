@@ -8,8 +8,6 @@ Python package to quantify the tissue compaction (as a measure of the contractil
 **B**: Measuring the increased intensity around the cell is measured.  <br>
 
 
-
-
 ## Installation
 The package can be installed by cloning this repository or downloading the repository as a zip file [here](https://github.com/davidbhr/CompactionAnalyzer/zipball/master). For installation, run the following command within the unzipped folder, in which the *setup.py* file is located: `pip install -e .`. This automatically downloads and installs all other required packages.
 
@@ -22,6 +20,16 @@ The package can be installed by cloning this repository or downloading the repos
 
 ### Multicellular Compaction Assay
 
-Also used to quantify Multicellular Compaction instead of single cells. This might have advantage same shape and no movement and can be done with same analysis
+Beneath individual cells also the compaction can bes assesed on a multicellular level using for example cell spheoids. This also offers the advantage that uniform round shape here and less moement The compaction can be accesed using the same analysis.
 
-Furthermore, also direct measurement of contractile forces by using **Jointforces** can resolve contractility of tumor spheroids and drug responses.
+Additionally, absolute forces can be measured using the python package **Jointforces** LINK HERE (requires additonal material measurements & timelapse imaging)
+
+## Resolving compound effects
+
+resolve contractility of tumor spheroids and drug responses.
+
+## How to cite
+
+If you are using the CompactionAnalyzer feel free to cite:
+
+TODO: Write a paper and put it here...

@@ -23,7 +23,7 @@ sigma_tensor = 7/scale          # sigma of applied gauss filter / window for str
 edge = 40                       # Cutt of pixels at the edge since values at the border cannot be trusted
 segmention_thres = 1.0          # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
 seg_gaus1, seg_gaus2 = 8,80     # 2 gaus filters used for local contrast enhancement
-show_segmentation = False       # display the segmentation ooutput
+show_segmentation = False        # display the segmentation output to test parameters - script wont run further
 sigma_first_blur  = 0.5         # slight first bluring of whole image before using structure tensor
 angle_sections = 5              # size of angle sections in degree 
 shell_width =  5/scale          # pixel width of distance shells (px-value=um-value/scale)

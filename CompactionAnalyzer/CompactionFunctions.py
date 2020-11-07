@@ -132,9 +132,14 @@ def segment_cell(img, thres=1, gaus1 = 8, gaus2=80, iterartions=1,show_segmentat
 
     # show segmentation
     if show_segmentation:
+        plt.ion()
         plt.figure()
-        plt.subplot(121), plt.imshow(img)
-        plt.subplot(122), plt.imshow(mask)
+        plt.subplot(121), plt.imshow(img); plt.title("Gauss blurred cell image")
+        plt.subplot(122), plt.imshow(mask); plt.title("Segmention")
+        plt.tight_layout(); plt.show()
+        print ("Display segmention and stop evaluation for testing")
+        stop  # just display segmention and stop evaluation for testing 
+        
     
     # determine radius of spheroid
     radius = np.sqrt(np.sum(mask) / np.pi)

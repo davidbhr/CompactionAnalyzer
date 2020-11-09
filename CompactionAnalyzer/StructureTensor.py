@@ -15,7 +15,7 @@ import numpy as np
 
 from skimage.draw import circle
 from scipy.signal import convolve2d
-from utilities import  convolution_fitler_with_nan
+from CompactionAnalyzer.utilities import  convolution_fitler_with_nan
 
 def rotate_vector_field(p, r):
     '''

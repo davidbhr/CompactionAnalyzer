@@ -4,8 +4,8 @@ from CompactionAnalyzer.CompactionFunctions import *
 # maxprojection Data
 # read in list of cells and list of fibers to evaluate 
 #  glob.glob is used for individual list of paths [] from these strings  
-fiber_list_string =  r"..\Tutorial\*\Fiber.tif"
-cell_list_string =  r"..\Tutorial\*\Cell.tif"   # ExampleCell
+fiber_list_string =  r"*\Fiber.tif"
+cell_list_string =  r"*\Cell.tif"   # ExampleCell
 
 
 # Generate input and output listt automatically
@@ -21,8 +21,8 @@ sigma_tensor = 7/scale          # sigma of applied gauss filter / window for str
                                 # should be in the order of the objects to analyze !! 
                                 # 7 um for collagen 
 edge = 40                       # Cutt of pixels at the edge since values at the border cannot be trusted
-segmention_thres = 1.0          # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
-seg_gaus1, seg_gaus2 = 8,80     # 2 gaus filters used for local contrast enhancement
+segmention_thres = 1.0          # for cell segemetntion, thres 1 equals normal otsu threshold , change to detect different percentage of bright pixel
+seg_gaus1, seg_gaus2 = 8,80     # 2 gaus filters used for local contrast enhancement for segementation
 show_segmentation = False        # display the segmentation output to test parameters - script wont run further
 sigma_first_blur  = 0.5         # slight first bluring of whole image before using structure tensor
 angle_sections = 5              # size of angle sections in degree 
@@ -33,7 +33,13 @@ dpi = 200                       # resolution of plots to be stored
 SaveNumpy = True                # saves numpy arrays for later analysis - might create lots of data
 norm1,norm2 = 1,99              # contrast spreading for input images  by setting all values below norm1-percentile to zero and
                                 # all values above norm2-percentile to 1
-                         
+seg_invert=False                # if segmentation is inverted (True) dark objects are detected inseated of bright ones
+seg_iter = 1                    # repetition of closing and dilation steps for segmentation      
+segmention_method="otsu"               #  use "otsu" or "yen"  as segmentation method
+load_segmentation = False        # if true enter the path of the segementation math in path_seg to
+path_seg = None                  # load in a saved.segmetnion.npy 
+
+                      
 # Start the structure analysis with the above specified parameters
 StuctureAnalysisMain(fiber_list=fiber_list,
                      cell_list=cell_list, 
@@ -53,7 +59,12 @@ StuctureAnalysisMain(fiber_list=fiber_list,
                      dpi = dpi,
                      SaveNumpy = SaveNumpy ,  
                      norm1=norm1,
-                     norm2 = norm2)
+                     norm2 = norm2,
+                     seg_invert=seg_invert,
+                     seg_iter=seg_iter,
+                     segmention_method=segmention_method,
+                     load_segmentation=load_segmentation,
+                     path_seg=path_seg)
 
 
 # Summarize Data for all cells in subfolders of analysis output

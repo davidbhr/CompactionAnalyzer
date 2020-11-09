@@ -6,7 +6,7 @@ import scipy.ndimage.morphology as scipy_morph
 import scipy.ndimage.measurements as scipy_meas
 from skimage.morphology import remove_small_objects
 import imageio
-#from skimage import color
+from skimage import color
 from scipy.ndimage.morphology import distance_transform_edt
 #import copy
 import matplotlib.pyplot as plt
@@ -92,34 +92,46 @@ def custom_mask(img,show_segmentation=True):
 
 
 
+#img = imageio.imread(cell_list[0])
 
-def segment_cell(img, thres=1, gaus1 = 8, gaus2=80, iterartions=1,show_segmentation = False, segmention="otsu"):   
+
+def segment_cell(img, thres=1, seg_gaus1 = 4, seg_gaus2=100, seg_iter=1,show_segmentation = False, segmention_method="otsu", seg_invert=False):   
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
     Args:
         img(array): Grayscale image as a Numpy array
         thres(float): To adjust the segmentation, keep 1
-        segmention: use "otsu" or "yen"  as segmentation method
-        iterations: iterations of closing steps , might increase to get more 
+        segmention_method: use "otsu" or "yen"  as segmentation method
+        seg_iter: iterations of closing steps , might increase to get more 
         robust segmentation but less precise segmentation, by default 1
+        seg_invert(bool): Default is false ans segements bright objects, if True
+        the segementatio is inverted and detects dark objects
     Returns:
         dict: Dictionary with keys: mask, radius, centroid (x/y)
     """
     height = img.shape[0]
     width = img.shape[1]
     # local gaussian   
-    img = np.abs(gaussian(img, sigma=gaus1) - gaussian(img, sigma=gaus2))
+    img = np.abs(gaussian(img, sigma=seg_gaus1) - gaussian(img, sigma=seg_gaus2))
     # segment cell
-    if segmention == "yen":
-        mask = img > threshold_yen(img) * thres
-    if segmention == "otsu":
-        mask = img > threshold_otsu(img) * thres  
-    
+    if segmention_method == "yen":
+        if seg_invert==False:
+            mask = img > threshold_yen(img) * thres
+
+        if seg_invert==True:
+            mask = img < threshold_yen(img) * thres 
+
+    if segmention_method == "otsu":
+         if seg_invert==False:
+            mask = img > threshold_otsu(img) * thres
+
+         if seg_invert==True:
+            mask = img < threshold_otsu(img) * thres
+
     # remove other objects
-    
-    mask = scipy_morph.binary_closing(mask, iterations=iterartions)
+    mask = scipy_morph.binary_closing(mask, iterations=seg_iter)
     mask = remove_small_objects(mask, min_size=1000)
-    mask = scipy_morph.binary_dilation(mask, iterations=iterartions)
+    mask = scipy_morph.binary_dilation(mask, iterations=seg_iter)
     mask = scipy_morph.binary_fill_holes(mask)
     
 
@@ -153,33 +165,11 @@ def segment_cell(img, thres=1, gaus1 = 8, gaus2=80, iterartions=1,show_segmentat
 
 
 
-scale =  0.318                  # imagescale as um per pixel
-sigma_tensor = 7/scale          # sigma of applied gauss filter / window for structure tensor analysis in px
-                                # should be in the order of the objects to analyze !! 
-                                # 7 um for collagen 
-edge = 40                       # Cutt of pixels at the edge since values at the border cannot be trusted
-segmention_thres = 1.0          # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
-seg_gaus1, seg_gaus2 = 8,80   
-show_segmentation = False    
-sigma_first_blur  = 0.5         # slight first bluring of whole image before using structure tensor
-angle_sections = 5              # size of angle sections in degree 
-shell_width =  5/scale          # pixel width of distance shells (px-value=um-value/scale)
-manual_segmention = False
-plotting = True                 # creates and saves plots additionally to excel files 
-dpi = 200                       # resolution of plots to be stored
-SaveNumpy = True               # saves numpy arrays for later analysis - might create lots of data
-norm1,norm2 = 1,99              # contrast spreading" by setting all values below norm1-percentile to zero and
-                                 # all values above norm2-percentile to 1
-                          
-
-
-
-
 def StuctureAnalysisMain(fiber_list,
                          cell_list, 
                          out_list,
                          scale=1,                       # imagescale as um per pixel
-                         sigma_tensor = 7/scale ,       # sigma of applied gauss filter / window for structure tensor analysis in px
+                         sigma_tensor = None ,       # sigma of applied gauss filter / window for structure tensor analysis in px
                                                         # should be in the order of the objects to analyze !! 
                                                         # 7 um for collagen 
                          edge = 40   ,                  # Cutt of pixels at the edge since values at the border cannot be trusted
@@ -188,14 +178,18 @@ def StuctureAnalysisMain(fiber_list,
                          show_segmentation = False ,    # display the segmentation ooutput
                          sigma_first_blur  = 0.5  ,     # slight first bluring of whole image before using structure tensor
                          angle_sections = 5    ,        # size of angle sections in degree 
-                         shell_width =  5/scale     ,   # pixel width of distance shells (px-value=um-value/scale)
+                         shell_width =  None        ,   # pixel width of distance shells (px-value=um-value/scale)
                          manual_segmention = False    , # manual segmentation of mask by click cell outline
                          plotting = True     ,          # creates and saves plots additionally to excel files 
                          dpi = 200      ,               # resolution of plots to be stored
                          SaveNumpy = True       ,       # saves numpy arrays for later analysis - might create lots of data
-                         norm1=1,norm2 = 99             # contrast spreading for input images by setting all values below norm1-percentile to zero and
+                         norm1=1,norm2 = 99  ,           # contrast spreading for input images by setting all values below norm1-percentile to zero and
                                                         # all values above norm2-percentile to 1
-                          ):
+                         seg_invert=False,              # if segmentation is inverted dark objects are detected inseated of bright
+                         seg_iter = 1,                  # repetition of closing and dilation steps for segmentation
+                         segmention_method="otsu",              #  use "otsu" or "yen"  as segmentation method
+                         load_segmentation = False,     # if true enter the path of the segementation math in path seg
+                         path_seg = None):
     """
     Main analysis
     
@@ -212,6 +206,13 @@ def StuctureAnalysisMain(fiber_list,
     """
     plt.ioff()
     
+    # if not specified use 7um for tensor analysis and 5um shells
+    if not sigma_tensor:
+        sigma_tensor = 7/scale
+    if not shell_width:
+        shell_width = 5/scale
+        
+        
     # loop thorugh cells
     for n,i in tqdm(enumerate(fiber_list)):
 
@@ -220,21 +221,26 @@ def StuctureAnalysisMain(fiber_list,
             os.makedirs(out_list[n])
              
         # load images
-        im_cell  = (imageio.imread(cell_list[n]))   #color.rgb2gray
-        im_fiber = (imageio.imread(fiber_list[n]))  #color.rgb2gray
+        im_cell  = color.rgb2gray(imageio.imread(cell_list[n]))  
+        im_fiber = color.rgb2gray(imageio.imread(fiber_list[n]))   
         
         # # applying normalizing/ contrast spreading
         im_cell_n = normalize(im_cell, norm1, norm2)
         im_fiber_n = normalize(im_fiber, norm1, norm2)  
         im_fiber_g = gaussian(im_fiber_n, sigma=sigma_first_blur)     # blur fiber image slightly (test with local gauss - similar)
         
-     
+
         # segment cell (either manual or automatically)
-        if manual_segmention:
+        if manual_segmention==True:
             segmention = custom_mask(im_cell_n)
-        else:
-            segmention = segment_cell(im_cell_n, thres= segmention_thres, gaus1 = seg_gaus1, gaus2=seg_gaus2,
-                                      show_segmentation = show_segmentation)    # thres 1 equals normal otsu threshold
+    
+        if (manual_segmention==False) and (load_segmentation == False):
+            segmention = segment_cell(im_cell_n, thres= segmention_thres, seg_gaus1 = seg_gaus1, seg_gaus2=seg_gaus2,
+                                      show_segmentation = show_segmentation,seg_invert=seg_invert,seg_iter=seg_iter,
+                                      segmention_method=segmention_method)   
+              
+        if load_segmentation:
+              segmention = np.load(path_seg,allow_pickle=True).item()             
         
         # center of the new cropped image (to avoid edge effects)
         center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
@@ -497,12 +503,11 @@ def StuctureAnalysisMain(fiber_list,
             np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity).npy" ),np.cos(2*angle_dev_weighted*np.pi/180) )    
             np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity and coherency).npy" ),np.cos(2*angle_dev_weighted2*np.pi/180) )    
             np.save(os.path.join(numpy_out, "Fiber Image Crop.npy" ),normalize(im_fiber_n[edge:-edge,edge:-edge]) )    
-            np.save(os.path.join(numpy_out, "Segmentation Crop.npy" ),segmention["mask"][edge:-edge,edge:-edge] )  
+            np.save(os.path.join(numpy_out, "segmention.npy" ),segmention)  
             np.save(os.path.join(numpy_out, "Coherency Map.npy" ),ori )  
             np.save(os.path.join(numpy_out, "Coherency Map (weighted by intensity).npy" ),ori_weight2)  
             np.save(os.path.join(numpy_out, "Vector_min_ax0.npy"),min_evec[:,:,0])  
             np.save(os.path.join(numpy_out, "Vector_min_ax1.npy"),min_evec[:,:,1])   
-            np.save(os.path.join(numpy_out, "Center_cropped_ax0,1.npy"),[center_small[0],center_small[1]])   
             np.save(os.path.join(numpy_out, "mask_surface_shells.npy"),results_distance['Mask_shell'])                                                                                   
             np.save(os.path.join(numpy_out, "mask_spherical_shells.npy"),results_distance['Mask_shell_center'])   
                                                            
@@ -597,6 +602,8 @@ def StuctureAnalysisMain(fiber_list,
             plt.savefig(os.path.join(figures,"cell-raw.png"), dpi=dpi)
     
             plt.close("all")    
+            
+
     return
 
 
@@ -733,6 +740,5 @@ def SummarizeResultsDistance(data, output_folder= None, dpi=200):
     excel_distance_combined.to_excel(os.path.join(output_folder,"results_distance_combined.xlsx"))
 
     plt.close("all")
-
 
 

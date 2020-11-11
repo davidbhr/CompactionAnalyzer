@@ -279,8 +279,11 @@ def StuctureAnalysisMain(fiber_list,
         """
         # Angular deviation from orietation to center vector
         angle_dev = np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) * 360/(2*np.pi)
+        orientation_dev = 2*(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) -1
         # weighting by coherence
         angle_dev_weighted = (angle_dev * ori) / np.nanmean(ori)     # no angle values anymore but the mean later is again an angle
+        orientation_dev_weighted = (orientation_dev * ori) / np.nanmean(ori)
+        
         # weighting by coherence and image intensity
         im_fiber_g = im_fiber_g[edge:-edge,edge:-edge]
         # could also use non filtered image
@@ -289,6 +292,9 @@ def StuctureAnalysisMain(fiber_list,
         # corresponding to pixels in the intesity iamage above a threshold are considered.
         weight_image = gaussian(im_fiber_g,sigma=15)
         angle_dev_weighted2 = (angle_dev_weighted *weight_image) / np.nanmean(weight_image)
+        orientation_dev_weighted2 = (orientation_dev_weighted *weight_image) / np.nanmean(weight_image)
+        
+        
         # also weighting the coherency like this
         ori_weight2 = (ori * weight_image) / np.nanmean(weight_image)
         
@@ -310,12 +316,17 @@ def StuctureAnalysisMain(fiber_list,
         alpha_dev_total1 = np.nanmean(angle_dev[(~segmention["mask"][edge:-edge,edge:-edge])])
         alpha_dev_total2 = np.nanmean(angle_dev_weighted[(~segmention["mask"][edge:-edge, edge:-edge])])
         alpha_dev_total3 = np.nanmean(angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])])
-        cos_dev_total1 = np.nanmean(np.cos(2*angle_dev[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
-        cos_dev_total2 = np.nanmean(np.cos(2*angle_dev_weighted[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
-        cos_dev_total3 = np.nanmean(np.cos(2*angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
+        # cos_dev_total1 = np.nanmean(np.cos(2*angle_dev[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
+        # cos_dev_total2 = np.nanmean(np.cos(2*angle_dev_weighted[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
+        # cos_dev_total3 = np.nanmean(np.cos(2*angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))   
+        cos_dev_total1 = np.nanmean(orientation_dev[(~segmention["mask"][edge:-edge,edge:-edge])])
+        cos_dev_total2 = np.nanmean(orientation_dev_weighted[(~segmention["mask"][edge:-edge,edge:-edge])])
+        cos_dev_total3 = np.nanmean(orientation_dev_weighted2[(~segmention["mask"][edge:-edge,edge:-edge])])
         coh_total = np.nanmean(ori[(~segmention["mask"][edge:-edge,edge:-edge]) ])
         coh_total2 = np.nanmean(ori_weight2[(~segmention["mask"][edge:-edge, edge:-edge])])
-              
+             
+
+        
         # create excel sheet with results for total image   
         # initialize result dictionary
         results_total = {'Mean Coherency': [], 'Mean Coherency (weighted by intensity)': [], 'Mean Angle': [],
@@ -370,9 +381,9 @@ def StuctureAnalysisMain(fiber_list,
                 results_angle['Angle Deviation'].append(np.nanmean(angle_dev[mask_angle]))
                 results_angle['Angle Deviation (weighted by coherency)'].append(np.nanmean(angle_dev_weighted[mask_angle]))
                 results_angle['Angle Deviation (weighted by intensity and coherency)'].append(np.nanmean(angle_dev_weighted2[mask_angle]))
-                results_angle['Orientation'].append(np.nanmean(np.cos(2*angle_dev[mask_angle]*np.pi/180)))
-                results_angle['Orientation (weighted by coherency)'].append(np.nanmean(np.cos(2*angle_dev_weighted[mask_angle]*np.pi/180)))
-                results_angle['Orientation (weighted by intensity and coherency)'].append(np.nanmean(np.cos(2*angle_dev_weighted2[mask_angle]*np.pi/180)))
+                results_angle['Orientation'].append(np.nanmean(orientation_dev[mask_angle]))
+                results_angle['Orientation (weighted by coherency)'].append(np.nanmean(orientation_dev_weighted[mask_angle]))
+                results_angle['Orientation (weighted by intensity and coherency)'].append(np.nanmean(orientation_dev_weighted2[mask_angle]))
        
         # create excel sheet with results for angle analysis       
         excel_angles= pd.DataFrame.from_dict(results_angle)
@@ -417,8 +428,8 @@ def StuctureAnalysisMain(fiber_list,
             # THINK ABOUT ANGLE DEV W 2 (with int here ?)
             results_distance['Angle (accumulated)'].append(np.nanmean(angle_dev_weighted[mask_shell_lower])  ) # accumulation of lower shells
             results_distance['Angle (individual)'].append(np.nanmean(angle_dev_weighted[mask_shell])  )    # exclusively in certain shell
-            results_distance['Orientation (accumulated)'].append(np.cos(2*np.nanmean(angle_dev_weighted[mask_shell_lower]*np.pi/180))  ) # accumulation of lower shells
-            results_distance['Orientation (individual)'].append(np.cos(2*np.nanmean(angle_dev_weighted[mask_shell]*np.pi/180))  )    # exclusively in certain shell
+            results_distance['Orientation (accumulated)'].append(np.nanmean(orientation_dev_weighted[mask_shell_lower])   ) # accumulation of lower shells
+            results_distance['Orientation (individual)'].append(np.nanmean(orientation_dev_weighted[mask_shell])  )    # exclusively in certain shell
             # MAYBE TODO:  weight by coherency+Intensity   within shell instead of the pure angle ?
             # mean intensity
             results_distance['Intensity (accumulated)'].append(np.nanmean(im_fiber_g[mask_shell_lower]))          # accumulation of lower shells
@@ -434,8 +445,8 @@ def StuctureAnalysisMain(fiber_list,
             results_distance['Angle disttocenter (accumulated)'].append(np.nanmean(angle_dev_weighted[mask_shell_lower_center])  ) # accumulation of lower shells
             results_distance['Angle disttocenter (individual)'].append(np.nanmean(angle_dev_weighted[mask_shell_center])  )    # exclusively in certain shell
             # MAYBE TODO:  weight by coherency+Intensity   within shell instead of the pure angle ?
-            results_distance['Orientation disttocenter (accumulated)'].append(np.nanmean(np.cos(2*angle_dev_weighted[mask_shell_lower_center]*np.pi/180))  ) # accumulation of lower shells
-            results_distance['Orientation disttocenter (individual)'].append(np.nanmean(np.cos(2*angle_dev_weighted[mask_shell_center]*np.pi/180))  )    # exclusively in certain shell
+            results_distance['Orientation disttocenter (accumulated)'].append(np.nanmean(orientation_dev_weighted[mask_shell_lower_center])  ) # accumulation of lower shells
+            results_distance['Orientation disttocenter (individual)'].append(np.nanmean(orientation_dev_weighted[mask_shell_center])  )    # exclusively in certain shell
             # mean intensity
             results_distance['Intensity disttocenter (accumulated)'].append(np.nanmean(im_fiber_g[mask_shell_lower_center]))          # accumulation of lower shells
             results_distance['Intensity disttocenter (individual)'].append(np.nanmean(im_fiber_g[mask_shell_center])  )    # exclusively in certain shell
@@ -499,9 +510,9 @@ def StuctureAnalysisMain(fiber_list,
             np.save(os.path.join(numpy_out, "Angle Map.npy" ),angle_dev )    
             np.save(os.path.join(numpy_out, "Angle Map (weighted by intensity).npy" ),angle_dev_weighted)    
             np.save(os.path.join(numpy_out, "Angle Map (weighted by intensity and coherency).npy" ),angle_dev_weighted2 )    
-            np.save(os.path.join(numpy_out, "Orientation Map.npy" ),np.cos(2*angle_dev*np.pi/180) )    
-            np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity).npy" ),np.cos(2*angle_dev_weighted*np.pi/180) )    
-            np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity and coherency).npy" ),np.cos(2*angle_dev_weighted2*np.pi/180) )    
+            np.save(os.path.join(numpy_out, "Orientation Map.npy" ),orientation )    
+            np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity).npy" ),orientation_dev_weighted)    
+            np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity and coherency).npy" ),orientation_dev_weighted2 )    
             np.save(os.path.join(numpy_out, "Fiber Image Crop.npy" ),normalize(im_fiber_n[edge:-edge,edge:-edge]) )    
             np.save(os.path.join(numpy_out, "segmention.npy" ),segmention)  
             np.save(os.path.join(numpy_out, "Coherency Map.npy" ),ori )  
@@ -531,13 +542,13 @@ def StuctureAnalysisMain(fiber_list,
             plot_angle_dev(angle_map = angle_dev_weighted2, 
                            vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
                            path_png= os.path.join(figures,"Angle_deviation_weighted.png"),label="Angle Deviation",dpi=dpi)
-            plot_angle_dev(angle_map = np.cos(2*angle_dev_weighted2*np.pi/180) ,  
+            plot_angle_dev(angle_map = orientation_dev_weighted2 ,  
                            vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
                            path_png= os.path.join(figures,"Orientation_weighted.png"),label="Orientation",dpi=dpi)
     
             # pure coherency and pure orientation
             plot_coherency(ori,path_png= os.path.join(figures,"coherency_noquiver.png"))
-            plot_coherency(np.cos(2*angle_dev_weighted2*np.pi/180),
+            plot_coherency(orientation_dev_weighted2,
                            path_png= os.path.join(figures,"Orientation_weighted_noquiver.png"),
                            label="Orientation",dpi=dpi) 
             # Polar plots        

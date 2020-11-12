@@ -279,10 +279,14 @@ def StuctureAnalysisMain(fiber_list,
         """
         # Angular deviation from orietation to center vector
         angle_dev = np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) * 360/(2*np.pi)
-        orientation_dev = 2*(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) -1
+        orientation_dev_01 = (np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1]))
+        orientation_dev = 2*(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1]))-1 
         # weighting by coherence
         angle_dev_weighted = (angle_dev * ori) / np.nanmean(ori)     # no angle values anymore but the mean later is again an angle
-        orientation_dev_weighted = (orientation_dev * ori) / np.nanmean(ori)
+        orientation_dev_weighted_01 =  ((orientation_dev_01 * ori) / np.nanmean(ori)) 
+        orientation_dev_weighted = 2 *  orientation_dev_weighted_01 - 1
+        
+        
         
         # weighting by coherence and image intensity
         im_fiber_g = im_fiber_g[edge:-edge,edge:-edge]
@@ -292,8 +296,8 @@ def StuctureAnalysisMain(fiber_list,
         # corresponding to pixels in the intesity iamage above a threshold are considered.
         weight_image = gaussian(im_fiber_g,sigma=15)
         angle_dev_weighted2 = (angle_dev_weighted *weight_image) / np.nanmean(weight_image)
-        orientation_dev_weighted2 = (orientation_dev_weighted *weight_image) / np.nanmean(weight_image)
-        
+        orientation_dev_weighted2_01 = (orientation_dev_01 *weight_image*ori) / np.nanmean(weight_image*ori)
+        orientation_dev_weighted2 =  2 *  orientation_dev_weighted2_01 - 1
         
         # also weighting the coherency like this
         ori_weight2 = (ori * weight_image) / np.nanmean(weight_image)
@@ -325,7 +329,6 @@ def StuctureAnalysisMain(fiber_list,
         coh_total = np.nanmean(ori[(~segmention["mask"][edge:-edge,edge:-edge]) ])
         coh_total2 = np.nanmean(ori_weight2[(~segmention["mask"][edge:-edge, edge:-edge])])
              
-
         
         # create excel sheet with results for total image   
         # initialize result dictionary
@@ -510,7 +513,7 @@ def StuctureAnalysisMain(fiber_list,
             np.save(os.path.join(numpy_out, "Angle Map.npy" ),angle_dev )    
             np.save(os.path.join(numpy_out, "Angle Map (weighted by intensity).npy" ),angle_dev_weighted)    
             np.save(os.path.join(numpy_out, "Angle Map (weighted by intensity and coherency).npy" ),angle_dev_weighted2 )    
-            np.save(os.path.join(numpy_out, "Orientation Map.npy" ),orientation )    
+            np.save(os.path.join(numpy_out, "Orientation Map.npy" ),orientation_dev )    
             np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity).npy" ),orientation_dev_weighted)    
             np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity and coherency).npy" ),orientation_dev_weighted2 )    
             np.save(os.path.join(numpy_out, "Fiber Image Crop.npy" ),normalize(im_fiber_n[edge:-edge,edge:-edge]) )    

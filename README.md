@@ -54,7 +54,7 @@ load_segmentation = False        # if true enter the path of the segementation m
 path_seg = None                  # load in a saved.segmetnion.npy 
 ```
 
-Then we can start the analyis using the single function
+Then we can start the analyis using the single function (follow the full 'CompactionAnalysis.py' script)
 
 ```python
 # Start the structure analysis with the above specified parameters
@@ -63,26 +63,12 @@ StuctureAnalysisMain(fiber_list=fiber_list,
                      out_list=out_list,
                      scale=scale, 
                      sigma_tensor = sigma_tensor , 
-                     edge = edge , 
-                     segmention_thres =segmention_thres , 
-                     seg_gaus1=  seg_gaus1, 
-                     seg_gaus2 = seg_gaus2 ,
-                     show_segmentation = show_segmentation ,    
-                     sigma_first_blur  = sigma_first_blur , 
-                     angle_sections = angle_sections,   
-                     shell_width = shell_width    ,  
-                     manual_segmention = manual_segmention, 
-                     plotting = plotting,
-                     dpi = dpi,
-                     SaveNumpy = SaveNumpy ,  
-                     norm1=norm1,
-                     norm2 = norm2,
-                     seg_invert=seg_invert,
-                     seg_iter=seg_iter,
-                     segmention_method=segmention_method,
-                     load_segmentation=load_segmentation,
-                     path_seg=path_seg)
+                     ...)
 ```
+
+
+
+
 
 
 

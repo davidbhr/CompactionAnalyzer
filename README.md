@@ -13,9 +13,9 @@ The package can be installed by cloning this repository or downloading the repos
 
 ## Tutorial
 
-The script **CompactionAnalysis.py** within the turorial folder might be good to start to get familiar with the analyis. For the analysis we need per cell an image of the fiber structure (e.g. 2nd harmonic, confocal reflection or stained fluorescence images; maximum intensity projection around the cells might be useful) and an image of the cell for segmentation (staining or bf). 
+The script *CompactionAnalysis.py* within the turorial folder might be good to start to get familiar with the analyis. For the analysis we need per cell an image of the fiber structure (e.g. 2nd harmonic, confocal reflection or stained fluorescence images; maximum intensity projection around the cells might be useful) and an image of the cell for segmentation (staining or bf). 
 
-We then compute the orientation of individual fibers using structure tensor analysis. Here **sigma_tensor** is the kernel size that determines the length scale on which the strucutre is analysed. The kernel size should be in the range of structure we want too look at and can be optimized for the individual application. For our fiber gels we use a value of 7 µm, which is in range of the pore size. 
+We then compute the orientation of individual fibers using structure tensor analysis. Here *sigma_tensor* is the kernel size that determines the length scale on which the strucutre is analysed. The kernel size should be in the range of structure we want too look at and can be optimized for the individual application. For our fiber gels we use a value of 7 µm, which is in range of the pore size. 
 
 
 

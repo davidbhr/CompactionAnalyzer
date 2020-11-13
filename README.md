@@ -67,38 +67,20 @@ StuctureAnalysisMain(fiber_list=fiber_list,
 ```
 
 
+Now per three cell excel file  and plots. there overall orientation `results_sdfsa.xlsc` . orientation / intensity in angle shells `results_sdfsa.xlsc` and the orientation / intensity in distance shells `results_sdfsa.xlsc`. 
 
 
 
 
 
+If we now want to evaluate e.g. a measurement containing multiple cells, we can read in all excel files (individual cells) in the underlying folders of the given `data` path and combine them in a new excel file by using
 
-If we have more cells we can easily read in all of them and analyze them individually sin * operator
+```python
+SummarizeResultsTotal(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")
+SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")
+```
 
-
-
-
-For ever cell analysis is done for global, angle and distance. Results are stored in individual excel sheets and - if activated - plots
-
-
-
-
-read in and plotted again .. show some data
-
-
-
-
-To evaluate measurements mseveral cells we can combine all data in selected subfolders usin 
-
-...
-
-Resutlng excel files contain the mean data for all cells
-
-Same can be done for distance analysis using
-...
-
-Then ...
-
+Now compromised excel sheet returns total analysis and also ditance analysis
 
 
 

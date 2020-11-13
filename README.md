@@ -13,21 +13,31 @@ The package can be installed by cloning this repository or downloading the repos
 
 ## Tutorial
 
-The script 'CompactionAnalysis.py' within the turorial folder might be good to start to get familiar with the analyis. For the analysis we need per each cell an image of the fiber structure (e.g. 2nd harmonic, confocal reflection or stained fluorescence images; maximum intensity projection around the cells might be useful) and an image of the cell for segmentation (staining or brightfield). 
+The script 'CompactionAnalysis.py' within the turorial folder might be good to start to get familiar with the analyis. 
+
+First we import all of the necessary functions using
+
+```python
+from CompactionAnalyzer.CompactionFunctions import *
+```
+
+For the analysis we need per each cell an image of the fiber structure (e.g. 2nd harmonic, confocal reflection or stained fluorescence images; maximum intensity projection around the cells might be useful) and an image of the cell for segmentation (staining or brightfield). 
+
+We define the input data for the fibers using `fiber_list_string` ant the cells using `cell_list_string` (glob style).  `generate_lists()` then searches all specified fiber and cell paths and creates output subfolder in the specified `output_folder` directory automatically.
 
 ```python
 from CompactionAnalyzer.CompactionFunctions import *
 output_folder = "Analysis_output" 
-fiber_list_string =  r"..\..\data\stack 2 relocated\pos002\*z6*.tif"
-cell_list_string =  r"..\..\data\stack 2 relocated\pos002\*z6*.tif" 
+fiber_list_string =  r"imagedata\*ch00*.tif"
+cell_list_string =  r"imagedata\*ch01*.tif" 
 
 fiber_list,cell_list, out_list = generate_lists(fiber_list_string, cell_list_string, output_main =output_folder)
 ```
 
-We then compute the orientation of individual fibers using structure tensor analysis. Here *sigma_tensor* is the kernel size that determines the length scale on which the strucutre is analysed. The kernel size should be in the range of structure we want to look at and can be optimized for the individual application. For our fiber gels we use a value of 7 µm, which is in range of the pore size. 
+We then want to start the analysis and compute the orientation of individual fibers using structure tensor analysis. Here *sigma_tensor* is the kernel size that determines the length scale on which the strucutre is analysed. The kernel size should be in the range of structure we want to look at and can be optimized for the individual application. For our fiber gels we use a value of 7 µm, which is in range of the pore size. 
 
 
-We can redefine all of the following paramters before starting the analysis. The corresponding pixel scale is set as `scale` and the segmentiation can be changed by using the `segmention_thres` or changing the local contrast enhancement via `seg_gaus1, seg_gaus2`. With `show_segmentation = True` we can inspect the segmentation or if preffered segment the mask manually by clicking for `show_segmentation = True`.
+We can redefine all of the following paramters before starting the analysis. The corresponding pixel scale is set as `scale` and the segmentiation can be changed by using the `segmention_thres` or by changing the local contrast enhancement via `seg_gaus1, seg_gaus2`. With `show_segmentation = True` we can inspect the segmentation or - if preferred - segment the mask manually by clicking using `show_segmentation = True`.
 
 ```python
 scale =  0.318                  # imagescale as um per pixel
@@ -54,7 +64,8 @@ load_segmentation = False        # if true enter the path of the segementation m
 path_seg = None                  # load in a saved.segmetnion.npy 
 ```
 
-Then we can start the analyis using the single function (follow the full 'CompactionAnalysis.py' script)
+
+Now we can start to analyse all our cells individually using the single function `StuctureAnalysisMain` (follow the full `CompactionAnalysis.py` script):
 
 ```python
 # Start the structure analysis with the above specified parameters
@@ -67,7 +78,7 @@ StuctureAnalysisMain(fiber_list=fiber_list,
 ```
 
 
-Now per three cell excel file  and plots. there overall orientation `results_sdfsa.xlsc` . orientation / intensity in angle shells `results_sdfsa.xlsc` and the orientation / intensity in distance shells `results_sdfsa.xlsc`. 
+Now we receive 3 excel files for each cell. there overall orientation `results_sdfsa.xlsc` . orientation / intensity in angle shells `results_sdfsa.xlsc` and the orientation / intensity in distance shells `results_sdfsa.xlsc`. 
 
 
 

@@ -13,7 +13,7 @@ The package can be installed by cloning this repository or downloading the repos
 
 ## Tutorial
 
-The script 'CompactionAnalysis.py' within the turorial folder might be good to start to get familiar with the analyis. 
+The script 'CompactionAnalysis.py' within the turorial folder might be good start to get familiar with the analyis. 
 
 First we import all of the necessary functions using
 

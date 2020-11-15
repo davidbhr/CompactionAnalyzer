@@ -78,7 +78,7 @@ StuctureAnalysisMain(fiber_list=fiber_list,
 ```
 
 
-Now we receive 3 excel files for each cell. there overall orientation `results_sdfsa.xlsc` . orientation / intensity in angle shells `results_sdfsa.xlsc` and the orientation / intensity in distance shells `results_sdfsa.xlsc`. 
+For each cell we now receive 3 excel files: The overall orientation `results_sdfsa.xlsc` . orientation / intensity in angle shells `results_sdfsa.xlsc` and the orientation / intensity in distance shells `results_sdfsa.xlsc`. 
 
 
 

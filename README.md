@@ -26,7 +26,6 @@ For the analysis we need per each cell an image of the fiber structure (e.g. 2nd
 We define the input data for the fibers using `fiber_list_string` ant the cells using `cell_list_string` (glob style).  `generate_lists()` then searches all specified fiber and cell paths and creates output subfolder in the specified `output_folder` directory automatically.
 
 ```python
-from CompactionAnalyzer.CompactionFunctions import *
 output_folder = "Analysis_output" 
 fiber_list_string =  r"imagedata\*ch00*.tif"
 cell_list_string =  r"imagedata\*ch01*.tif" 

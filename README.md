@@ -15,13 +15,13 @@ The package can be installed by cloning this repository or downloading the repos
 
 The script 'CompactionAnalysis.py' within the turorial folder might be good start to get familiar with the analyis. 
 
-First we import all of the necessary functions using
+First we import all of the necessary functions by using
 
 ```python
 from CompactionAnalyzer.CompactionFunctions import *
 ```
 
-For the analysis we need per each cell an image of the fiber structure (e.g. 2nd harmonic, confocal reflection or stained fluorescence images; maximum intensity projection around the cells might be useful) and an image of the cell for segmentation (staining or brightfield). 
+For the analysis we then need per each cell an image of the fiber structure (e.g. 2nd harmonic, confocal reflection or stained fluorescence images; maximum intensity projection around the cells might be useful) and an image of the cell for segmentation (staining or brightfield). 
 
 We define the input data for the fibers using `fiber_list_string` ant the cells using `cell_list_string` (glob style).  `generate_lists()` then searches all specified fiber and cell paths and creates output subfolder in the specified `output_folder` directory automatically.
 

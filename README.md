@@ -36,7 +36,7 @@ fiber_list,cell_list, out_list = generate_lists(fiber_list_string, cell_list_str
 We then want to start the analysis and compute the orientation of individual fibers using structure tensor analysis. Here *sigma_tensor* is the kernel size that determines the length scale on which the strucutre is analysed. The kernel size should be in the range of structure we want to look at and can be optimized for the individual application. For our fiber gels we use a value of 7 µm, which is in range of the pore size. 
 
 
-We can redefine all of the following paramters before starting the analysis. The corresponding pixel scale is set as `scale` and the segmentiation can be changed by using the `segmention_thres` or by changing the local contrast enhancement via `seg_gaus1, seg_gaus2`. With `show_segmentation = True` we can inspect the segmentation or - if preferred - segment the mask manually by clicking using `show_segmentation = True`.
+We can redefine all of the following paramters before starting the analysis. The corresponding pixel scale is set as `scale` and the segmentiation can be changed by using the `segmention_thres` or by changing the local contrast enhancement via `seg_gaus1, seg_gaus2`. With `show_segmentation = True` we can inspect the segmentation or - if preferred - segment the mask manually by clicking using `manual_segmention  = True`.
 
 ```python
 scale =  0.318                  # imagescale as um per pixel

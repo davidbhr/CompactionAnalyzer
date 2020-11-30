@@ -186,8 +186,8 @@ def get_principal_vectors(ot_xx, ot_yx, ot_yy):
     min_evec[min_not_defined] = rotate_vector_field(np.pi / 2, max_evec)[min_not_defined]
 
     # fill nans with zeros --> makes sense because later weighting with coherency would set zero  anyway
-    min_evec[np.isnan(min_evec)] = 0
-    max_evec[np.isnan(max_evec)] = 0
+    # min_evec[np.isnan(min_evec)] = 0
+    # max_evec[np.isnan(max_evec)] = np.nan
 
     return max_evec, min_evec, max_eval, min_eval
 

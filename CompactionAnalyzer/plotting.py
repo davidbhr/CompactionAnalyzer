@@ -106,9 +106,9 @@ def show_quiver(fx, fy, filter=[0, 1], scale_ratio=0.4, headwidth=None, headleng
 
 
       
-def plot_angle_dev(angle_map,vec0,vec1,coherency_map,path_png,label="Angle Deviation",dpi=300):
+def plot_angle_dev(angle_map,vec0,vec1,coherency_map,path_png,label="Angle Deviation",dpi=300,cmap="viridis"):
      # angle deviation no weights
-    fig =plt.figure();plt.imshow(angle_map); cbar =plt.colorbar()
+    fig =plt.figure();plt.imshow(angle_map,cmap=cmap); cbar =plt.colorbar()
     mx = vec0 * coherency_map
     my = vec1 * coherency_map
     mx, my, x, y = filter_values(mx, my, abs_filter=0,

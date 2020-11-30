@@ -547,13 +547,16 @@ def StuctureAnalysisMain(fiber_list,
             # plot orientation and angle deviation maps together with orientation structure 
             plot_angle_dev(angle_map = angle_dev, 
                            vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-                           path_png= os.path.join(figures,"Angle_deviation.png"),label="Angle Deviation",dpi=dpi)
+                           path_png= os.path.join(figures,"Angle_deviation.png"),label="Angle Deviation",dpi=dpi,cmap="viridis_r")
             plot_angle_dev(angle_map = angle_dev_weighted2, 
                            vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-                           path_png= os.path.join(figures,"Angle_deviation_weighted.png"),label="Angle Deviation",dpi=dpi)
+                           path_png= os.path.join(figures,"Angle_deviation_weighted.png"),label="Angle Deviation",dpi=dpi,cmap="viridis_r")
             plot_angle_dev(angle_map = orientation_dev_weighted2 ,  
                            vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-                           path_png= os.path.join(figures,"Orientation_weighted.png"),label="Orientation",dpi=dpi)
+                           path_png= os.path.join(figures,"Orientation_weighted.png"),label="Orientation",dpi=dpi,cmap="viridis")
+            plot_angle_dev(angle_map = orientation_dev,  
+                           vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
+                           path_png= os.path.join(figures,"Orientation.png"),label="Orientation",dpi=dpi,cmap="viridis")
     
             # pure coherency and pure orientation
             plot_coherency(ori,path_png= os.path.join(figures,"coherency_noquiver.png"))
@@ -573,10 +576,10 @@ def StuctureAnalysisMain(fiber_list,
                        path_png= os.path.join(figures,"polar_intensity.png"), label = "Mean Intensity",dpi=dpi)
             
             plot_polar(results_angle['Angles Plotting'], results_angle['Orientation (weighted by intensity and coherency)'],
-                               path_png= os.path.join(figures,"Orientation_weighted.png"), label = "Orientation",dpi=dpi)
+                               path_png= os.path.join(figures,"Orientation_weighted_polar.png"), label = "Orientation",dpi=dpi)
             
             plot_polar(results_angle['Angles Plotting'], results_angle['Orientation'],
-                               path_png= os.path.join(figures,"Orientation.png"), label = "Orientation",dpi=dpi)
+                               path_png= os.path.join(figures,"Orientation_polar.png"), label = "Orientation",dpi=dpi)
             
             # summarizing triple plot
             plot_triple(results_angle,results_total , path_png= os.path.join(figures,"Triple_plot.png") ,dpi=dpi)

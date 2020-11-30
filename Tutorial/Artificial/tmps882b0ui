@@ -1,17 +1,24 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Nov 30 14:28:18 2020
+
+@author: david
+"""
+
 from CompactionAnalyzer.CompactionFunctions import *
 
 
 # maxprojection Data
 # read in list of cells and list of fibers to evaluate 
 #  glob.glob is used for individual list of paths [] from these strings  
-fiber_list_string =  r"ExampleCells\*\C003.tif"
-cell_list_string =  r"ExampleCells\*\C004.tif"   # ExampleCell
+fiber_list_string =  r"rand*.tif"
+cell_list_string =  r"*Cell*.tif"   # ExampleCell
 
 
 # Generate input and output listt automatically
 # fiber_list, cell_list and out_list can also be created manual 
 # as e.g. out_list=["output/conditionx/cell1", "output/conditiony/cell2"] etc...
-output_folder = "ExampleCells_output" # base path to store results
+output_folder = "rand_output" # base path to store results
 fiber_list,cell_list, out_list = generate_lists(fiber_list_string, cell_list_string, output_main =output_folder)
 
 
@@ -68,13 +75,10 @@ StuctureAnalysisMain(fiber_list=fiber_list,
 
 
 # Summarize Data for all cells in subfolders of analysis output
-SummarizeResultsTotal(data="ExampleCells_output", output_folder= "ExampleCells_output\Combine_Set1")
-SummarizeResultsDistance(data="ExampleCells_output", output_folder= "ExampleCells_output\Combine_Set1")
+SummarizeResultsTotal(data="rand_output", output_folder= "rand_output\Combine_Set1")
+SummarizeResultsDistance(data="rand_output", output_folder= "rand_output\Combine_Set1")
 
 
 
 
 
-
-
-    

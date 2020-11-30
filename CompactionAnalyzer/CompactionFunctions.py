@@ -277,14 +277,18 @@ def StuctureAnalysisMain(fiber_list,
         """
         total image analysis
         """
-        # Angular deviation from orietation to center vector
-        angle_dev = np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) * 360/(2*np.pi)
-        orientation_dev_01 = (np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1]))
-        orientation_dev = 2*(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1]))-1 
+        # Angular deviation from orietation to center vector - 
+        angle_dev = np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) * 360/(2*np.pi) 
+        # calculate oreination from angle_dev since they are normal distributed and np.abs((dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) is not
+        orientation_dev_01 = angle_dev/90  
+        # orientation_dev_01 = np.abs((dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1]))
+        orientation_dev = -(2*orientation_dev_01-1)  # norm from -1 to 1 ; changed sign
+        
+  
         # weighting by coherence
         angle_dev_weighted = (angle_dev * ori) / np.nanmean(ori)     # no angle values anymore but the mean later is again an angle
         orientation_dev_weighted_01 =  ((orientation_dev_01 * ori) / np.nanmean(ori)) 
-        orientation_dev_weighted = 2 *  orientation_dev_weighted_01 - 1
+        orientation_dev_weighted = -(2  *orientation_dev_weighted_01 - 1)
         
         
         
@@ -297,7 +301,7 @@ def StuctureAnalysisMain(fiber_list,
         weight_image = gaussian(im_fiber_g,sigma=15)
         angle_dev_weighted2 = (angle_dev_weighted *weight_image) / np.nanmean(weight_image)
         orientation_dev_weighted2_01 = (orientation_dev_01 *weight_image*ori) / np.nanmean(weight_image*ori)
-        orientation_dev_weighted2 =  2 *  orientation_dev_weighted2_01 - 1
+        orientation_dev_weighted2 =  -(2 * orientation_dev_weighted2_01 - 1)
         
         # also weighting the coherency like this
         ori_weight2 = (ori * weight_image) / np.nanmean(weight_image)

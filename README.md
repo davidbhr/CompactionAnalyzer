@@ -23,7 +23,7 @@ from CompactionAnalyzer.CompactionFunctions import *
 
 For the analysis we then need per each cell an image of the fiber structure (e.g. 2nd harmonic, confocal reflection or stained fluorescence images; maximum intensity projection around the cells might be useful) and an image of the cell for segmentation (staining or brightfield). 
 
-We define the input data for the fibers using `fiber_list_string` ant the cells using `cell_list_string` (glob style).  `generate_lists()` then searches all specified fiber and cell paths and creates output subfolder in the specified `output_folder` directory automatically.
+We define the input data for the fibers using `fiber_list_string` ant the cells using `cell_list_string` (here we can utilize the * place holder to selecet multiple images).  `generate_lists()` then searches all specified fiber and cell paths and creates output subfolder in the specified `output_folder` directory automatically.
 
 ```python
 output_folder = "Analysis_output" 

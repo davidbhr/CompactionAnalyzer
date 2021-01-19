@@ -11,7 +11,7 @@ setup(
     download_url = '',
     author='David Böhringer, Andreas Bauer',
     author_email='david.boehringer@fau.de',
-    license='The MIT License (MIT)',
+    license='GNU General Public License v3.0',
     install_requires=['numpy>=1.16.2',
                       'pandas>=0.23.4',
                       'matplotlib>=2.2.2',

@@ -101,8 +101,8 @@ SummarizeResultsTotal(data="Analysis_output", output_folder= "Analysis_output\Co
 SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")
 ```
 
-Now compromised excel sheet returns total analysis and also ditance analysis
-
+Now we receive a compromised excel sheet returns total analysis and also ditance analysis for all cells combined. The different values "dfdsf " or "fdfd"
+now mean orientation of all cells . In the 
 
 <img src="https://raw.githubusercontent.com/davidbhr/compactionanalyzer/master/docs/images/Fig3-combineexcel.png" width="800" />
 

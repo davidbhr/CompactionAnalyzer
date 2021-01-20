@@ -113,11 +113,15 @@ Might be usefull to use Maximum intensity image around cell (smalls stacks) to i
  For different max projection height it might be necessary to change parameter X , since fiberstructure seems / erscheint more densly. Maximumprojection can also be created using the function   XY
 
 
+IMAGE coolwarm erosion
+
+
+
 ## Multicellular Compaction Assay
 
-Beneath individual cells also the compaction can bes assesed on a multicellular level using for example cell spheoids. This also offers the advantage that uniform round shape here and less moement The compaction can be accesed using the same analysis.
+Beneath individual cells also the compaction can bes assesed on a multicellular level using for example cell sphetoids. This can offer the advantage that uniform round shape  and less moement a lower sample number ight be suffiecient. 
 
-Additionally, absolute forces can be measured using the python package **Jointforces** LINK HERE (requires additonal material measurements & timelapse imaging)
+Additionally, absolute forces of spheroids can be measured using the python package **Jointforces** LINK HERE, which requires additonal material measurements & timelapse imaging.
 
 ## Resolving compound effects
 

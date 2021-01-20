@@ -98,3 +98,157 @@ Tutorial/ArtificialData_output/Combine_Set1/Dist_Intensity_Norm_allcells.png
 Tutorial/ArtificialData_output/Combine_Set1/Dist_Orientation_allcells.png
 Tutorial/ArtificialData_output/Combine_Set1/results_distance_combined.xlsx
 Tutorial/ArtificialData_output/Combine_Set1/results_total_combined.xlsx
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/Angle_deviation.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/Angle_deviation_weighted.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/cell-raw.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/coherency_noquiver.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/fiber_segemention.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/Intensity_distance.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/Orientation.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/Orientation_distance.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/Orientation_polar.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/Orientation_weighted.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/Orientation_weighted_noquiver.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/Orientation_weighted_polar.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/overlay.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/overlay2.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/polar_coherency_double.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/polar_coherency_weighted.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/polar_intensity.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/quiv_coherency_center.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/shells.png
+Tutorial/ExampleCells_output/Cell_1/C004/Figures/Triple_plot.png
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/Angle Map (weighted by intensity and coherency).npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/Angle Map (weighted by intensity).npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/Angle Map.npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/Coherency Map (weighted by intensity).npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/Coherency Map.npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/Fiber Image Crop.npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/mask_spherical_shells.npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/mask_surface_shells.npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/Orientation Map (weighted by intensity and coherency).npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/Orientation Map (weighted by intensity).npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/Orientation Map.npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/segmention.npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/Vector_min_ax0.npy
+Tutorial/ExampleCells_output/Cell_1/C004/NumpyArrays/Vector_min_ax1.npy
+Tutorial/ExampleCells_output/Cell_1/C004/results_angles.xlsx
+Tutorial/ExampleCells_output/Cell_1/C004/results_distance.xlsx
+Tutorial/ExampleCells_output/Cell_1/C004/results_total.xlsx
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/Angle_deviation.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/Angle_deviation_weighted.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/cell-raw.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/coherency_noquiver.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/fiber_segemention.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/Intensity_distance.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/Orientation.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/Orientation_distance.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/Orientation_polar.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/Orientation_weighted.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/Orientation_weighted_noquiver.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/Orientation_weighted_polar.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/overlay.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/overlay2.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/polar_coherency_double.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/polar_coherency_weighted.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/polar_intensity.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/quiv_coherency_center.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/shells.png
+Tutorial/ExampleCells_output/Cell_2/C004/Figures/Triple_plot.png
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/Angle Map (weighted by intensity and coherency).npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/Angle Map (weighted by intensity).npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/Angle Map.npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/Coherency Map (weighted by intensity).npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/Coherency Map.npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/Fiber Image Crop.npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/mask_spherical_shells.npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/mask_surface_shells.npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/Orientation Map (weighted by intensity and coherency).npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/Orientation Map (weighted by intensity).npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/Orientation Map.npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/segmention.npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/Vector_min_ax0.npy
+Tutorial/ExampleCells_output/Cell_2/C004/NumpyArrays/Vector_min_ax1.npy
+Tutorial/ExampleCells_output/Cell_2/C004/results_angles.xlsx
+Tutorial/ExampleCells_output/Cell_2/C004/results_distance.xlsx
+Tutorial/ExampleCells_output/Cell_2/C004/results_total.xlsx
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/Angle_deviation.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/Angle_deviation_weighted.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/cell-raw.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/coherency_noquiver.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/fiber_segemention.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/Intensity_distance.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/Orientation.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/Orientation_distance.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/Orientation_polar.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/Orientation_weighted.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/Orientation_weighted_noquiver.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/Orientation_weighted_polar.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/overlay.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/overlay2.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/polar_coherency_double.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/polar_coherency_weighted.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/polar_intensity.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/quiv_coherency_center.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/shells.png
+Tutorial/ExampleCells_output/Cell_3/C004/Figures/Triple_plot.png
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/Angle Map (weighted by intensity and coherency).npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/Angle Map (weighted by intensity).npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/Angle Map.npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/Coherency Map (weighted by intensity).npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/Coherency Map.npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/Fiber Image Crop.npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/mask_spherical_shells.npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/mask_surface_shells.npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/Orientation Map (weighted by intensity and coherency).npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/Orientation Map (weighted by intensity).npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/Orientation Map.npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/segmention.npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/Vector_min_ax0.npy
+Tutorial/ExampleCells_output/Cell_3/C004/NumpyArrays/Vector_min_ax1.npy
+Tutorial/ExampleCells_output/Cell_3/C004/results_angles.xlsx
+Tutorial/ExampleCells_output/Cell_3/C004/results_distance.xlsx
+Tutorial/ExampleCells_output/Cell_3/C004/results_total.xlsx
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/Angle_deviation.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/Angle_deviation_weighted.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/cell-raw.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/coherency_noquiver.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/fiber_segemention.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/Intensity_distance.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/Orientation.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/Orientation_distance.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/Orientation_polar.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/Orientation_weighted.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/Orientation_weighted_noquiver.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/Orientation_weighted_polar.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/overlay.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/overlay2.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/polar_coherency_double.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/polar_coherency_weighted.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/polar_intensity.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/quiv_coherency_center.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/shells.png
+Tutorial/ExampleCells_output/Cell_4/C004/Figures/Triple_plot.png
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/Angle Map (weighted by intensity and coherency).npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/Angle Map (weighted by intensity).npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/Angle Map.npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/Coherency Map (weighted by intensity).npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/Coherency Map.npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/Fiber Image Crop.npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/mask_spherical_shells.npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/mask_surface_shells.npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/Orientation Map (weighted by intensity and coherency).npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/Orientation Map (weighted by intensity).npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/Orientation Map.npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/segmention.npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/Vector_min_ax0.npy
+Tutorial/ExampleCells_output/Cell_4/C004/NumpyArrays/Vector_min_ax1.npy
+Tutorial/ExampleCells_output/Cell_4/C004/results_angles.xlsx
+Tutorial/ExampleCells_output/Cell_4/C004/results_distance.xlsx
+Tutorial/ExampleCells_output/Cell_4/C004/results_total.xlsx
+Tutorial/ExampleCells_output/Combine_Set1/Angle_allcells.png
+Tutorial/ExampleCells_output/Combine_Set1/Dist_Intensity_allcells.png
+Tutorial/ExampleCells_output/Combine_Set1/Dist_Intensity_Norm_allcells.png
+Tutorial/ExampleCells_output/Combine_Set1/Dist_Orientation_allcells.png
+Tutorial/ExampleCells_output/Combine_Set1/results_distance_combined.xlsx
+Tutorial/ExampleCells_output/Combine_Set1/results_total_combined.xlsx

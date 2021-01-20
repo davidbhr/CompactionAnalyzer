@@ -64,7 +64,7 @@ path_seg = None                  # load in a saved.segmetnion.npy
 ```
 
 
-Now we can start to analyse all our cells individually using the single function `StuctureAnalysisMain` (follow the full `CompactionAnalysis.py` script):
+Now we can start to analyse all our cells individually using the single function `StuctureAnalysisMain` (follow the scripts in the tutorial folder):
 
 ```python
 # Start the structure analysis with the above specified parameters
@@ -77,7 +77,17 @@ StuctureAnalysisMain(fiber_list=fiber_list,
 ```
 
 
-For each cell we now receive 3 excel files: The overall orientation `results_sdfsa.xlsc` . orientation / intensity in angle shells `results_sdfsa.xlsc` and the orientation / intensity in distance shells `results_sdfsa.xlsc`. 
+For each cell we now receive 3 excel files: 
+
+* `results_total.xlsx`    - Evaluating the overall orientation per field of view in
+* `results_distance.xlsx` - Evaluating the orientation & Intensity in distance shells to cell surface
+* `results_angle.xlsx`    - Evaluating  the orientation & Intensity in angle sections around the cell center
+
+To compare different cells we can utilize e.g the total orientation within a field of view (vorraussetzung that all cell have the same FoV) or could also compare the Intensity values in the first distance shell(s). 
+
+
+
+
 
 
 

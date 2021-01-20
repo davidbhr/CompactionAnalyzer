@@ -1,6 +1,6 @@
 # CompactionAnalyzer 
 
-<img src="https://raw.githubusercontent.com/davidbhr/compactionanalyzer/master/docs/images/Fig1-rawtostructure.png" width="400" />
+<img src="https://raw.githubusercontent.com/davidbhr/compactionanalyzer/master/docs/images/Fig1-rawtostructure.png" width="800" />
 
 ## Quantification of tissue compaction around cells
 

@@ -79,8 +79,8 @@ StuctureAnalysisMain(fiber_list=fiber_list,
 
 For each cell we now receive 3 excel files: 
 
-* `results_total.xlsx`    - Evaluating the overall orientation per field of view in
-* `results_distance.xlsx` - Evaluating the orientation & Intensity in distance shells to cell surface
+* `results_total.xlsx`    - Evaluating the overall orientation within the field of view 
+* `results_distance.xlsx` - Evaluating the orientation & Intensity in distance shells towards the cell surface
 * `results_angle.xlsx`    - Evaluating  the orientation & Intensity in angle sections around the cell center
 
 To compare different cells we can utilize e.g the total orientation within a field of view (vorraussetzung that all cell have the same FoV) or could also compare the Intensity values in the first distance shell(s). 

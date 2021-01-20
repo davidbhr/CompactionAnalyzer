@@ -252,3 +252,124 @@ Tutorial/ExampleCells_output/Combine_Set1/Dist_Intensity_Norm_allcells.png
 Tutorial/ExampleCells_output/Combine_Set1/Dist_Orientation_allcells.png
 Tutorial/ExampleCells_output/Combine_Set1/results_distance_combined.xlsx
 Tutorial/ExampleCells_output/Combine_Set1/results_total_combined.xlsx
+Tutorial/EmptyGel_output/Combine_Set1/results_total_combined.xlsx
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/Angle_deviation.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/Angle_deviation_weighted.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/cell-raw.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/coherency_noquiver.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/fiber_segemention.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/Intensity_distance.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/Orientation.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/Orientation_distance.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/Orientation_polar.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/Orientation_weighted.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/Orientation_weighted_noquiver.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/Orientation_weighted_polar.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/overlay.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/overlay2.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/polar_coherency_double.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/polar_coherency_weighted.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/polar_intensity.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/quiv_coherency_center.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/shells.png
+Tutorial/EmptyGel_output/Pos01/Cell/Figures/Triple_plot.png
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/Angle Map (weighted by intensity and coherency).npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/Angle Map (weighted by intensity).npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/Angle Map.npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/Coherency Map (weighted by intensity).npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/Coherency Map.npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/Fiber Image Crop.npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/mask_spherical_shells.npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/mask_surface_shells.npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/Orientation Map (weighted by intensity and coherency).npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/Orientation Map (weighted by intensity).npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/Orientation Map.npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/segmention.npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/Vector_min_ax0.npy
+Tutorial/EmptyGel_output/Pos01/Cell/NumpyArrays/Vector_min_ax1.npy
+Tutorial/EmptyGel_output/Pos01/Cell/results_angles.xlsx
+Tutorial/EmptyGel_output/Pos01/Cell/results_distance.xlsx
+Tutorial/EmptyGel_output/Pos01/Cell/results_total.xlsx
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/Angle_deviation.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/Angle_deviation_weighted.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/cell-raw.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/coherency_noquiver.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/fiber_segemention.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/Intensity_distance.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/Orientation.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/Orientation_distance.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/Orientation_polar.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/Orientation_weighted.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/Orientation_weighted_noquiver.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/Orientation_weighted_polar.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/overlay.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/overlay2.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/polar_coherency_double.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/polar_coherency_weighted.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/polar_intensity.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/quiv_coherency_center.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/shells.png
+Tutorial/EmptyGel_output/Pos02/Cell/Figures/Triple_plot.png
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/Angle Map (weighted by intensity and coherency).npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/Angle Map (weighted by intensity).npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/Angle Map.npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/Coherency Map (weighted by intensity).npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/Coherency Map.npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/Fiber Image Crop.npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/mask_spherical_shells.npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/mask_surface_shells.npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/Orientation Map (weighted by intensity and coherency).npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/Orientation Map (weighted by intensity).npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/Orientation Map.npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/segmention.npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/Vector_min_ax0.npy
+Tutorial/EmptyGel_output/Pos02/Cell/NumpyArrays/Vector_min_ax1.npy
+Tutorial/EmptyGel_output/Pos02/Cell/results_angles.xlsx
+Tutorial/EmptyGel_output/Pos02/Cell/results_distance.xlsx
+Tutorial/EmptyGel_output/Pos02/Cell/results_total.xlsx
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/Angle_deviation.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/Angle_deviation_weighted.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/cell-raw.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/coherency_noquiver.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/fiber_segemention.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/Intensity_distance.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/Orientation.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/Orientation_distance.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/Orientation_polar.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/Orientation_weighted.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/Orientation_weighted_noquiver.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/Orientation_weighted_polar.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/overlay.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/overlay2.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/polar_coherency_double.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/polar_coherency_weighted.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/polar_intensity.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/quiv_coherency_center.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/shells.png
+Tutorial/EmptyGel_output/Pos03/Cell/Figures/Triple_plot.png
+Tutorial/EmptyGel_output/Pos03/Cell/results_angles.xlsx
+Tutorial/EmptyGel_output/Pos03/Cell/results_distance.xlsx
+Tutorial/EmptyGel_output/Pos03/Cell/results_total.xlsx
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/Angle_deviation.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/Angle_deviation_weighted.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/cell-raw.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/coherency_noquiver.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/fiber_segemention.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/Intensity_distance.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/Orientation.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/Orientation_distance.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/Orientation_polar.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/Orientation_weighted.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/Orientation_weighted_noquiver.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/Orientation_weighted_polar.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/overlay.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/overlay2.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/polar_coherency_double.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/polar_coherency_weighted.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/polar_intensity.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/quiv_coherency_center.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/shells.png
+Tutorial/EmptyGel_output/Pos04/Cell/Figures/Triple_plot.png
+Tutorial/EmptyGel_output/Pos04/Cell/results_angles.xlsx
+Tutorial/EmptyGel_output/Pos04/Cell/results_distance.xlsx
+Tutorial/EmptyGel_output/Pos04/Cell/results_total.xlsx

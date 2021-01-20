@@ -30,7 +30,7 @@ shell_width =  5/scale          # pixel width of distance shells (px-value=um-va
 manual_segmention = False       # manual segmentation of mask by click cell outline
 plotting = True                 # creates and saves plots additionally to excel files 
 dpi = 200                       # resolution of plots to be stored
-SaveNumpy = True                # saves numpy arrays for later analysis - might create lots of data
+SaveNumpy = False                # saves numpy arrays for later analysis - might create lots of data
 norm1,norm2 = 1,99              # contrast spreading for input images  by setting all values below norm1-percentile to zero and
                                 # all values above norm2-percentile to 1
 seg_invert=False                # if segmentation is inverted (True) dark objects are detected inseated of bright ones

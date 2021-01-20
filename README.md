@@ -13,15 +13,17 @@ The package can be installed by cloning this repository or downloading the repos
 
 ## Tutorial
 
-The scripts within the turorial folder might be good start to get familiar with the analyis. The script `CompactionAnalysis_cells_collagen.py` evaluates 4 example cells that are embedded in collagen and compact the surrounding tissue.  Script `CompactionAnalysis_empty_collagen.py` and `CompactionAnalysis_artificial_data.py` evaluate empty collagen gels that show random allignement and artifiacl data with random allignement. 
+The scripts within the turorial folder might be good start to get familiar with the analyis. The script `CompactionAnalysis_cells_collagen.py` evaluates 4 example cells that are embedded in collagen and compact the surrounding tissue. We recorded the fiber stucture using second harmonic imaging and the cell using fluorescent staininh. 
 
-In general we first import all of the necessary functions by using
+Further scripts `CompactionAnalysis_empty_collagen.py` & `CompactionAnalysis_artificial_data.py` evaluate empty collagen gels that show random allignement and artifiacl data with random allignement. 
+
+In each script we start to import all necessary functions by using
 
 ```python
 from CompactionAnalyzer.CompactionFunctions import *
 ```
 
-For the analysis we then need per each cell an image of the fiber structure (e.g. 2nd harmonic, confocal reflection or stained fluorescence images; maximum intensity projection around the cells might be useful) and an image of the cell for segmentation (staining or brightfield). 
+For the analysis, we then need per cell an image of the fiber structure (e.g. 2nd harmonic, confocal reflection or stained fluorescence images; maximum intensity projection around the cells might be useful) and an image of the cell for segmentation (staining or brightfield). 
 
 We define the input data for the fibers using `fiber_list_string` ant the cells using `cell_list_string` (here we can utilize the * place holder to selecet multiple images).  `generate_lists()` then searches all specified fiber and cell paths and creates output subfolder in the specified `output_folder` directory automatically.
 

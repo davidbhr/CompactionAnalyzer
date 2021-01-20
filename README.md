@@ -17,7 +17,7 @@ The scripts within the turorial folder might be good start to get familiar with 
 
 Further scripts `CompactionAnalysis_empty_collagen.py` & `CompactionAnalysis_artificial_data.py` evaluate empty collagen gels that show random allignement and artifiacl data with random allignement. 
 
-In each script we start to import all necessary functions by using
+We start to import all necessary functions in these scripts using
 
 ```python
 from CompactionAnalyzer.CompactionFunctions import *
@@ -25,7 +25,7 @@ from CompactionAnalyzer.CompactionFunctions import *
 
 For the analysis, we then need per cell an image of the fiber structure (e.g. 2nd harmonic, confocal reflection or stained fluorescence images; maximum intensity projection around the cells might be useful) and an image of the cell for segmentation (staining or brightfield). 
 
-We define the input data for the fibers using `fiber_list_string` ant the cells using `cell_list_string` (here we can utilize the * place holder to selecet multiple images).  `generate_lists()` then searches all specified fiber and cell paths and creates output subfolder in the specified `output_folder` directory automatically.
+We define the input data for the fibers using `fiber_list_string` ant the cells using `cell_list_string` (here we can utilize the * place holder to selecet multiple images).  `generate_lists()` then searches all specified fiber and cell paths and creates the output subfolder in the specified `output_folder` directory completley automatically.
 
 ```python
 output_folder = "Analysis_output" 
@@ -35,7 +35,7 @@ cell_list_string =  r"imagedata\*ch01*.tif"
 fiber_list,cell_list, out_list = generate_lists(fiber_list_string, cell_list_string, output_main =output_folder)
 ```
 
-We then want to start the analysis and compute the orientation of individual fibers using structure tensor analysis. Here *sigma_tensor* is the kernel size that determines the length scale on which the strucutre is analysed. The kernel size should be in the range of structure we want to look at and can be optimized for the individual application. For our fiber gels we use a value of 7 µm, which is in range of the pore size. 
+We now want to start the analysis and compute the orientation of individual fibers using structure tensor analysis. Here *sigma_tensor* is the kernel size that determines the length scale on which the strucutre is analysed. The kernel size should be in the range of the structure-size we want to look at and can be optimized for the individual application. For our fiber gels we use a value of 7 µm, which is in range of the pore size. 
 
 
 We can redefine all of the following paramters before starting the analysis. The corresponding pixel scale is set as `scale` and the segmentiation can be changed by using the `segmention_thres` or by changing the local contrast enhancement via `seg_gaus1, seg_gaus2`. With `show_segmentation = True` we can inspect the segmentation or - if preferred - segment the mask manually by clicking using `manual_segmention  = True`.
@@ -109,11 +109,15 @@ Now compromised excel sheet returns total analysis and also ditance analysis
 
 
 
+
+
 ## Maxprojections
 
 Might be usefull to use Maximum intensity image around cell (smalls stacks) to include maximal compation.  
  For different max projection height it might be necessary to change parameter X , since fiberstructure seems / erscheint more densly. Maximumprojection can also be created using the function   XY
 
+
+## Kernel size
 
 IMAGE coolwarm erosion
 

@@ -13,9 +13,9 @@ The package can be installed by cloning this repository or downloading the repos
 
 ## Tutorial
 
-The script 'CompactionAnalysis.py' within the turorial folder might be good start to get familiar with the analyis. 
+The scripts within the turorial folder might be good start to get familiar with the analyis. The script `CompactionAnalysis_cells_collagen.py` evaluates 4 example cells that are embedded in collagen and compact the surrounding tissue.  Script `CompactionAnalysis_empty_collagen.py` and `CompactionAnalysis_artificial_data.py` evaluate empty collagen gels that show random allignement and artifiacl data with random allignement. 
 
-First we import all of the necessary functions by using
+In general we first import all of the necessary functions by using
 
 ```python
 from CompactionAnalyzer.CompactionFunctions import *

@@ -90,7 +90,7 @@ For each cell we now receive 3 excel files:
 To compare different cells we can utilize e.g the total orientation within a field of view (vorraussetzung that all cell have the same FoV) or could also compare the Intensity values in the first distance shell(s). 
 
 
-<img src="https://raw.githubusercontent.com/davidbhr/compactionanalyzer/master/docs/images/Fig2-orientationeval.png" width="400" />
+<img src="https://raw.githubusercontent.com/davidbhr/compactionanalyzer/master/docs/images/Fig2-orientationeval.png" width="800" />
 
 
 

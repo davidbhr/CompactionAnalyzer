@@ -104,6 +104,10 @@ SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output
 Now compromised excel sheet returns total analysis and also ditance analysis
 
 
+<img src="https://raw.githubusercontent.com/davidbhr/compactionanalyzer/master/docs/images/Fig3-combineexcel.png" width="800" />
+
+
+
 
 
 

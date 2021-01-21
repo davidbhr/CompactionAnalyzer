@@ -87,22 +87,20 @@ For each cell we now receive 3 excel files:
 * `results_distance.xlsx` - Evaluating the orientation & Intensity in distance shells towards the cell surface
 * `results_angle.xlsx`    - Evaluating  the orientation & Intensity in angle sections around the cell center
 
-To compare different cells we can utilize e.g the total orientation within a field of view (vorraussetzung that all cell have the same FoV) or could also compare the Intensity values in the first distance shell(s). 
+To compare different cells we can utilize e.g the total orientation within a field of view (requires that all cell have the same Field of View) or could also compare the Intensity values in the first distance shell(s). 
 
 
 <img src="../master//docs/images//Fig2-orientationeval.png" width="1000" />
 
 
-
-If we now want to evaluate e.g. a measurement containing multiple cells, we can read in all excel files (individual cells) in the underlying folders of the given `data` path and combine them in a new excel file by using
+If we now want to evaluate e.g. a measurement containing multiple cells, we can read in all excel files (of individual cells) in the underlying folders of the given `data` path and combine them in a new excel file by using
 
 ```python
 SummarizeResultsTotal(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")
 SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")
 ```
 
-Now we receive a compromised excel sheet returns total analysis and also ditance analysis for all cells combined. The different values "dfdsf " or "fdfd"
-now mean orientation of all cells . In the 
+Now we receive a compromised excel sheet (mean value of all cells) that return the total analysis and another excel sheet with the distance analysis. The different values "dfdsf " or "fdfd" now mean orientation of all cells . In the 
 
 <img src="../master/docs/images/Fig3-combineexcel.png" width="1000" />
 

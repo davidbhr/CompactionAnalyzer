@@ -1,8 +1,6 @@
 # CompactionAnalyzer 
 
-![Image](../master//docs/images/Fig1-rawtostructure.png?raw=true,width="400")
-
-<img src="../master//docs/images/Fig1-rawtostructure.png?raw=true" width="400" />
+<img src="../master//docs/images/Fig1-rawtostructure.png?raw=true" width="500" />
 
 ## Quantification of tissue compaction around cells
 
@@ -92,7 +90,7 @@ For each cell we now receive 3 excel files:
 To compare different cells we can utilize e.g the total orientation within a field of view (vorraussetzung that all cell have the same FoV) or could also compare the Intensity values in the first distance shell(s). 
 
 
-<img src="https://raw.githubusercontent.com/davidbhr/CompactionAnalyzer/master/docs/images//Fig2-orientationeval.png" width="400" />
+<img src="../master//docs/images//Fig2-orientationeval.png" width="400" />
 
 
 
@@ -106,7 +104,7 @@ SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output
 Now we receive a compromised excel sheet returns total analysis and also ditance analysis for all cells combined. The different values "dfdsf " or "fdfd"
 now mean orientation of all cells . In the 
 
-<img src="https://raw.githubusercontent.com/davidbhr/CompactionAnalyzer/master/docs/images/Fig3-combineexcel.png" width="400" />
+<img src="../master/docs/images/Fig3-combineexcel.png" width="400" />
 
 
 

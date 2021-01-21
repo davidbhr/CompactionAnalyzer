@@ -1,6 +1,6 @@
 # CompactionAnalyzer 
 
-<img src="../master//docs/images/Fig1-rawtostructure.png?raw=true" width="800" />
+<img src="../master//docs/images/Fig1-rawtostructure.png?raw=true" width="1000" />
 
 ## Quantification of tissue compaction around cells
 
@@ -90,7 +90,7 @@ For each cell we now receive 3 excel files:
 To compare different cells we can utilize e.g the total orientation within a field of view (vorraussetzung that all cell have the same FoV) or could also compare the Intensity values in the first distance shell(s). 
 
 
-<img src="../master//docs/images//Fig2-orientationeval.png" width="800" />
+<img src="../master//docs/images//Fig2-orientationeval.png" width="1000" />
 
 
 
@@ -104,11 +104,7 @@ SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output
 Now we receive a compromised excel sheet returns total analysis and also ditance analysis for all cells combined. The different values "dfdsf " or "fdfd"
 now mean orientation of all cells . In the 
 
-<img src="../master/docs/images/Fig3-combineexcel.png" width="800" />
-
-
-
-
+<img src="../master/docs/images/Fig3-combineexcel.png" width="1000" />
 
 
 
@@ -130,7 +126,7 @@ IMAGE coolwarm erosion
 
 Beneath individual cells also the compaction can bes assesed on a multicellular level using for example cell sphetoids. This can offer the advantage that uniform round shape  and less moement a lower sample number ight be suffiecient. 
 
-Additionally, absolute forces of spheroids can be measured using the python package [here](https://github.com/christophmark/jointforces/mater), which requires additonal material measurements & timelapse imaging.
+Additionally, absolute forces of spheroids can be measured using the python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging.
 
 ## Resolving compound effects
 

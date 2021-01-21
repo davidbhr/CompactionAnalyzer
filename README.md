@@ -1,6 +1,6 @@
 # CompactionAnalyzer 
 
-<img src="../master//docs/images/Fig1-rawtostructure.png?raw=true" width="700" />
+<img src="../master//docs/images/Fig1-rawtostructure.png?raw=true" width="800" />
 
 ## Quantification of tissue compaction around cells
 
@@ -130,14 +130,15 @@ IMAGE coolwarm erosion
 
 Beneath individual cells also the compaction can bes assesed on a multicellular level using for example cell sphetoids. This can offer the advantage that uniform round shape  and less moement a lower sample number ight be suffiecient. 
 
-Additionally, absolute forces of spheroids can be measured using the python package **Jointforces** LINK HERE, which requires additonal material measurements & timelapse imaging.
+Additionally, absolute forces of spheroids can be measured using the python package [here](https://github.com/christophmark/jointforces/mater), which requires additonal material measurements & timelapse imaging.
 
 ## Resolving compound effects
 
-resolve contractility of tumor spheroids and drug responses.
+Application can be to resolve compound effects that act on cell contractility.  (ToDo: Image here ?)
 
-## How to cite
 
-If you are using the CompactionAnalyzer feel free to cite:
+## Literature
+
+Read more about the method in the following article
 
 TODO: Write a paper and put it here...

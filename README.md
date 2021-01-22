@@ -108,13 +108,11 @@ Now we receive a compromised excel sheet xthat return the total analysis for all
 
 
 
-## Maxprojections
+## Maxprojections & Kernel Size
 
 Might be usefull to use Maximum intensity image around cell (smalls stacks) to include maximal compation.  
  For different max projection height it might be necessary to change parameter X , since fiberstructure seems / erscheint more densly. Maximumprojection can also be created using the function   XY
 
-
-## Kernel size
 
 IMAGE coolwarm erosion
 
@@ -128,7 +126,9 @@ Additionally, absolute forces of spheroids can be measured using the python pack
 
 ## Resolving compound effects
 
-Application can be to resolve compound effects that act on cell contractility.  (ToDo: Image here ?)
+An application of the CompactionAnalyzer might resolving the effects on cell contractility for different drug tests.  (ToDo: Image here ?)
+
+(..  time development and cell-cell communication)
 
 
 ## Literature

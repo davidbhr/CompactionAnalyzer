@@ -93,7 +93,7 @@ To compare different cells we can utilize e.g the total orientation within a fie
 <img src="../master//docs/images//Fig2-orientationeval.png" width="1000" />
 
 
-If we now want to evaluate e.g. a measurement containing multiple cells, we can read in all excel files (of individual cells) in the underlying folders of the given `data` path and combine them in a new excel file by using
+If we now want to evaluate e.g. a measurement containing multiple cells, we can read in all excel files (of individual cells) in the underlying folders of the given `data` path and combine them in a new excel file by using. (Note: The function searches all subfolders for the "results_total.xlsx" and "results_distance.xlsx" files. If you want do discard outliers you could just rename the corresponding files to for example "_results_total.xlsx")
 
 ```python
 SummarizeResultsTotal(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")

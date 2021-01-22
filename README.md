@@ -93,13 +93,15 @@ To compare different cells we can utilize e.g the total orientation within a fie
 <img src="../master//docs/images//Fig2-orientationeval.png" width="1000" />
 
 
-If we now want to evaluate e.g. a measurement containing multiple cells, we can read in all excel files (of individual cells) in the underlying folders of the given `data` path and combine them in a new excel file by using. 
- > Note: These function searches all subfolders for the "results_total.xlsx" and "results_distance.xlsx" files. If you want do discard outliers it might be practical to rename the corresponding files to for example "_results_total.xlsx" and "_results_distance.xlsx")
+If we now want to evaluate a measurement containing multiple cells, we can read in all excel files (of individual cells) in the underlying folders of the given `data` path and combine them in a new excel file by using:
 
 ```python
 SummarizeResultsTotal(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")
 SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")
 ```
+
+ > Note: These function searches all subfolders for the "results_total.xlsx" and "results_distance.xlsx" files. If you want do discard outliers it might be practical to rename the corresponding files to for example "_results_total.xlsx" and "_results_distance.xlsx")
+
 
 Now we receive a compromised excel sheet xthat return the total analysis for all cells and another excel sheet with the mean distance analysis. The different values "dfdsf " or "fdfd" now for .....
 

@@ -1,6 +1,6 @@
 # CompactionAnalyzer 
 
-<img src="https://raw.githubusercontent.com/davidbhr/CompactionAnalyzer/master/docs/images/Fig1-rawtostructure.png?token=ALXJCVKUDJEDDGOE57HIEFLABAU4C" width="400" />
+<img src="../master//docs/images/Fig1-rawtostructure.png?raw=true" width="1000" />
 
 ## Quantification of tissue compaction around cells
 
@@ -87,28 +87,22 @@ For each cell we now receive 3 excel files:
 * `results_distance.xlsx` - Evaluating the orientation & Intensity in distance shells towards the cell surface
 * `results_angle.xlsx`    - Evaluating  the orientation & Intensity in angle sections around the cell center
 
-To compare different cells we can utilize e.g the total orientation within a field of view (vorraussetzung that all cell have the same FoV) or could also compare the Intensity values in the first distance shell(s). 
+To compare different cells we can utilize e.g the total orientation within a field of view (requires that all cell have the same Field of View) or could also compare the Intensity values in the first distance shell(s). 
 
 
-<img src="https://raw.githubusercontent.com/davidbhr/CompactionAnalyzer/master/docs/images//Fig2-orientationeval.png" width="400" />
+<img src="../master//docs/images//Fig2-orientationeval.png" width="1000" />
 
 
-
-If we now want to evaluate e.g. a measurement containing multiple cells, we can read in all excel files (individual cells) in the underlying folders of the given `data` path and combine them in a new excel file by using
+If we now want to evaluate e.g. a measurement containing multiple cells, we can read in all excel files (of individual cells) in the underlying folders of the given `data` path and combine them in a new excel file by using
 
 ```python
 SummarizeResultsTotal(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")
 SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")
 ```
 
-Now we receive a compromised excel sheet returns total analysis and also ditance analysis for all cells combined. The different values "dfdsf " or "fdfd"
-now mean orientation of all cells . In the 
+Now we receive a compromised excel sheet xthat return the total analysis for all cells and another excel sheet with the mean distance analysis. The different values "dfdsf " or "fdfd" now mean orientation of all cells . In the 
 
-<img src="https://raw.githubusercontent.com/davidbhr/CompactionAnalyzer/master/docs/images/Fig3-combineexcel.png" width="400" />
-
-
-
-
+<img src="../master/docs/images/Fig3-combineexcel.png" width="1000" />
 
 
 
@@ -130,14 +124,15 @@ IMAGE coolwarm erosion
 
 Beneath individual cells also the compaction can bes assesed on a multicellular level using for example cell sphetoids. This can offer the advantage that uniform round shape  and less moement a lower sample number ight be suffiecient. 
 
-Additionally, absolute forces of spheroids can be measured using the python package **Jointforces** LINK HERE, which requires additonal material measurements & timelapse imaging.
+Additionally, absolute forces of spheroids can be measured using the python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging.
 
 ## Resolving compound effects
 
-resolve contractility of tumor spheroids and drug responses.
+Application can be to resolve compound effects that act on cell contractility.  (ToDo: Image here ?)
 
-## How to cite
 
-If you are using the CompactionAnalyzer feel free to cite:
+## Literature
+
+Read more about the method in the following article
 
 TODO: Write a paper and put it here...

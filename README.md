@@ -100,7 +100,7 @@ SummarizeResultsTotal(data="Analysis_output", output_folder= "Analysis_output\Co
 SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")
 ```
 
-Now we receive a compromised excel sheet xthat return the total analysis for all cells and another excel sheet with the mean distance analysis. The different values "dfdsf " or "fdfd" now mean orientation of all cells . In the 
+Now we receive a compromised excel sheet xthat return the total analysis for all cells and another excel sheet with the mean distance analysis. The different values "dfdsf " or "fdfd" now for .....
 
 <img src="../master/docs/images/Fig3-combineexcel.png" width="1000" />
 

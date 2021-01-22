@@ -103,7 +103,7 @@ SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output
  > Note: These function searches all subfolders for the "results_total.xlsx" and "results_distance.xlsx" files. If you want to discard outliers it might be practical to rename the corresponding files to for example "_results_total.xlsx" and "_results_distance.xlsx")
 
 
-Now we receive a compromised excel sheet xthat return the total analysis for all cells and another excel sheet with the mean distance analysis. The different values "dfdsf " or "fdfd" now for .....
+Now we receive a compromised excel sheet xthat return the total analysis for all cells and another excel sheet with the mean distance analysis. The different values "dfdsf " or "fdfd" now for .....   from which we can calulate mean / ..
 
 <img src="../master/docs/images/Fig3-combineexcel.png" width="1000" />
 
@@ -129,7 +129,9 @@ Additionally, absolute forces of spheroids can be measured using the python pack
 
 ## Resolving compound effects
 
-An application of the CompactionAnalyzer might resolving the effects on cell contractility for different drug tests.  (ToDo: Image here ?)
+An application of the CompactionAnalyzer is resolving drug-dependend effects on cell contractility. Due to variability in cell shapes, a large sample size of cells is desirable
+
+(ToDo: Image here ?)
 
 (..  time development and cell-cell communication)
 

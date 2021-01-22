@@ -47,7 +47,7 @@ scale =  0.318                  # imagescale as um per pixel
 sigma_tensor = 7/scale          # sigma of applied gauss filter / window for structure tensor analysis in px
                                 # should be in the order of the objects to analyze !! 
                                 # 7 um for collagen 
-edge = 40                       # Cutt of pixels at the edge since values at the border cannot be trusted
+edge = 40                       # Cut off pixels at the edge since values at the border cannot be trusted
 segmention_thres = 1.0          # for cell segemetntion, thres 1 equals normal otsu threshold , change to detect different percentage of bright pixel
 seg_gaus1, seg_gaus2 = 8,80     # 2 gaus filters used for local contrast enhancement for segementation
 show_segmentation = False        # display the segmentation output to test parameters - script wont run further
@@ -57,7 +57,7 @@ shell_width =  5/scale          # pixel width of distance shells (px-value=um-va
 manual_segmention = False       # manual segmentation of mask by click cell outline
 plotting = True                 # creates and saves plots additionally to excel files 
 dpi = 200                       # resolution of plots to be stored
-SaveNumpy = True                # saves numpy arrays for later analysis - might create lots of data
+SaveNumpy = False               # saves numpy arrays for later analysis - might create lots of data
 norm1,norm2 = 1,99              # contrast spreading for input images  by setting all values below norm1-percentile to zero and
                                 # all values above norm2-percentile to 1
 seg_invert=False                # if segmentation is inverted (True) dark objects are detected inseated of bright ones
@@ -100,7 +100,7 @@ SummarizeResultsTotal(data="Analysis_output", output_folder= "Analysis_output\Co
 SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")
 ```
 
- > Note: These function searches all subfolders for the "results_total.xlsx" and "results_distance.xlsx" files. If you want do discard outliers it might be practical to rename the corresponding files to for example "_results_total.xlsx" and "_results_distance.xlsx")
+ > Note: These function searches all subfolders for the "results_total.xlsx" and "results_distance.xlsx" files. If you want to discard outliers it might be practical to rename the corresponding files to for example "_results_total.xlsx" and "_results_distance.xlsx")
 
 
 Now we receive a compromised excel sheet xthat return the total analysis for all cells and another excel sheet with the mean distance analysis. The different values "dfdsf " or "fdfd" now for .....

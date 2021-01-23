@@ -32,7 +32,7 @@ We define the input data for the fibers using `fiber_list_string` ant the cells 
 ```python
 output_folder = "C:\user\Analysis_output"                     # output folder that will be created and filled automatically
 fiber_list_string =  r"C:\user\imagedata\cell_*\*ch00*.tif"   # input fiber images of all cells 
-cell_list_string =  r"C:\user\imagedata\cell_*\*ch01*.tif"    # inputstained images of all cells 
+cell_list_string =  r"C:\user\imagedata\cell_*\*ch01*.tif"    # input stained images of all cells 
 
 fiber_list,cell_list, out_list = generate_lists(fiber_list_string, cell_list_string, output_main =output_folder)
 ```

@@ -30,9 +30,9 @@ For the analysis, we then need per cell an image of the fiber structure (e.g. 2n
 We define the input data for the fibers using `fiber_list_string` ant the cells using `cell_list_string` (here we can utilize the * place holder to selecet multiple images).  `generate_lists()` then searches all specified fiber and cell paths and creates the output subfolder in the specified `output_folder` directory completley automatically.
 
 ```python
-output_folder = "Analysis_output" 
-fiber_list_string =  r"imagedata\*ch00*.tif"
-cell_list_string =  r"imagedata\*ch01*.tif" 
+output_folder = "C:\user\Analysis_output"                     # output folder that will be created and filled automatically
+fiber_list_string =  r"C:\user\imagedata\cell_*\*ch00*.tif"   # input fiber images of all cells 
+cell_list_string =  r"C:\user\imagedata\cell_*\*ch01*.tif"    # inputstained images of all cells 
 
 fiber_list,cell_list, out_list = generate_lists(fiber_list_string, cell_list_string, output_main =output_folder)
 ```

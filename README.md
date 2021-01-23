@@ -125,7 +125,8 @@ IMAGE coolwarm erosion
 
 Beneath individual cells also the compaction can bes assesed on a multicellular level using for example cell sphetoids. This can offer the advantage that uniform round shape  and less moement a lower sample number ight be suffiecient. 
 
-Additionally, absolute forces of spheroids can be measured using the python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging.
+
+Additionally, absolute forces of spheroids can be measured using the *jointforces* python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging. Absolute forces of cell can be assesed using *saenopy* [here](https://github.com/rgerum/saenopy), which requires additonal material measurements and two (larger) 3D stacks of the contracted and realaxed state per cell.
 
 ## Resolving compound effects
 

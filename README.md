@@ -15,9 +15,9 @@ The package can be installed by cloning this repository or downloading the repos
 
 ## Tutorial
 
-The scripts within the turorial folder might be a good start to get familiar with the analyis. The script `CompactionAnalysis_cells_collagen.py` evaluates 4 example cells that are embedded in collagen and compact the surrounding tissue. We recorded the fiber stucture using 2nd harmonic imaging and the cell using fluorescent staining. 
+The scripts within the turorial folder might be a good start to get familiar with the analyis. The script `CompactionAnalysis_cells_collagen.py` evaluates 4 example cells that are embedded in collagen and compact the surrounding tissue. We recorded the fiber stucture using 2nd harmonic imaging and the cells using fluorescent staining. 
 
-Further scripts `CompactionAnalysis_empty_collagen.py` & `CompactionAnalysis_artificial_data.py` evaluate empty collagen gels that show random allignement and artifiacl data with random allignement. 
+Further scripts `CompactionAnalysis_empty_collagen.py` & `CompactionAnalysis_artificial_data.py` evaluate empty collagen gels that show random fiber allignement and artifiacl data with random allignement. 
 
 We start to import all necessary functions in these scripts using
 

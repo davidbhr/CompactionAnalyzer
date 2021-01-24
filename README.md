@@ -100,7 +100,7 @@ SummarizeResultsTotal(data="Analysis_output", output_folder= "Analysis_output\Co
 SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output\Combine_Set1")
 ```
 
- > Note: These function searches all subfolders for the *results_total.xlsx* and *results_distance.xlsx* files. If you want to discard outliers it might be practical to rename the corresponding files to for example *_results_total.xlsx* and *_results_distance.xlsx*)
+ > Note: These function searches all subfolders for the *"results_total.xlsx"* and *"results_distance.xlsx"* files. If you want to discard outliers it might be practical to rename the corresponding files to for example *"_results_total.xlsx"* and *"_results_distance.xlsx"*)
 
 
 Now we receive a compromised excel sheet that returns the global analysis for all cells and another excel sheet with the mean distance analysis. The different columns `Mean Angle` and `Orientation` refer to the angular deviation between all orientation vectors to the respective cell center and the hereby resulting orientation. These quantities are weighted by the coherency (orientation strength) and additionally also by both, the coherency and the image intensity.  From the different cells we now can calculate different quantities, as for example the mean `Orientation (weighted by intensity and coherency)` of all cells, which is named `Overall weighted Oriantation (mean all cells)` and also stored in the same excel file.

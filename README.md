@@ -87,7 +87,7 @@ For each cell we now receive 3 excel files:
 * `results_distance.xlsx` - Evaluating the orientation & Intensity in distance shells towards the cell surface
 * `results_angle.xlsx`    - Evaluating  the orientation & Intensity in angle sections around the cell center
 
-To compare different cells we can utilize e.g the total orientation within a field of view (requires that all cell have the same Field of View) or could also compare the Intensity values in the first distance shell(s). 
+To compare different cells we can utilize e.g the total orientation within a field of view (requires that all cells have the same Field of View) or could also compare the intensity values in the first distance shell(s). 
 
 
 <img src="../master//docs/images//Fig2-orientationeval.png" width="1000" />

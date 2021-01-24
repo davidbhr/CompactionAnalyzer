@@ -103,18 +103,20 @@ SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output
  > Note: These function searches all subfolders for the "results_total.xlsx" and "results_distance.xlsx" files. If you want to discard outliers it might be practical to rename the corresponding files to for example "_results_total.xlsx" and "_results_distance.xlsx")
 
 
-Now we receive a compromised excel sheet xthat return the total analysis for all cells and another excel sheet with the mean distance analysis. The different values "dfdsf " or "fdfd" now for .....   from which we can calulate mean / ..
+Now we receive a compromised excel sheet that returns the global analysis for all cells and another excel sheet with the mean distance analysis. The different columns "Angle" and "Orientation" refer to the angular deviation between all orientation vectors to the respective cell center and the hereby resulting orientation. These quantities are weighted by the coherency (orientation strength) and additionally also by both, the coherency and the image intensity.  From the different cells we now can calculate different quantities, as for example the mean 'Orientation (weighted by intensity and coherency)' of all cells, which is named "Overall weighted Oriantation (mean all cells)" and also stored in the same excel file.
+
 
 <img src="../master/docs/images/Fig3-combineexcel.png" width="1000" />
 
 
 
-
-
 ## Maxprojections & Kernel Size
 
+ToDo
+ 
 Might be usefull to use Maximum intensity image around cell (smalls stacks) to include maximal compation.  
- For different max projection height it might be necessary to change parameter X , since fiberstructure seems / erscheint more densly. Maximumprojection can also be created using the function   XY
+ For different max projection height it might be necessary to change parameter X , since fiberstructure ppearsmore densly. 
+ Maximumprojection can also be created using the function   XY
 
 
 IMAGE coolwarm erosion
@@ -123,10 +125,10 @@ IMAGE coolwarm erosion
 
 ## Multicellular Compaction Assay
 
-Beneath individual cells also the compaction can bes assesed on a multicellular level using for example cell sphetoids. This can offer the advantage that uniform round shape  and less moement a lower sample number ight be suffiecient. 
-
+Beneath individual cells also the compaction can bes assesed on a multicellular level using for example cell sphetoids. This offers the advantage of uniform round shape and less movement so that even a lower sample number might be suffiecient. 
 
 > Additionally, absolute forces of spheroids can be measured using the *jointforces* python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging. Absolute forces of cell can be assesed using *saenopy* [here](https://github.com/rgerum/saenopy), which requires additonal material measurements and two (larger) 3D stacks of the contracted and realaxed state per cell.
+
 
 ## Resolving compound effects
 

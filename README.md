@@ -122,14 +122,6 @@ Might be usefull to use Maximum intensity image around cell (smalls stacks) to i
 IMAGE coolwarm erosion
 
 
-
-## Multicellular Compaction Assay
-
-Beneath individual cells also the compaction can bes assesed on a multicellular level using for example cell sphetoids. This offers the advantage of uniform round shape and less movement so that even a lower sample number might be suffiecient. 
-
-> Additionally, absolute forces of spheroids can be measured using the *jointforces* python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging. Absolute forces of cell can be assesed using *saenopy* [here](https://github.com/rgerum/saenopy), which requires additonal material measurements and two (larger) 3D stacks of the contracted and realaxed state per cell.
-
-
 ## Resolving compound effects
 
 An application of the CompactionAnalyzer is resolving drug-dependend effects on cell contractility. Due to variability in cell shapes, a large sample size of cells is desirable
@@ -137,6 +129,13 @@ An application of the CompactionAnalyzer is resolving drug-dependend effects on 
 (ToDo: Image here ?)
 
 (..  time development and cell-cell communication)
+
+
+## Multicellular Compaction Assay
+
+Beneath individual cells also the compaction can be assesed on a multicellular level using for example mutlicellular spheroids. This offers the advantage of uniform round shape and less movement so that even a lower sample number might be suffiecient. 
+
+> Additionally, absolute forces of spheroids can be measured using the *jointforces* python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging. Absolute forces of cell can be assesed using *saenopy* [here](https://github.com/rgerum/saenopy), which requires additonal material measurements and two (larger) 3D stacks of the contracted and realaxed state per cell.
 
 
 ## Literature

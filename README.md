@@ -122,7 +122,7 @@ Might be usefull to use Maximum intensity image around cell (smalls stacks) to i
 IMAGE coolwarm erosion
 
 
-## Resolving compound effects
+## Resolving Drug Effects
 
 An application of the CompactionAnalyzer is resolving drug-dependend effects on cell contractility. Due to variability in cell shapes, a large sample size of cells is desirable
 

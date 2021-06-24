@@ -212,6 +212,7 @@ def StuctureAnalysisMain(fiber_list,
     if not shell_width:
         shell_width = 5/scale
         
+   
         
     # loop thorugh cells
     for n,i in tqdm(enumerate(fiber_list)):
@@ -219,7 +220,24 @@ def StuctureAnalysisMain(fiber_list,
         #create output folder if not existing
         if not os.path.exists(out_list[n]):
             os.makedirs(out_list[n])
-             
+         
+            
+        #### save a parameters file   
+        import yaml
+        dict_file = {
+                  'Parameters': {'scale': [scale], 'sigma_tensor': [sigma_tensor], 'edge': [edge],
+                                 'seg_gaus1': [seg_gaus1], 'seg_gaus2': [seg_gaus2], 'show_segmentation': [show_segmentation],
+                                 'sigma_first_blur': [sigma_first_blur], 'angle_sections': [angle_sections], 'shell_width': [shell_width],
+                                 'manual_segmention': [manual_segmention], 'plotting': [plotting], 'dpi': [dpi],
+                                 'SaveNumpy': [SaveNumpy], 'norm1': [norm1], 'norm2': [norm2],
+                                 'seg_invert': [seg_invert], 'seg_iter': [seg_iter], 'segmention_method': [segmention_method],
+                                 'load_segmentation': [load_segmentation], 'path_seg': [path_seg]},
+                  'Data' :   {'fiber_list': [fiber_list], 'cell_list': [cell_list], 'out_list': [out_list]}
+                    }  
+        with open(os.path.join(out_list[n],"parameters.yml"), 'w') as yaml_file:
+            yaml.dump(dict_file, yaml_file, default_flow_style=False)
+  
+            
         # load images
         im_cell  = color.rgb2gray(imageio.imread(cell_list[n]))  
         im_fiber = color.rgb2gray(imageio.imread(fiber_list[n]))   

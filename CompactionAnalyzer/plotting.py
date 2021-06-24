@@ -67,13 +67,13 @@ def filter_values(ar1, ar2, abs_filter=0, f_dist=3):
     return s1, s2, xv[select], yv[select]
 
 
-def show_quiver(fx, fy, filter=[0, 1], scale_ratio=0.4, headwidth=None, headlength=None, headaxislength=None,
+def show_quiver(fx, fy, filter=[0, 1], scale_ratio=0.5, headwidth=0., headlength=0., headaxislength=0.,
                 width=None, cmap="rainbow",
                 figsize=None, cbar_str="", ax=None, fig=None
                 , vmin=None, vmax=None, cbar_axes_fraction=0.2, cbar_tick_label_size=15
                 , cbar_width="2%", cbar_height="50%", cbar_borderpad=0.1,
                 cbar_style="not-clickpoints", plot_style="not-clickpoints", cbar_title_pad=1, plot_cbar=True, alpha=1,
-                ax_origin="upper", **kwargs):
+                ax_origin="upper", pivot = "middle", **kwargs):
     # list of all necessary quiver parameters
     quiver_parameters = {"headwidth": headwidth, "headlength": headlength, "headaxislength": headaxislength,
                          "width": width, "scale_units": "xy", "angles": "xy", "scale": None}
@@ -112,11 +112,12 @@ def plot_angle_dev(angle_map,vec0,vec1,coherency_map,path_png,label="Angle Devia
     mx = vec0 * coherency_map
     my = vec1 * coherency_map
     mx, my, x, y = filter_values(mx, my, abs_filter=0,
-                                   f_dist=15)  #
-    plt.quiver(x, y, mx*300, my*300,scale=1,scale_units="xy", angles="xy")
+                                   f_dist=15)  #9
+    plt.quiver(x, y, mx*300, my*300,scale=1.2,scale_units="xy", angles="xy",
+               headwidth=0., headlength=0., headaxislength=0.)  #, width=0.005)
     plt.tight_layout()
     plt.axis('off'); cbar.set_label(label,fontsize=12)
-    plt.savefig(path_png, dpi=dpi); plt.tight_layout()
+    plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0); plt.tight_layout()
     return fig
     
 def plot_coherency(coherency,path_png,label="Coherency",dpi=300):
@@ -124,7 +125,7 @@ def plot_coherency(coherency,path_png,label="Coherency",dpi=300):
     fig =plt.figure();plt.imshow(coherency); cbar =plt.colorbar()
     plt.tight_layout()
     plt.axis('off'); cbar.set_label(label,fontsize=12)
-    plt.savefig(path_png, dpi=dpi); plt.tight_layout()
+    plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0); plt.tight_layout()
     return fig
      
 def plot_polar(angle_plotting, something, path_png,label="something",dpi=300,
@@ -135,7 +136,7 @@ def plot_polar(angle_plotting, something, path_png,label="something",dpi=300,
         ax1.plot(angle_plotting, something2, label=label2 , linewidth=2, c = "C1")
     if something3:
         ax1.plot(angle_plotting, something3, label=label3 , linewidth=2, c = "C2")    
-    plt.tight_layout();plt.legend(fontsize=12);plt.savefig(path_png, dpi=dpi)
+    plt.tight_layout();plt.legend(fontsize=12);plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
     return fig    
 
 def plot_triple(results_angle, results_total, path_png ,dpi=300):
@@ -169,7 +170,7 @@ def plot_triple(results_angle, results_total, path_png ,dpi=300):
            table = ax3.table(cellText = values, rowLabels=strings,bbox=[0.6,0.2,0.7,0.9])
            table.set_fontsize(11)
            #plt.tight_layout()
-           plt.savefig(path_png, dpi=dpi)
+           plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
            return fig
 
 def quiv_coherency_center(vec0,vec1,center0,center1,coherency_map, path_png, dpi=200):
@@ -177,7 +178,7 @@ def quiv_coherency_center(vec0,vec1,center0,center1,coherency_map, path_png, dpi
     fig5, ax5 = show_quiver (vec0 * coherency_map, vec1 * coherency_map, filter=[f, 15], scale_ratio=0.1,width=0.003, 
                              cbar_str="Coherency", cmap="viridis")
     ax5.plot(center0,center1,"o")
-    plt.tight_layout();plt.savefig(path_png, dpi=dpi)
+    plt.tight_layout();plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
     return fig5
 
 def plot_fiber_seg(fiber_image,c0,c1,segmention, path_png,dpi=200 ):
@@ -192,7 +193,7 @@ def plot_fiber_seg(fiber_image,c0,c1,segmention, path_png,dpi=200 ):
     plt.imshow(fiber_image, origin="upper")
     plt.imshow(segmention, cmap=cmap, norm = my_norm, origin="upper")
     plt.scatter(c0,c1, c= "w");plt.axis('off')
-    plt.tight_layout() ;plt.savefig(path_png, dpi=dpi)
+    plt.tight_layout() ;plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
     return fig7
 
 def plot_overlay(fiber_image , c0,c1, vec0,vec1, coherency_map,
@@ -206,11 +207,11 @@ def plot_overlay(fiber_image , c0,c1, vec0,vec1, coherency_map,
             #everything else visible
             cmap.set_over('k', alpha=1)
             # plot mask and center
-            show_quiver (vec0 * coherency_map, vec1 * coherency_map, filter=[f, show_n],alpha=0 , scale_ratio=0.1,width=0.002, plot_cbar=False, cbar_str="coherency", cmap="viridis")
+            show_quiver (vec0 * coherency_map, vec1 * coherency_map, filter=[f, show_n],alpha=0 , scale_ratio=0.08,width=0.002, plot_cbar=False, cbar_str="coherency", cmap="viridis")
             plt.imshow(fiber_image, origin="upper")
-            plt.imshow(segmention, cmap=cmap, norm = my_norm, origin="upper")
-            plt.scatter(c0,c1, c= "w")
-            plt.tight_layout() ;plt.savefig(path_png, dpi=dpi)
+            plt.imshow(segmention, cmap=cmap, norm = my_norm, origin="upper", zorder=100)
+            plt.scatter(c0,c1, c= "w", zorder=200)
+            plt.tight_layout() ;plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
             return fig       
         
 def plot_shells(shell_masks,path_png,dpi=200 ):
@@ -225,7 +226,7 @@ def plot_shells(shell_masks,path_png,dpi=200 ):
         cmap.set_over('k', alpha=0)
         # plot mask and center
         plt.imshow(shell_masks[-s], cmap = cmap ,  origin="upper", alpha= 0.2 ) 
-    plt.tight_layout(); plt.axis("off");plt.savefig(path_png, dpi=dpi)
+    plt.tight_layout(); plt.axis("off");plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
     return fig
     
  # Distance analysis

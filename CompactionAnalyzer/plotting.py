@@ -170,7 +170,7 @@ def plot_triple(results_angle, results_total, path_png ,dpi=300):
            table = ax3.table(cellText = values, rowLabels=strings,bbox=[0.6,0.2,0.7,0.9])
            table.set_fontsize(11)
            #plt.tight_layout()
-           plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
+           plt.savefig(path_png, dpi=dpi)#, bbox_inches='tight', pad_inches=0)
            return fig
 
 def quiv_coherency_center(vec0,vec1,center0,center1,coherency_map, path_png, dpi=200):

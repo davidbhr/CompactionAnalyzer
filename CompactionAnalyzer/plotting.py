@@ -204,7 +204,7 @@ def plot_fiber_seg(fiber_image,c0,c1,segmention, path_png,dpi=200, scale=None ):
     return fig7
 
 def plot_overlay(fiber_image , c0,c1, vec0,vec1, coherency_map,
-                       segmention,path_png,dpi=200, show_n = 15 ):
+                       segmention,path_png,dpi=200, show_n = 15, scale=None ):
             fig=plt.figure();f = np.nanpercentile(coherency_map,0.75)
             # plot overlay
             my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
@@ -218,6 +218,10 @@ def plot_overlay(fiber_image , c0,c1, vec0,vec1, coherency_map,
             plt.imshow(fiber_image, origin="upper")
             plt.imshow(segmention, cmap=cmap, norm = my_norm, origin="upper", zorder=100)
             plt.scatter(c0,c1, c= "w", zorder=200)
+            if scale is not None:
+                scalebar = ScaleBar(scale, "um", length_fraction=0.1, location="lower right", box_alpha=0 , 
+                            color="k")
+                plt.gca().add_artist(scalebar)
             plt.tight_layout() ;plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
             return fig       
         

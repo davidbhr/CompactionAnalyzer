@@ -2,6 +2,8 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib_scalebar.scalebar import ScaleBar
+
 
 def scale_for_quiver(ar1, ar2, dims, scale_ratio=0.2, return_scale=False):
     scale = scale_ratio * np.max(dims) / np.nanmax(np.sqrt((ar1) ** 2 + (ar2) ** 2))
@@ -181,7 +183,7 @@ def quiv_coherency_center(vec0,vec1,center0,center1,coherency_map, path_png, dpi
     plt.tight_layout();plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
     return fig5
 
-def plot_fiber_seg(fiber_image,c0,c1,segmention, path_png,dpi=200 ):
+def plot_fiber_seg(fiber_image,c0,c1,segmention, path_png,dpi=200, scale=None ):
     fig7= plt.figure() 
     my_norm = matplotlib.colors.Normalize(vmin=0.9999, vmax=1, clip=False)  
     cmap =  plt.get_cmap('Greys')#copy()
@@ -192,7 +194,12 @@ def plot_fiber_seg(fiber_image,c0,c1,segmention, path_png,dpi=200 ):
     # plot mask and center
     plt.imshow(fiber_image, origin="upper")
     plt.imshow(segmention, cmap=cmap, norm = my_norm, origin="upper")
-    plt.scatter(c0,c1, c= "w");plt.axis('off')
+    plt.scatter(c0,c1, c= "w");plt.axis('off');
+    if scale is not None:
+        scalebar = ScaleBar(scale, "um", length_fraction=0.1, location="lower right", box_alpha=0 , 
+                    color="k")
+        plt.gca().add_artist(scalebar)
+
     plt.tight_layout() ;plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
     return fig7
 

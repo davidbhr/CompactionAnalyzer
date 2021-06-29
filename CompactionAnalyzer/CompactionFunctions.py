@@ -611,20 +611,20 @@ def StuctureAnalysisMain(fiber_list,
             plot_fiber_seg(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
                            c0=center_small[0],c1=center_small[1],
                            segmention=segmention["mask"][edge:-edge,edge:-edge], 
-                           path_png=os.path.join(figures,"fiber_segemention.png"),dpi=dpi )
+                           path_png=os.path.join(figures,"fiber_segemention.png"),dpi=dpi,scale=scale )
         
             # plot overlaywith fiber image 
             plot_overlay(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
                            c0=center_small[0],c1=center_small[1], vec0=min_evec[:,:,0],
                            vec1=min_evec[:,:,1], coherency_map=ori, show_n=15,
                            segmention=segmention["mask"][edge:-edge,edge:-edge], 
-                           path_png=os.path.join(figures,"overlay.png"),dpi=dpi )
+                           path_png=os.path.join(figures,"overlay.png"),dpi=dpi ,scale=scale)
             
             plot_overlay(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
                            c0=center_small[0],c1=center_small[1], vec0=min_evec[:,:,0],
                            vec1=min_evec[:,:,1], coherency_map=ori,show_n=10,
                            segmention=segmention["mask"][edge:-edge,edge:-edge], 
-                           path_png=os.path.join(figures,"overlay2.png"),dpi=dpi )
+                           path_png=os.path.join(figures,"overlay2.png"),dpi=dpi ,scale=scale)
             
     
             ### DISTANCE PLOTS

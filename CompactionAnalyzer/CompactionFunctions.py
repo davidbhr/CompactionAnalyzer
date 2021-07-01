@@ -8,7 +8,6 @@ from skimage.morphology import remove_small_objects
 import imageio
 from skimage import color
 from scipy.ndimage.morphology import distance_transform_edt
-#import copy
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
@@ -19,6 +18,11 @@ from CompactionAnalyzer.CompactionFunctions import *
 from CompactionAnalyzer.utilities import *
 from CompactionAnalyzer.StructureTensor import *
 from CompactionAnalyzer.plotting import *
+from skimage.filters.rank import entropy
+from skimage.morphology import disk
+from skimage import img_as_float
+from skimage.morphology import reconstruction
+
 
 def load_stack(stack_list):
     z = len(stack_list)
@@ -90,18 +94,24 @@ def custom_mask(img,show_segmentation=True):
     #     plt.subplot(122), plt.imshow(mask)    
     return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)} 
 
+def regional_maxima(img):
+    # following https://scikit-image.org/docs/stable/auto_examples/color_exposure/plot_regional_maxima.html
+    image = img_as_float(img)
+    mask = image
+    seed = np.copy(image)
+    seed[1:-1, 1:-1] = image.min()
+    dilated = reconstruction(seed, mask, method='dilation')
+    image=image-dilated
+    return image
 
-
-#img = imageio.imread(cell_list[0])
-
-
-def segment_cell(img, thres=1, seg_gaus1 = 4, seg_gaus2=100, seg_iter=1,show_segmentation = False, segmention_method="otsu", seg_invert=False):   
+def segment_cell(img, thres=1, seg_gaus1 = 8, seg_gaus2=80, seg_iter=1,show_segmentation = False, 
+                 segmention_method="otsu", seg_invert=False, regional_max_correction=True):   
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
     Args:
         img(array): Grayscale image as a Numpy array
         thres(float): To adjust the segmentation, keep 1
-        segmention_method: use "otsu" or "yen"  as segmentation method
+        segmention_method: use "otsu", "yen" or "entropy" as segmentation method
         seg_iter: iterations of closing steps , might increase to get more 
         robust segmentation but less precise segmentation, by default 1
         seg_invert(bool): Default is false ans segements bright objects, if True
@@ -111,8 +121,18 @@ def segment_cell(img, thres=1, seg_gaus1 = 4, seg_gaus2=100, seg_iter=1,show_seg
     """
     height = img.shape[0]
     width = img.shape[1]
-    # local gaussian   
-    img = np.abs(gaussian(img, sigma=seg_gaus1) - gaussian(img, sigma=seg_gaus2))
+    
+    
+    # local gaussian (or single gaussian if gaus2 == None)  
+    if seg_gaus2 is not None:
+        img = np.abs(gaussian(img, sigma=seg_gaus1) - gaussian(img, sigma=seg_gaus2))
+    else:
+        img = gaussian(img, sigma=seg_gaus1) 
+        
+    # regional maxima to get rid of background noise
+    if regional_max_correction:
+        img = regional_maxima(img)
+      
     # segment cell
     if segmention_method == "yen":
         if seg_invert==False:
@@ -127,12 +147,22 @@ def segment_cell(img, thres=1, seg_gaus1 = 4, seg_gaus2=100, seg_iter=1,show_seg
 
          if seg_invert==True:
             mask = img < threshold_otsu(img) * thres
+            
+    if segmention_method == "entropy":    
+         if seg_invert==False:
+            img2 = entropy(img.astype(np.uint8), disk(10))
+            mask = img2 > threshold_otsu(img2) * thres
+         if seg_invert==True:
+            img2 = entropy(img.astype(np.uint8), disk(10))
+            mask = img2 < threshold_otsu(img2) * thres
+                     
 
     # remove other objects
-    mask = scipy_morph.binary_closing(mask, iterations=seg_iter)
-    mask = remove_small_objects(mask, min_size=1000)
-    mask = scipy_morph.binary_dilation(mask, iterations=seg_iter)
-    mask = scipy_morph.binary_fill_holes(mask)
+    if seg_iter is not None:
+        mask = scipy_morph.binary_closing(mask, iterations=seg_iter)
+        mask = remove_small_objects(mask, min_size=500)
+        mask = scipy_morph.binary_dilation(mask, iterations=seg_iter)
+        mask = scipy_morph.binary_fill_holes(mask)
     
 
     # identify spheroid as the most centered object
@@ -169,12 +199,13 @@ def StuctureAnalysisMain(fiber_list,
                          cell_list, 
                          out_list,
                          scale=1,                       # imagescale as um per pixel
-                         sigma_tensor = None ,       # sigma of applied gauss filter / window for structure tensor analysis in px
+                         sigma_tensor = None ,          # sigma of applied gauss filter / window for structure tensor analysis in px
                                                         # should be in the order of the objects to analyze !! 
                                                         # 7 um for collagen 
                          edge = 40   ,                  # Cutt of pixels at the edge since values at the border cannot be trusted
                          segmention_thres = 1.0 ,       # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
-                         seg_gaus1=8, seg_gaus2 = 80 ,  # 2 gaus filters used for local contrast enhancement
+                         seg_gaus1=8, seg_gaus2 = 80 ,  # 2 gaus filters used for local contrast enhancement; For seg_gaus2 = None a single gauss filter will be applied
+                         regional_max_correction = True,# correct background noise using regional maxima approach
                          show_segmentation = False ,    # display the segmentation ooutput
                          sigma_first_blur  = 0.5  ,     # slight first bluring of whole image before using structure tensor
                          angle_sections = 5    ,        # size of angle sections in degree 
@@ -182,12 +213,12 @@ def StuctureAnalysisMain(fiber_list,
                          manual_segmention = False    , # manual segmentation of mask by click cell outline
                          plotting = True     ,          # creates and saves plots additionally to excel files 
                          dpi = 200      ,               # resolution of plots to be stored
-                         SaveNumpy = True       ,       # saves numpy arrays for later analysis - might create lots of data
+                         SaveNumpy = False       ,       # saves numpy arrays for later analysis - might create lots of data
                          norm1=1,norm2 = 99  ,           # contrast spreading for input images by setting all values below norm1-percentile to zero and
                                                         # all values above norm2-percentile to 1
                          seg_invert=False,              # if segmentation is inverted dark objects are detected inseated of bright
                          seg_iter = 1,                  # repetition of closing and dilation steps for segmentation
-                         segmention_method="otsu",              #  use "otsu" or "yen"  as segmentation method
+                         segmention_method="otsu",      #  use "otsu", "entropy" or "yen"  as segmentation method
                          load_segmentation = False,     # if true enter the path of the segementation math in path seg
                          path_seg = None):
     """
@@ -227,7 +258,8 @@ def StuctureAnalysisMain(fiber_list,
         dict_file = {
                   'Parameters': {'scale': [scale], 'sigma_tensor': [sigma_tensor], 'edge': [edge],
                                  'seg_gaus1': [seg_gaus1], 'seg_gaus2': [seg_gaus2], 'show_segmentation': [show_segmentation],
-                                 'sigma_first_blur': [sigma_first_blur], 'angle_sections': [angle_sections], 'shell_width': [shell_width],
+                                 'regional_max_correction': [regional_max_correction], 'sigma_first_blur': [sigma_first_blur], 
+                                 'angle_sections': [angle_sections], 'shell_width': [shell_width],
                                  'manual_segmention': [manual_segmention], 'plotting': [plotting], 'dpi': [dpi],
                                  'SaveNumpy': [SaveNumpy], 'norm1': [norm1], 'norm2': [norm2],
                                  'seg_invert': [seg_invert], 'seg_iter': [seg_iter], 'segmention_method': [segmention_method],
@@ -255,7 +287,7 @@ def StuctureAnalysisMain(fiber_list,
         if (manual_segmention==False) and (load_segmentation == False):
             segmention = segment_cell(im_cell_n, thres= segmention_thres, seg_gaus1 = seg_gaus1, seg_gaus2=seg_gaus2,
                                       show_segmentation = show_segmentation,seg_invert=seg_invert,seg_iter=seg_iter,
-                                      segmention_method=segmention_method)   
+                                      segmention_method=segmention_method, regional_max_correction=regional_max_correction)   
               
         if load_segmentation:
               segmention = np.load(path_seg,allow_pickle=True).item()             

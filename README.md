@@ -62,7 +62,7 @@ norm1,norm2 = 1,99              # contrast spreading for input images  by settin
                                 # all values above norm2-percentile to 1
 seg_invert=False                # if segmentation is inverted (True) dark objects are detected inseated of bright ones
 seg_iter = 1                    # repetition of closing and dilation steps for segmentation      
-segmention_method="otsu"               #  use "otsu" or "yen"  as segmentation method
+segmention_method="otsu"         #  use "otsu" or "yen" or "entopy"  as segmentation method
 load_segmentation = False        # if true enter the path of the segementation math in path_seg to
 path_seg = None                  # load in a saved.segmetnion.npy 
 ```

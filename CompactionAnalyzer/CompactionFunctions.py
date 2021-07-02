@@ -104,7 +104,7 @@ def regional_maxima(img):
     image=image-dilated
     return image
 
-def segment_cell(img, thres=1, seg_gaus1 = 8, seg_gaus2=80, seg_iter=1,show_segmentation = False, 
+def segment_cell(img, thres=1, seg_gaus1 = 0.5, seg_gaus2=100, seg_iter=1,show_segmentation = False, 
                  segmention_method="otsu", seg_invert=False, regional_max_correction=True):   
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
@@ -204,7 +204,7 @@ def StuctureAnalysisMain(fiber_list,
                                                         # 7 um for collagen 
                          edge = 40   ,                  # Cutt of pixels at the edge since values at the border cannot be trusted
                          segmention_thres = 1.0 ,       # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
-                         seg_gaus1=8, seg_gaus2 = 80 ,  # 2 gaus filters used for local contrast enhancement; For seg_gaus2 = None a single gauss filter will be applied
+                         seg_gaus1=0.5, seg_gaus2 = 100 ,  # 2 gaus filters used for local contrast enhancement; For seg_gaus2 = None a single gauss filter will be applied
                          regional_max_correction = True,# correct background noise using regional maxima approach
                          show_segmentation = False ,    # display the segmentation ooutput
                          sigma_first_blur  = 0.5  ,     # slight first bluring of whole image before using structure tensor

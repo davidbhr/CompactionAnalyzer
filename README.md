@@ -49,7 +49,7 @@ sigma_tensor = 7/scale          # sigma of applied gauss filter / window for str
                                 # 7 um for collagen 
 edge = 40                       # Cut off pixels at the edge since values at the border cannot be trusted
 segmention_thres = 1.0          # for cell segemetntion, thres 1 equals normal otsu threshold , change to detect different percentage of bright pixel
-seg_gaus1, seg_gaus2 = 8,80     # 2 gaus filters used for local contrast enhancement for segementation
+seg_gaus1, seg_gaus2 = 0.5,100  # 2 gaus filters used for local contrast enhancement for segementation
 show_segmentation = False        # display the segmentation output to test parameters - script wont run further
 sigma_first_blur  = 0.5         # slight first bluring of whole image before using structure tensor
 angle_sections = 5              # size of angle sections in degree 

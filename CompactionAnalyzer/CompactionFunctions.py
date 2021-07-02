@@ -160,7 +160,7 @@ def segment_cell(img, thres=1, seg_gaus1 = 0.5, seg_gaus2=100, seg_iter=1,show_s
     # remove other objects
     if seg_iter is not None:
         mask = scipy_morph.binary_closing(mask, iterations=seg_iter)
-        mask = remove_small_objects(mask, min_size=500)
+        mask = remove_small_objects(mask, min_size=300)
         mask = scipy_morph.binary_dilation(mask, iterations=seg_iter)
         mask = scipy_morph.binary_fill_holes(mask)
     

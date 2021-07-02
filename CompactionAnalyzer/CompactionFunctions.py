@@ -561,21 +561,21 @@ def StuctureAnalysisMain(fiber_list,
     
         if SaveNumpy:
             #create output folder if not existing
-            numpy_out = os.path.join(out_list[n], "NumpyArrays" )
+            numpy_out = os.path.join(out_list[n], r"NumpyArrays" )
             if not os.path.exists(numpy_out):
                 os.makedirs(numpy_out)
                 
           
-            np.save(os.path.join(numpy_out, "Angle Map.npy" ),angle_dev )    
-            np.save(os.path.join(numpy_out, "Angle Map (weighted by intensity).npy" ),angle_dev_weighted)    
-            np.save(os.path.join(numpy_out, "Angle Map (weighted by intensity and coherency).npy" ),angle_dev_weighted2 )    
-            np.save(os.path.join(numpy_out, "Orientation Map.npy" ),orientation_dev )    
-            np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity).npy" ),orientation_dev_weighted)    
-            np.save(os.path.join(numpy_out, "Orientation Map (weighted by intensity and coherency).npy" ),orientation_dev_weighted2 )    
-            np.save(os.path.join(numpy_out, "Fiber Image Crop.npy" ),normalize(im_fiber_n[edge:-edge,edge:-edge]) )    
+            np.save(os.path.join(numpy_out, "AngleMap.npy" ),angle_dev )    
+            np.save(os.path.join(numpy_out, "AngleMap(weight_int).npy" ),angle_dev_weighted)    
+            np.save(os.path.join(numpy_out, "AngleMap(weight_int_coh).npy"),angle_dev_weighted2 )    
+            np.save(os.path.join(numpy_out, "OrientationMap.npy" ),orientation_dev )    
+            np.save(os.path.join(numpy_out, "OrientationMap(weight_int).npy" ),orientation_dev_weighted)    
+            np.save(os.path.join(numpy_out, "OrientationMap(weight_int_coh).npy" ),orientation_dev_weighted2 )    
+            np.save(os.path.join(numpy_out, "FiberImageCrop.npy" ),normalize(im_fiber_n[edge:-edge,edge:-edge]) )    
             np.save(os.path.join(numpy_out, "segmention.npy" ),segmention)  
-            np.save(os.path.join(numpy_out, "Coherency Map.npy" ),ori )  
-            np.save(os.path.join(numpy_out, "Coherency Map (weighted by intensity).npy" ),ori_weight2)  
+            np.save(os.path.join(numpy_out, "CoherencyMap.npy" ),ori )  
+            np.save(os.path.join(numpy_out, "CoherencyMap(weighted_int).npy" ),ori_weight2)  
             np.save(os.path.join(numpy_out, "Vector_min_ax0.npy"),min_evec[:,:,0])  
             np.save(os.path.join(numpy_out, "Vector_min_ax1.npy"),min_evec[:,:,1])   
             np.save(os.path.join(numpy_out, "mask_surface_shells.npy"),mask_shells['Mask_shell'])                                                                                   

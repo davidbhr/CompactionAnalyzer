@@ -160,7 +160,7 @@ def segment_cell(img, thres=1, seg_gaus1 = 0.5, seg_gaus2=100, seg_iter=1,show_s
     # remove other objects
     if seg_iter is not None:
         mask = scipy_morph.binary_closing(mask, iterations=seg_iter)
-        mask = remove_small_objects(mask, min_size=300)
+        mask = remove_small_objects(mask, min_size=1000)
         mask = scipy_morph.binary_dilation(mask, iterations=seg_iter)
         mask = scipy_morph.binary_fill_holes(mask)
     
@@ -670,10 +670,9 @@ def StuctureAnalysisMain(fiber_list,
             plot_distance(results_distance,string_plot = "Intensity Norm (individual)",
               path_png=os.path.join(figures,"Intensity_distance.png"),dpi=dpi)
             
-            # save raw cell image        
-            plt.figure(); plt.imshow(im_cell_n);plt.axis("off"),plt.tight_layout()
-            plt.savefig(os.path.join(figures,"cell-raw.png"), dpi=dpi)
-    
+            # save raw cell image   
+            plot_cell(im_cell_n, path_png=os.path.join(figures,"cell-raw.png"),  scale=scale, dpi=dpi)
+
             plt.close("all")    
             
 

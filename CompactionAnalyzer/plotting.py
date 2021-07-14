@@ -252,3 +252,11 @@ def plot_distance(results_distance,path_png,string_plot = "Orientation (individu
         plt.ylim(ylim)
     return fig
            
+def plot_cell(im_cell_n,  path_png,scale=None,dpi=200):
+        fig = plt.figure(); plt.imshow(im_cell_n);plt.axis("off"),plt.tight_layout()
+        if scale is not None:
+            scalebar = ScaleBar(scale, "um", length_fraction=0.1, location="lower right", box_alpha=0 , 
+                        color="k")
+        plt.gca().add_artist(scalebar)
+        plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
+        return fig

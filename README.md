@@ -43,18 +43,18 @@ We now want to start the analysis and compute the orientation of individual fibe
 We can redefine all of the following paramters before starting the analysis. The corresponding pixel scale is set as `scale` and the segmentiation can be changed by using the `segmention_thres` or by changing the local contrast enhancement via `seg_gaus1, seg_gaus2`. With `show_segmentation = True` we can inspect the segmentation or - if preferred - segment the mask manually by clicking using `manual_segmention  = True`.
 
 ```python
-scale =  0.318                  # imagescale as um per pixel
-sigma_tensor = 7/scale          # sigma of applied gauss filter / window for structure tensor analysis in px
+scale =  0.318                  # imagescale in um per pixel
+sigma_tensor = 7/scale          # sigma of applied gauss filter / windowsize for the structure tensor analysis in px
                                 # should be in the order of the objects to analyze !! 
                                 # 7 um for collagen 
 edge = 40                       # Cut off pixels at the edge since values at the border cannot be trusted
-segmention_thres = 1.0          # for cell segemetntion, thres 1 equals normal otsu threshold , change to detect different percentage of bright pixel
+segmention_thres = 1.0          # for cell segmentation, thres 1 equals normal otsu threshold , change to detect different percentage of bright pixel
 seg_gaus1, seg_gaus2 = 0.5,100  # 2 gaus filters used for local contrast enhancement for segementation
-show_segmentation = False        # display the segmentation output to test parameters - script wont run further
+show_segmentation = False        # display the segmentation output to visualze the mask - script wont run further
 sigma_first_blur  = 0.5         # slight first bluring of whole image before using structure tensor
 angle_sections = 5              # size of angle sections in degree 
 shell_width =  5/scale          # pixel width of distance shells (px-value=um-value/scale)
-manual_segmention = False       # manual segmentation of mask by click cell outline
+manual_segmention = False       # manual segmentation of mask by clicking the cell outline
 plotting = True                 # creates and saves plots additionally to excel files 
 dpi = 200                       # resolution of plots to be stored
 SaveNumpy = False               # saves numpy arrays for later analysis - might create lots of data
@@ -62,9 +62,9 @@ norm1,norm2 = 1,99              # contrast spreading for input images  by settin
                                 # all values above norm2-percentile to 1
 seg_invert=False                # if segmentation is inverted (True) dark objects are detected inseated of bright ones
 seg_iter = 1                    # repetition of closing and dilation steps for segmentation      
-segmention_method="otsu"         #  use "otsu" or "yen" or "entopy"  as segmentation method
+segmention_method="otsu"         #  use "otsu" or "yen" or "entropy"  as segmentation method
 load_segmentation = False        # if true enter the path of the segementation math in path_seg to
-path_seg = None                  # load in a saved.segmetnion.npy 
+path_seg = None                  # load in a saved segmentation *.npy - file
 ```
 
 

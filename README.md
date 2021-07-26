@@ -122,7 +122,7 @@ Might be usefull to use Maximum intensity image around cell (smalls stacks) to i
 IMAGE coolwarm erosion
 
 
-## Resolving Drug Effects
+## Resolving Drug Effects & Multicellular Compaction Assay
 
 An application of the CompactionAnalyzer is resolving drug-dependend effects on cell contractility. Due to variability in cell shapes, a large sample size of cells is desirable
 
@@ -130,16 +130,19 @@ An application of the CompactionAnalyzer is resolving drug-dependend effects on 
 
 (..  time development and cell-cell communication)
 
-
-## Multicellular Compaction Assay
-
-Beneath individual cells also the compaction can be assesed on a multicellular level using for example mutlicellular spheroids. This offers the advantage of uniform round shape and less movement so that even a lower sample number might be suffiecient. 
+Beneath individual cells also the compaction assay can be used on a multicellular level using for example mutlicellular spheroids. This offers the advantage of uniform round shape and less movement so that even a lower sample number might be suffiecient. 
 
 > Additionally, absolute forces of spheroids can be measured using the *jointforces* python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging. Absolute forces of cell can be assesed using *saenopy* [here](https://github.com/rgerum/saenopy), which requires additonal material measurements and two (larger) 3D stacks of the contracted and realaxed state per cell.
+
+## Graphical User Interface (GIU)
+
+We provide a graphical user interface that simplifies the execution and evaluation of several experiments. Intensity & Orientation results of individual or grouped experiments can be visualized. To start the GUI, just run the script XX.py
+
+IMAGE
 
 
 ## Literature
 
 Read more about the method in the following article
 
-TODO:  paper  here...
+TODO: Write a paper

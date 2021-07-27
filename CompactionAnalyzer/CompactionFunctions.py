@@ -565,15 +565,14 @@ def StuctureAnalysisMain(fiber_list,
             if not os.path.exists(numpy_out):
                 os.makedirs(numpy_out)
                 
-          
+            np.save(os.path.join(numpy_out, "segmention.npy" ),segmention)
             np.save(os.path.join(numpy_out, "AngleMap.npy" ),angle_dev )    
             np.save(os.path.join(numpy_out, "AngleMap(weight_int).npy" ),angle_dev_weighted)    
             np.save(os.path.join(numpy_out, "AngleMap(weight_int_coh).npy"),angle_dev_weighted2 )    
             np.save(os.path.join(numpy_out, "OrientationMap.npy" ),orientation_dev )    
-            np.save(os.path.join(numpy_out, "OrientationMap(weight_int).npy" ),orientation_dev_weighted)    
-            np.save(os.path.join(numpy_out, "OrientationMap(weight_int_coh).npy" ),orientation_dev_weighted2 )    
-            np.save(os.path.join(numpy_out, "FiberImageCrop.npy" ),normalize(im_fiber_n[edge:-edge,edge:-edge]) )    
-            np.save(os.path.join(numpy_out, "segmention.npy" ),segmention)  
+            np.save(os.path.join(numpy_out, "OrientationMap_weight_int.npy" ),orientation_dev_weighted)    
+            np.save(os.path.join(numpy_out, "OrientationMap_weight_intcoh.npy" ),orientation_dev_weighted2 )    
+            np.save(os.path.join(numpy_out, "FiberImageCrop.npy" ),normalize(im_fiber_n[edge:-edge,edge:-edge]) )      
             np.save(os.path.join(numpy_out, "CoherencyMap.npy" ),ori )  
             np.save(os.path.join(numpy_out, "CoherencyMap(weighted_int).npy" ),ori_weight2)  
             np.save(os.path.join(numpy_out, "Vector_min_ax0.npy"),min_evec[:,:,0])  
@@ -658,10 +657,9 @@ def StuctureAnalysisMain(fiber_list,
                            segmention=segmention["mask"][edge:-edge,edge:-edge], 
                            path_png=os.path.join(figures,"overlay2.png"),dpi=dpi ,scale=scale)
             
-    
             ### DISTANCE PLOTS
-            # plot shells
-            plot_shells(mask_shells['Mask_shell'],path_png=os.path.join(figures,"shells.png"),dpi=dpi )
+            # plot shells - deactived as it consumes a lot of time
+            # plot_shells(mask_shells['Mask_shell'],path_png=os.path.join(figures,"shells.png"),dpi=dpi )
         
             # plot intensity and orientation (idividual) over distance 
             plot_distance(results_distance,string_plot = "Orientation (individual)",

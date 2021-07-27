@@ -108,6 +108,11 @@ Now we receive a compromised excel sheet that returns the global analysis for al
 
 <img src="../master/docs/images/Fig3-combineexcel.png" width="1000" />
 
+## Graphical User Interface (GUI)
+
+We provide a graphical user interface that simplifies the execution and evaluation of several experiments. Intensity & Orientation results of individual or grouped experiments can be visualized. To start the GUI, just run the script XX.py
+
+IMAGE
 
 
 ## Maxprojections & Kernel Size
@@ -134,11 +139,6 @@ Beneath individual cells also the compaction assay can be used on a multicellula
 
 > Additionally, absolute forces of spheroids can be measured using the *jointforces* python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging. Absolute forces of cell can be assesed using *saenopy* [here](https://github.com/rgerum/saenopy), which requires additonal material measurements and two (larger) 3D stacks of the contracted and realaxed state per cell.
 
-## Graphical User Interface (GIU)
-
-We provide a graphical user interface that simplifies the execution and evaluation of several experiments. Intensity & Orientation results of individual or grouped experiments can be visualized. To start the GUI, just run the script XX.py
-
-IMAGE
 
 
 ## Literature

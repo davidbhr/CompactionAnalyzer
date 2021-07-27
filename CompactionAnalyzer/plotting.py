@@ -186,7 +186,7 @@ def quiv_coherency_center(vec0,vec1,center0,center1,coherency_map, path_png, dpi
 def plot_fiber_seg(fiber_image,c0,c1,segmention, path_png,dpi=200, scale=None ):
     fig7= plt.figure() 
     my_norm = matplotlib.colors.Normalize(vmin=0.9999, vmax=1, clip=False)  
-    cmap =  plt.get_cmap('Greys')#copy()
+    cmap =  plt.get_cmap('Greys').copy()
     # everything under vmin gets transparent (all zeros in mask)
     cmap.set_under('k', alpha=0)
     #everything else visible
@@ -208,7 +208,7 @@ def plot_overlay(fiber_image , c0,c1, vec0,vec1, coherency_map,
             fig=plt.figure();f = np.nanpercentile(coherency_map,0.75)
             # plot overlay
             my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
-            cmap =  plt.get_cmap('Greys')#copy()
+            cmap =  plt.get_cmap('Greys').copy()
             # everything under vmin gets transparent (all zeros in mask)
             cmap.set_under('k', alpha=0)
             #everything else visible
@@ -230,7 +230,7 @@ def plot_shells(shell_masks,path_png,dpi=200 ):
     cmap_list = ["Greens","Greys","Reds","Oranges","Blues","PuBu","GnBu"]
     for s in  range(len(shell_masks)):
         my_norm = matplotlib.colors.Normalize(vmin=0.99, vmax=1, clip=False)  
-        cmap =  plt.get_cmap(cmap_list[s%len(cmap_list)])#copy()
+        cmap =  plt.get_cmap(cmap_list[s%len(cmap_list)]).copy()
         # everything under vmin gets transparent (all zeros in mask)
         cmap.set_under('k', alpha=1)
         #everything else visible

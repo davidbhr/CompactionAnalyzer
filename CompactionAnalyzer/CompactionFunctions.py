@@ -22,6 +22,8 @@ from skimage.filters.rank import entropy
 from skimage.morphology import disk
 from skimage import img_as_float
 from skimage.morphology import reconstruction
+import warnings
+
 
 
 def load_stack(stack_list):
@@ -271,8 +273,8 @@ def StuctureAnalysisMain(fiber_list,
   
             
         # load images
-        im_cell  = color.rgb2gray(imageio.imread(cell_list[n]))  
-        im_fiber = color.rgb2gray(imageio.imread(fiber_list[n]))   
+        im_cell  = imageio.imread(cell_list[n])  #color.rgb2gray(..)
+        im_fiber = imageio.imread(fiber_list[n])   #color.rgb2gray(
         
         # # applying normalizing/ contrast spreading
         im_cell_n = normalize(im_cell, norm1, norm2)
@@ -306,7 +308,7 @@ def StuctureAnalysisMain(fiber_list,
         # get structure tensor
         ori, max_evec, min_evec, max_eval, min_eval = analyze_local(im_fiber_g_forstructure, sigma=sigma_tensor, size=0, filter_type="gaussian")
         # cut off edges as specified
-        if edge is not 0:
+        if edge != 0:
             ori, max_evec, min_evec, max_eval, min_eval = ori[edge:-edge,edge:-edge], max_evec[edge:-edge,edge:-edge], min_evec[edge:-edge,edge:-edge], \
                                                           max_eval[edge:-edge,edge:-edge], min_eval[edge:-edge,edge:-edge]
         """
@@ -340,8 +342,7 @@ def StuctureAnalysisMain(fiber_list,
         orientation_dev_weighted_01 =  ((orientation_dev_01 * ori) / np.nanmean(ori)) 
         orientation_dev_weighted = -(2  *orientation_dev_weighted_01 - 1)
         
-        
-        
+
         # weighting by coherence and image intensity
         im_fiber_g = im_fiber_g[edge:-edge,edge:-edge]
         # could also use non filtered image
@@ -364,8 +365,11 @@ def StuctureAnalysisMain(fiber_list,
         dy_norm_a = dx_norm.copy()
         s_to_center = ((grad_x * dx_norm) + (grad_y * dy_norm))**2
         s_around_center = ((grad_x * dx_norm_a) + (grad_y * dy_norm_a))**2
-        s_norm1 = (s_around_center - s_to_center)/(grad_x**2 + grad_y**2)
-        #s_norm2 = (s_around_center - s_to_center)/(s_around_center + s_to_center)
+        # Ignore RuntimeWarnings here 
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            s_norm1 = (s_around_center - s_to_center)/(grad_x**2 + grad_y**2)
+            #s_norm2 = (s_around_center - s_to_center)/(s_around_center + s_to_center)
             
         
         # save values for total image analysis
@@ -476,42 +480,45 @@ def StuctureAnalysisMain(fiber_list,
         
         # make the distance shell analysis
         for i in range(len(shells)-1):
-            
-            # distance shells parallel to surface
-            # mask of individual shells and accumulation of all points closer to the correponding cell
-            mask_shell = (dist_surface > (shells[i])) & (dist_surface <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])  
-            mask_shell_lower=  (dist_surface <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])
-            mask_shells['Mask_shell'].append(mask_shell)
-            # calculate mintensity and angle deviation within the growing shells (always within start shell to highest shell)
-            # weight wuth shell values :
+            # Ignore RuntimeWarnings here 
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=RuntimeWarning)
                 
-            # Save Angle and Orientation - Weight by coherency or coherency+intensity shell-wise now
-            results_distance['Angle (accumulated)'].append(np.nanmean(angle_dev[mask_shell_lower]*ori[mask_shell_lower]/np.nanmean(ori[mask_shell_lower])))
-            results_distance['Angle (individual)'].append(np.nanmean(angle_dev[mask_shell]*ori[mask_shell]/np.nanmean(ori[mask_shell]) ))    # exclusively in certain shell
-            results_distance['Angle (individual-weightInt)'].append(np.nanmean(angle_dev[mask_shell]*ori[mask_shell]*weight_image[mask_shell]/np.nanmean(ori[mask_shell]*weight_image[mask_shell]) ))    # exclusively in certain shell
-            results_distance['Orientation (accumulated)'].append(np.nanmean(orientation_dev[mask_shell_lower]*ori[mask_shell_lower]/np.nanmean(ori[mask_shell_lower])))
-            results_distance['Orientation (individual)'].append(np.nanmean(orientation_dev[mask_shell]*ori[mask_shell]/np.nanmean(ori[mask_shell]) ))    # exclusively in certain shell
-            results_distance['Orientation (individual-weightInt)'].append(np.nanmean(orientation_dev[mask_shell]*ori[mask_shell]*weight_image[mask_shell]/np.nanmean(ori[mask_shell]*weight_image[mask_shell]) ))    
-           
-    
-           # mean intensity
-            results_distance['Intensity (accumulated)'].append(np.nanmean(im_fiber_g[mask_shell_lower]))          # accumulation of lower shells
-            results_distance['Intensity (individual)'].append(np.nanmean(im_fiber_g[mask_shell])  )    # exclusively in certain shell
-  
-            # distance shells as circles around center
-            mask_shell_center = (distance > (shells[i])) & (distance <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])  
-            mask_shell_lower_center=  (distance <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])
-            mask_shells['Mask_shell_center'].append(mask_shell_center)
-          
-            
-            results_distance['Angle disttocenter (accumulated)'].append(np.nanmean(angle_dev[mask_shell_lower_center]*ori[mask_shell_lower_center]/np.nanmean(ori[mask_shell_lower_center])))
-            results_distance['Angle disttocenter (individual)'].append(np.nanmean(angle_dev[mask_shell_center]*ori[mask_shell_center]/np.nanmean(ori[mask_shell_center]) ))    # exclusively in certain shell
-            results_distance['Orientation disttocenter (accumulated)'].append(np.nanmean(orientation_dev_weighted[mask_shell_lower_center]*ori[mask_shell_lower_center]/np.nanmean(ori[mask_shell_lower_center])))
-            results_distance['Orientation disttocenter (individual)'].append(np.nanmean(orientation_dev_weighted[mask_shell_center]*ori[mask_shell_center]/np.nanmean(ori[mask_shell_center]) ))    # exclusively in certain shell
-            # mean intensity
-            results_distance['Intensity disttocenter (accumulated)'].append(np.nanmean(im_fiber_g[mask_shell_lower_center]))          # accumulation of lower shells
-            results_distance['Intensity disttocenter (individual)'].append(np.nanmean(im_fiber_g[mask_shell_center])  )    # exclusively in certain shell
-            
+                # distance shells parallel to surface
+                # mask of individual shells and accumulation of all points closer to the correponding cell
+                mask_shell = (dist_surface > (shells[i])) & (dist_surface <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])  
+                mask_shell_lower=  (dist_surface <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])
+                mask_shells['Mask_shell'].append(mask_shell)
+                # calculate mintensity and angle deviation within the growing shells (always within start shell to highest shell)
+                # weight wuth shell values :
+                    
+                # Save Angle and Orientation - Weight by coherency or coherency+intensity shell-wise now
+                results_distance['Angle (accumulated)'].append(np.nanmean(angle_dev[mask_shell_lower]*ori[mask_shell_lower]/np.nanmean(ori[mask_shell_lower])))
+                results_distance['Angle (individual)'].append(np.nanmean(angle_dev[mask_shell]*ori[mask_shell]/np.nanmean(ori[mask_shell]) ))    # exclusively in certain shell
+                results_distance['Angle (individual-weightInt)'].append(np.nanmean(angle_dev[mask_shell]*ori[mask_shell]*weight_image[mask_shell]/np.nanmean(ori[mask_shell]*weight_image[mask_shell]) ))    # exclusively in certain shell
+                results_distance['Orientation (accumulated)'].append(np.nanmean(orientation_dev[mask_shell_lower]*ori[mask_shell_lower]/np.nanmean(ori[mask_shell_lower])))
+                results_distance['Orientation (individual)'].append(np.nanmean(orientation_dev[mask_shell]*ori[mask_shell]/np.nanmean(ori[mask_shell]) ))    # exclusively in certain shell
+                results_distance['Orientation (individual-weightInt)'].append(np.nanmean(orientation_dev[mask_shell]*ori[mask_shell]*weight_image[mask_shell]/np.nanmean(ori[mask_shell]*weight_image[mask_shell]) ))    
+               
+        
+               # mean intensity
+                results_distance['Intensity (accumulated)'].append(np.nanmean(im_fiber_g[mask_shell_lower]))          # accumulation of lower shells
+                results_distance['Intensity (individual)'].append(np.nanmean(im_fiber_g[mask_shell])  )    # exclusively in certain shell
+      
+                # distance shells as circles around center
+                mask_shell_center = (distance > (shells[i])) & (distance <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])  
+                mask_shell_lower_center=  (distance <= (shells[i+1])) & (~segmention["mask"][edge:-edge,edge:-edge])
+                mask_shells['Mask_shell_center'].append(mask_shell_center)
+              
+                
+                results_distance['Angle disttocenter (accumulated)'].append(np.nanmean(angle_dev[mask_shell_lower_center]*ori[mask_shell_lower_center]/np.nanmean(ori[mask_shell_lower_center])))
+                results_distance['Angle disttocenter (individual)'].append(np.nanmean(angle_dev[mask_shell_center]*ori[mask_shell_center]/np.nanmean(ori[mask_shell_center]) ))    # exclusively in certain shell
+                results_distance['Orientation disttocenter (accumulated)'].append(np.nanmean(orientation_dev_weighted[mask_shell_lower_center]*ori[mask_shell_lower_center]/np.nanmean(ori[mask_shell_lower_center])))
+                results_distance['Orientation disttocenter (individual)'].append(np.nanmean(orientation_dev_weighted[mask_shell_center]*ori[mask_shell_center]/np.nanmean(ori[mask_shell_center]) ))    # exclusively in certain shell
+                # mean intensity
+                results_distance['Intensity disttocenter (accumulated)'].append(np.nanmean(im_fiber_g[mask_shell_lower_center]))          # accumulation of lower shells
+                results_distance['Intensity disttocenter (individual)'].append(np.nanmean(im_fiber_g[mask_shell_center])  )    # exclusively in certain shell
+                
     
         # create excel sheet with results for angle analysis       
         # norm intensities   (Baseline: mean intensity of the 2 outmost shells)
@@ -606,12 +613,13 @@ def StuctureAnalysisMain(fiber_list,
             plot_angle_dev(angle_map = orientation_dev,  
                            vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
                            path_png= os.path.join(figures,"Orientation.png"),label="Orientation",dpi=dpi,cmap="viridis")
-    
+            plt.close("all") 
             # pure coherency and pure orientation
             plot_coherency(ori,path_png= os.path.join(figures,"coherency_noquiver.png"))
             plot_coherency(orientation_dev_weighted2,
                            path_png= os.path.join(figures,"Orientation_weighted_noquiver.png"),
                            label="Orientation",dpi=dpi) 
+            plt.close("all") 
             # Polar plots        
             plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
                        path_png= os.path.join(figures,"polar_coherency_weighted.png"), label = "Coherency (weighted)",dpi=dpi)
@@ -629,7 +637,7 @@ def StuctureAnalysisMain(fiber_list,
             
             plot_polar(results_angle['Angles Plotting'], results_angle['Orientation'],
                                path_png= os.path.join(figures,"Orientation_polar.png"), label = "Orientation",dpi=dpi)
-            
+            plt.close("all") 
             # summarizing triple plot
             plot_triple(results_angle,results_total , path_png= os.path.join(figures,"Triple_plot.png") ,dpi=dpi)
        
@@ -637,7 +645,7 @@ def StuctureAnalysisMain(fiber_list,
             quiv_coherency_center(vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
                              center0=center_small[0],center1 = center_small[1],
                            path_png= os.path.join(figures,"quiv_coherency_center.png"),dpi=dpi )
-             
+            plt.close("all") 
             # image fiber + segmention
             plot_fiber_seg(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
                            c0=center_small[0],c1=center_small[1],
@@ -656,7 +664,7 @@ def StuctureAnalysisMain(fiber_list,
                            vec1=min_evec[:,:,1], coherency_map=ori,show_n=10,
                            segmention=segmention["mask"][edge:-edge,edge:-edge], 
                            path_png=os.path.join(figures,"overlay2.png"),dpi=dpi ,scale=scale)
-            
+            plt.close("all") 
             ### DISTANCE PLOTS
             # plot shells - deactived as it consumes a lot of time
             # plot_shells(mask_shells['Mask_shell'],path_png=os.path.join(figures,"shells.png"),dpi=dpi )
@@ -667,7 +675,7 @@ def StuctureAnalysisMain(fiber_list,
         
             plot_distance(results_distance,string_plot = "Intensity Norm (individual)",
               path_png=os.path.join(figures,"Intensity_distance.png"),dpi=dpi)
-            
+            plt.close("all") 
             # save raw cell image   
             plot_cell(im_cell_n, path_png=os.path.join(figures,"cell-raw.png"),  scale=scale, dpi=dpi)
 

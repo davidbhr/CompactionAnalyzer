@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib_scalebar.scalebar import ScaleBar
-
+import warnings
 
 def scale_for_quiver(ar1, ar2, dims, scale_ratio=0.2, return_scale=False):
     scale = scale_ratio * np.max(dims) / np.nanmax(np.sqrt((ar1) ** 2 + (ar2) ** 2))
@@ -68,7 +68,11 @@ def filter_values(ar1, ar2, abs_filter=0, f_dist=3):
     def_abs = np.sqrt((ar1 ** 2 + ar2 ** 2))
     select_x = ((xv - 1) % f_dist) == 0
     select_y = ((yv - 1) % f_dist) == 0
-    select_size = def_abs > abs_filter
+    
+     # Ignore RuntimeWarnings here 
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        select_size = def_abs > abs_filter
     select = select_x * select_y * select_size
     s1 = ar1[select]
     s2 = ar2[select]

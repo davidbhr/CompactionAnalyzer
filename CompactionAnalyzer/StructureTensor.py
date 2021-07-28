@@ -5,7 +5,7 @@ Analyzing the orientation of structures like collagen fibres or cells in cell pa
 images locally or as a whole. This uses the structure tensor https://en.wikipedia.org/wiki/Structure_tensor
 and builds heavily on the method presented here http://bigwww.epfl.ch/demo/orientation/
 '''
-
+import warnings
 import matplotlib.pyplot as plt
 from skimage.filters import gaussian
 from scipy.ndimage.filters import uniform_filter
@@ -72,9 +72,12 @@ def select_max_min(x1, x2, b1, b2):
 
     x_max = np.zeros(x1.shape)
     x_min = np.zeros(x2.shape)
-
-    bigger1 = np.abs(b1) > np.abs(b2)  # mask where absolute value of first value is bigger
-    bigger2 = ~bigger1
+    
+    # Ignore RuntimeWarnings here 
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        bigger1 = np.abs(b1) > np.abs(b2)  # mask where absolute value of first value is bigger
+        bigger2 = ~bigger1
 
     x_max[bigger1] = x1[bigger1]
     x_max[bigger2] = x2[bigger2]

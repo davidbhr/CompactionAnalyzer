@@ -9,9 +9,8 @@ import qtawesome as qta
 os.environ["QT_API"] = "pyqt5"
 
 from qtpy import QtCore, QtWidgets, QtGui
-
 import numpy as np
-import QtShortCuts, QExtendedGraphicsView
+from CompactionAnalyzer import QtShortCuts, QExtendedGraphicsView
 import imageio
 from qimage2ndarray import array2qimage
 import matplotlib.pyplot as plt

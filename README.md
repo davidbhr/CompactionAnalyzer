@@ -106,21 +106,21 @@ SummarizeResultsDistance(data="Analysis_output", output_folder= "Analysis_output
 Now we receive a compromised excel sheet that returns the global analysis for all cells and another excel sheet with the mean distance analysis. The different columns `Mean Angle` and `Orientation` refer to the angular deviation between all orientation vectors to the respective cell center and the hereby resulting orientation. These quantities are weighted by the coherency (orientation strength) and additionally also by both, the coherency and the image intensity.  From the different cells we now can calculate different quantities, as for example the mean `Orientation (weighted by intensity and coherency)` of all cells, which is named `Overall weighted Oriantation (mean all cells)` and also stored in the same excel file.
 
 
-<img src="../master/docs/images/Fig3-combineexcel.png" width="700" />
+<img src="../master/docs/images/Fig3-combineexcel.png" width="1000" />
 
 ## Graphical User Interface (GUI)
 
 For an easy use of the CompactionAnalyzer, we provide a graphical user interface (GUI) that simplifies the execution and evaluation of several experiments. To start the GUI, just run the script `GUI.py`. Pairs of fiber and cell images can be loaded individually or batchwise by using the *-placeholder.
 
-<img src="../master//docs/images//GUI_readimages.png" width="700" />
+<img src="../master//docs/images//GUI_readimages.png" width="1000" />
 
 Parameters can be configurated and the cell-segmentationen viewed and changed individually per cell. Upon `Run` the analysis is started and results will be stored in specified output folder.
 
-<img src="../master//docs/images//GUI_evaluation.png" width="700" />
+<img src="../master//docs/images//GUI_evaluation.png" width="1000" />
 
 For data analysis, the `results_total.xlsx` files can be loaded again individually or batchwise by using the *-placeholder. Intensity and Orientation can then be evaluated individually or by adding several cells to user defined groups. Bar and distance plots (mean+-se) are created automatically and individual python-scripts to re-plot the data can be exported.
 
-<img src="../master//docs/images//GUI_DataAnalysis.png" width="700" />
+<img src="../master//docs/images//GUI_DataAnalysis.png" width="1000" />
 
 
 

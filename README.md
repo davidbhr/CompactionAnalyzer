@@ -110,9 +110,19 @@ Now we receive a compromised excel sheet that returns the global analysis for al
 
 ## Graphical User Interface (GUI)
 
-We provide a graphical user interface that simplifies the execution and evaluation of several experiments. Intensity & Orientation results of individual or grouped experiments can be visualized. To start the GUI, just run the script XX.py
+For an easy use of the CompactionAnalyzer, we provide a graphical user interface (GUI) that simplifies the execution and evaluation of several experiments. To start the GUI, just run the script `GUI.py` with your python intepreter. Pairs of fiber and cell images can be loaded individually or batchwise by using the *-placeholder.
 
-IMAGE
+<img src="../master//docs/images//GUI_readimages.png" width="1000" />
+
+Parameters can be configurated and the segmentationen viewed and changed individually per cell. Upon `Run` the analysis is started and the results are stored in specified output folder for all cells.
+
+<img src="../master//docs/images//GUI_evaluation.png" width="1000" />
+
+Intensity and Orientation can be evaluated individually or by adding several cells to user defined groups. Bar and distance plots (mean+-se) are created automatically and  individual python-scripts re-plot the data can be exported.
+
+<img src="../master//docs/images//GUI_DataAnalysis.png" width="1000" />
+
+
 
 
 ## Maxprojections & Kernel Size

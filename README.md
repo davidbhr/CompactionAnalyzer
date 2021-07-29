@@ -114,11 +114,11 @@ For an easy use of the CompactionAnalyzer, we provide a graphical user interface
 
 <img src="../master//docs/images//GUI_readimages.png" width="700" />
 
-Parameters can be configurated and the cell-segmentationen viewed and changed individually per cell. Upon `Run` the analysis is started and results will be stored in specified output folder for all cells.
+Parameters can be configurated and the cell-segmentationen viewed and changed individually per cell. Upon `Run` the analysis is started and results will be stored in specified output folder.
 
 <img src="../master//docs/images//GUI_evaluation.png" width="700" />
 
-Intensity and Orientation can be evaluated individually or by adding several cells to user defined groups. For this, the `results_total.xlsx` can be loaded again individually or in batches by using the *-placeholder. Bar and distance plots (mean+-se) are created automatically and individual python-scripts to re-plot the data can be exported.
+For data analysis, the `results_total.xlsx` files can be loaded again individually or batchwise by using the *-placeholder. Intensity and Orientation can then be evaluated individually or by adding several cells to user defined groups. Bar and distance plots (mean+-se) are created automatically and individual python-scripts to re-plot the data can be exported.
 
 <img src="../master//docs/images//GUI_DataAnalysis.png" width="700" />
 

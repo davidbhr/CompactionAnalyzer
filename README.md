@@ -37,7 +37,7 @@ cell_list_string =  r"C:\user\imagedata\cell_*\*ch01*.tif"    # input stained im
 fiber_list,cell_list, out_list = generate_lists(fiber_list_string, cell_list_string, output_main =output_folder)
 ```
 
-We now want to start the analysis and compute the orientation of individual fibers using structure tensor analysis. Here *sigma_tensor* is the kernel size that determines the length scale on which the strucutre is analysed. The kernel size should be in the range of the structure-size we want to look at and can be optimized for the individual application. For our fiber gels we use a value of 7 µm, which is in range of the pore size. 
+We now want to start the analysis and compute the orientation of individual fibers using structure tensor analysis. Here *sigma_tensor* is the kernel size that determines the length scale on which the strucutre is analysed. The kernel size should be in the range of the structure-size we want to look at and can be optimized for the individual application. For our fiber gels we use a value of 7 µm, which is in range of the pore size. The script `DetermineWindowSize.py` in the tutorial folder provides a template to systematically test different windowsizes on the same image pair and from that select the ideal size of the `sigma_tensor` for this setup (which displays a peak in the orientation).
 
 
 We can redefine all of the following paramters before starting the analysis. The corresponding pixel scale is set as `scale` and the segmentiation can be changed by using the `segmention_thres` or by changing the local contrast enhancement via `seg_gaus1, seg_gaus2`. With `show_segmentation = True` we can inspect the segmentation or - if preferred - segment the mask manually by clicking using `manual_segmention  = True`.
@@ -125,18 +125,6 @@ For data analysis, the `results_total.xlsx` files can be loaded again individual
 
 
 
-## Maxprojections & Kernel Size
-
-ToDo
- 
-Might be usefull to use Maximum intensity image around cell (smalls stacks) to include maximal compation.  
- For different max projection height it might be necessary to change parameter X , since fiberstructure ppearsmore densly. 
- Maximumprojection can also be created using the function   XY
-
-
-IMAGE coolwarm erosion
-
-
 ## Resolving Drug Effects & Multicellular Compaction Assay
 
 An application of the CompactionAnalyzer is resolving drug-dependend effects on cell contractility. Due to variability in cell shapes, a large sample size of cells is desirable
@@ -151,7 +139,7 @@ Beneath individual cells also the compaction assay can be used on a multicellula
 
 
 
-## Literature
+## Read more
 
 Read more about the method in the following article
 

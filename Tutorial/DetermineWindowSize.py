@@ -11,32 +11,34 @@ from CompactionAnalyzer.CompactionFunctions import *
 import pandas as pd
 from tqdm import tqdm
 
-##### Script to determine optimal windowsize on given pair of images
-
-
 # load in the maxprojection data of cell and fiber to do the test 
-fiber_list_string =  r"Cell_1\C003.tif"
-cell_list_string =  r"Cell_1\C004.tif"  
+
+#### see parameter file for segmentation 
+
+
+fiber_list_string =  r"DetermineWindowSize\Cell_1\C003.tif"
+cell_list_string =  r"DetermineWindowSize\Cell_1\C004.tif"  # ExampleCell
 
   
+
+
 # Set analysis arameters 
-scale =  0.318                 # imagescale as um per pixel
+scale =  0.318                # imagescale as um per pixel
 edge = 40                       # Cutt of pixels at the edge since values at the border cannot be trusted
 segmention_thres =1# for cell segemetntion, thres 1 equals normal otsu threshold , change to detect different percentage of bright pixel
-seg_gaus1, seg_gaus2 =0.5,100     # 2 gaus filters used for local contrast enhancement for segementation
+seg_gaus1, seg_gaus2 =1.5,100     # 2 gaus filters used for local contrast enhancement for segementation
 sigma_first_blur  = 0.5         # slight first bluring of whole image before using structure tensor
 show_segmentation = False
 segmention_method="otsu"               #  use "otsu" , "yen"  or "entropy" as segmentation method
 regional_max_correction = True
 seg_iter = 1
-dpi = 300
 
 # specify which windowsizes should be tested (list of values in µm)
 sigma_list = np.arange(1.0,30,1)   ## alternative in the style of [1,2,3,4,5]
 
 
 ## main output folder
-output_folder = r"SigmaTest_Cell1"
+output_folder = r"DetermineWindowSize\Output"
 #create output folder if not existing
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
@@ -67,12 +69,11 @@ for sigma in tqdm(sigma_list):
                          seg_iter =seg_iter,
                          SaveNumpy = False  ,
                          plotting = True,
-                         dpi = dpi
+                         dpi = 100
                         )
 
 
 ### plot results
-
 #read in all creates result folder
 result_folders = natsorted(glob.glob(os.path.join(output_folder, "Sigma*")))
 

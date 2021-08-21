@@ -207,6 +207,7 @@ def StuctureAnalysisMain(fiber_list,
                          edge = 40   ,                  # Cutt of pixels at the edge since values at the border cannot be trusted
                          segmention_thres = 1.0 ,       # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
                          seg_gaus1=0.5, seg_gaus2 = 100 ,  # 2 gaus filters used for local contrast enhancement; For seg_gaus2 = None a single gauss filter will be applied
+                         max_dist = None,                # optional: specify the maximal distance aroun cell center for analysis (in px)
                          regional_max_correction = True,# correct background noise using regional maxima approach
                          show_segmentation = False ,    # display the segmentation ooutput
                          sigma_first_blur  = 0.5  ,     # slight first bluring of whole image before using structure tensor
@@ -238,6 +239,7 @@ def StuctureAnalysisMain(fiber_list,
 
     """
     plt.ioff()
+   # plt.ion()
     
     # if not specified use 7um for tensor analysis and 5um shells
     if not sigma_tensor:
@@ -265,7 +267,10 @@ def StuctureAnalysisMain(fiber_list,
                                  'manual_segmention': [manual_segmention], 'plotting': [plotting], 'dpi': [dpi],
                                  'SaveNumpy': [SaveNumpy], 'norm1': [norm1], 'norm2': [norm2],
                                  'seg_invert': [seg_invert], 'seg_iter': [seg_iter], 'segmention_method': [segmention_method],
-                                 'load_segmentation': [load_segmentation], 'path_seg': [path_seg]},
+                                 'load_segmentation': [load_segmentation], 'path_seg': [path_seg],
+                                 'max_dist': [max_dist]
+                                 
+                                 },
                   'Data' :   {'fiber_list': [fiber_list], 'cell_list': [cell_list], 'out_list': [out_list]}
                     }  
         with open(os.path.join(out_list[n],"parameters.yml"), 'w') as yaml_file:
@@ -324,8 +329,7 @@ def StuctureAnalysisMain(fiber_list,
         dy_norm = (dy/distance)
         dist_surface = distance_transform_edt(~segmention["mask"])[edge:-edge,edge:-edge] # dist to surface
     
-    
-        
+          
         """
         total image analysis
         """
@@ -336,9 +340,15 @@ def StuctureAnalysisMain(fiber_list,
         # orientation_dev_01 = np.abs((dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1]))
         orientation_dev = -(2*orientation_dev_01-1)  # norm from -1 to 1 ; changed sign
         
+        ### set values to nan if max distance is specified
+        ## for following analysis then only orientation within a certtain distance to the cell are used
+        if max_dist:
+            angle_dev[distance>=max_dist] = np.nan
+            ori[distance>=max_dist] = np.nan
+            angle[distance>=max_dist] = np.nan # also for angular evaluation
   
         # weighting by coherence
-        angle_dev_weighted = (angle_dev * ori) / np.nanmean(ori)     # no angle values anymore but the mean later is again an angle
+        angle_dev_weighted = (angle_dev * ori) / np.nanmean(ori)     # no angle values anymore (stretched due weights) but the mean later is again an angle
         orientation_dev_weighted_01 =  ((orientation_dev_01 * ori) / np.nanmean(ori)) 
         orientation_dev_weighted = -(2  *orientation_dev_weighted_01 - 1)
         
@@ -381,9 +391,9 @@ def StuctureAnalysisMain(fiber_list,
         # cos_dev_total1 = np.nanmean(np.cos(2*angle_dev[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
         # cos_dev_total2 = np.nanmean(np.cos(2*angle_dev_weighted[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
         # cos_dev_total3 = np.nanmean(np.cos(2*angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))   
-        cos_dev_total1 = np.nanmean(orientation_dev[(~segmention["mask"][edge:-edge,edge:-edge])])
-        cos_dev_total2 = np.nanmean(orientation_dev_weighted[(~segmention["mask"][edge:-edge,edge:-edge])])
-        cos_dev_total3 = np.nanmean(orientation_dev_weighted2[(~segmention["mask"][edge:-edge,edge:-edge])])
+        cos_dev_total1 = np.nanmean(orientation_dev[(~segmention["mask"][edge:-edge,edge:-edge])   ])
+        cos_dev_total2 = np.nanmean(orientation_dev_weighted[(~segmention["mask"][edge:-edge,edge:-edge])     ])
+        cos_dev_total3 = np.nanmean(orientation_dev_weighted2[(~segmention["mask"][edge:-edge,edge:-edge])     ])
         coh_total = np.nanmean(ori[(~segmention["mask"][edge:-edge,edge:-edge]) ])
         coh_total2 = np.nanmean(ori_weight2[(~segmention["mask"][edge:-edge, edge:-edge])])
              
@@ -411,6 +421,7 @@ def StuctureAnalysisMain(fiber_list,
         Angular sections
         """
         
+        
         # initialize result dictionary
         results_angle = {'Angles': [], 'Angles Plotting': [], 'Angle Deviation': [], 'Angle Deviation (weighted by coherency)': [], 
                          'Angle Deviation (weighted by intensity and coherency)': [],
@@ -422,12 +433,21 @@ def StuctureAnalysisMain(fiber_list,
     
         # make the angle analysis in sections
         for alpha in range(-180, 180, angle_sections):
+                # mask the angle section
                 mask_angle = (angle > (alpha-angle_sections/2)) & (angle <= (alpha+angle_sections/2)) & (~segmention["mask"][edge:-edge,edge:-edge])
+                
+                # in case we have a distance limit only draw angles upn that distance ### not necessary anymore now use "max_dist" for both
+                # if angle_sections_distance:
+                #     mask_angle = (angle > (alpha-angle_sections/2)) & (angle <= (alpha+angle_sections/2)) & (~segmention["mask"][edge:-edge,edge:-edge]) & (distance<angle_sections_distance)
+                     
+                # special case at borders   
                 if alpha == -180:
                       mask_angle = ((angle > (180-angle_sections/2)) | (angle <= (alpha+angle_sections/2))) & (~segmention["mask"][edge:-edge,edge:-edge])
+                            
                 if alpha == 180:
-                      mask_angle = ((angle > (alpha-angle_sections/2)) | (angle <= (-180 +angle_sections/2))) & (~segmention["mask"][edge:-edge,edge:-edge])            
-                      
+                      mask_angle = ((angle > (alpha-angle_sections/2)) | (angle <= (-180 +angle_sections/2))) & (~segmention["mask"][edge:-edge,edge:-edge])     
+                     
+               
                 # save angle data
                 angle_current = alpha * np.pi / 180
                 results_angle['Angles'].append(angle_current)  
@@ -446,7 +466,7 @@ def StuctureAnalysisMain(fiber_list,
                 results_angle['Orientation'].append(np.nanmean(orientation_dev[mask_angle]))
                 results_angle['Orientation (weighted by coherency)'].append(np.nanmean(orientation_dev[mask_angle]*ori[mask_angle]/np.nanmean(ori[mask_angle])))
                 results_angle['Orientation (weighted by intensity and coherency)'].append(np.nanmean(orientation_dev[mask_angle]*ori[mask_angle]*weight_image[mask_angle]/np.nanmean(ori[mask_angle]*weight_image[mask_angle])))
-       
+
         # create excel sheet with results for angle analysis       
         excel_angles= pd.DataFrame.from_dict(results_angle)
         excel_angles.to_excel(os.path.join(out_list[n],"results_angles.xlsx"))

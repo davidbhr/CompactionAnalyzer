@@ -40,7 +40,7 @@ fiber_list,cell_list, out_list = generate_lists(fiber_list_string, cell_list_str
 We now want to start the analysis and compute the orientation of individual fibers using structure tensor analysis. Here *sigma_tensor* is the kernel size that determines the length scale on which the strucutre is analysed. The kernel size should be in the range of the structure-size we want to look at and can be optimized for the individual application. For our fiber gels we use a value of 7 µm, which is in range of the pore size. The script `DetermineWindowSize.py` in the tutorial folder provides a template to systematically test different windowsizes on the same image pair and from that select the ideal size of the `sigma_tensor` for this setup (which displays a peak in the orientation).
 
 
-We can redefine all of the following paramters before starting the analysis. The corresponding pixel scale is set as `scale` and the segmentiation can be changed by using the `segmention_thres` or by changing the local contrast enhancement via `seg_gaus1, seg_gaus2`. With `show_segmentation = True` we can inspect the segmentation or - if preferred - segment the mask manually by clicking using `manual_segmention  = True`.
+We can redefine all of the following paramters before starting the analysis. The corresponding pixel scale is set as `scale` and the segmentiation can be changed by using the `segmention_thres` or by changing the local contrast enhancement via `seg_gaus1, seg_gaus2`. With `show_segmentation = True` we can inspect the segmentation or - if preferred - segment the mask manually by clicking using `manual_segmention  = True`. Further, a maximal distance around the cell center can be specified for the analysis using `max_dist`. 
 
 ```python
 scale =  0.318                  # imagescale in um per pixel
@@ -49,6 +49,7 @@ sigma_tensor = 7/scale          # sigma of applied gauss filter / windowsize for
                                 # 7 um for collagen 
 edge = 40                       # Cut off pixels at the edge since values at the border cannot be trusted
 segmention_thres = 1.0          # for cell segmentation, thres 1 equals normal otsu threshold , change to detect different percentage of bright pixel
+max_dist = None,                # optional: specify the maximal distance around cell center for the analysis (in px)
 seg_gaus1, seg_gaus2 = 0.5,100  # 2 gaus filters used for local contrast enhancement for segementation
 show_segmentation = False        # display the segmentation output to visualze the mask - script wont run further
 sigma_first_blur  = 0.5         # slight first bluring of whole image before using structure tensor

@@ -207,7 +207,7 @@ def StuctureAnalysisMain(fiber_list,
                          edge = 40   ,                  # Cutt of pixels at the edge since values at the border cannot be trusted
                          segmention_thres = 1.0 ,       # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
                          seg_gaus1=0.5, seg_gaus2 = 100 ,  # 2 gaus filters used for local contrast enhancement; For seg_gaus2 = None a single gauss filter will be applied
-                         max_dist = None,                # optional: specify the maximal distance aroun cell center for analysis (in px)
+                         max_dist = None,                # optional: specify the maximal distance around cell center for analysis (in px)
                          regional_max_correction = True,# correct background noise using regional maxima approach
                          show_segmentation = False ,    # display the segmentation ooutput
                          sigma_first_blur  = 0.5  ,     # slight first bluring of whole image before using structure tensor

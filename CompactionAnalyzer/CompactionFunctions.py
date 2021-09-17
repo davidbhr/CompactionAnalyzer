@@ -107,7 +107,7 @@ def regional_maxima(img):
     return image
 
 def segment_cell(img, thres=1, seg_gaus1 = 0.5, seg_gaus2=100, seg_iter=1,show_segmentation = False, 
-                 segmention_method="otsu", seg_invert=False, regional_max_correction=True):   
+                 segmention_method="otsu", seg_invert=False, regional_max_correction=True, segmention_min_area=1000):   
     """
     Image segmentation function to create  mask, radius, and position of a spheroid in a grayscale image.
     Args:
@@ -162,7 +162,7 @@ def segment_cell(img, thres=1, seg_gaus1 = 0.5, seg_gaus2=100, seg_iter=1,show_s
     # remove other objects
     if seg_iter is not None:
         mask = scipy_morph.binary_closing(mask, iterations=seg_iter)
-        mask = remove_small_objects(mask, min_size=1000)
+        mask = remove_small_objects(mask, min_size=segmention_min_area)
         mask = scipy_morph.binary_dilation(mask, iterations=seg_iter)
         mask = scipy_morph.binary_fill_holes(mask)
     
@@ -222,6 +222,7 @@ def StuctureAnalysisMain(fiber_list,
                          seg_invert=False,              # if segmentation is inverted dark objects are detected inseated of bright
                          seg_iter = 1,                  # repetition of closing and dilation steps for segmentation
                          segmention_method="otsu",      #  use "otsu", "entropy" or "yen"  as segmentation method
+                         segmention_min_area = 1000,     
                          load_segmentation = False,     # if true enter the path of the segementation math in path seg
                          path_seg = None):
     """
@@ -255,8 +256,7 @@ def StuctureAnalysisMain(fiber_list,
         #create output folder if not existing
         if not os.path.exists(out_list[n]):
             os.makedirs(out_list[n])
-         
-            
+           
         #### save a parameters file   
         import yaml
         dict_file = {
@@ -279,7 +279,13 @@ def StuctureAnalysisMain(fiber_list,
             
         # load images
         im_cell  = imageio.imread(cell_list[n])  #color.rgb2gray(..)
-        im_fiber = imageio.imread(fiber_list[n])   #color.rgb2gray(
+        im_fiber = imageio.imread(fiber_list[n])   #color.rgb2gray()
+        
+        ## if 3 channels convert to grey  
+        if len(im_cell.shape) == 3 :
+            im_cell = color.rgb2gray(im_cell)
+        if len(im_fiber.shape) == 3 :
+            im_fiber = color.rgb2gray(im_fiber)    
         
         # # applying normalizing/ contrast spreading
         im_cell_n = normalize(im_cell, norm1, norm2)
@@ -294,7 +300,7 @@ def StuctureAnalysisMain(fiber_list,
         if (manual_segmention==False) and (load_segmentation == False):
             segmention = segment_cell(im_cell_n, thres= segmention_thres, seg_gaus1 = seg_gaus1, seg_gaus2=seg_gaus2,
                                       show_segmentation = show_segmentation,seg_invert=seg_invert,seg_iter=seg_iter,
-                                      segmention_method=segmention_method, regional_max_correction=regional_max_correction)   
+                                      segmention_method=segmention_method, regional_max_correction=regional_max_correction, segmention_min_area=segmention_min_area)   
               
         if load_segmentation:
               segmention = np.load(path_seg,allow_pickle=True).item()             

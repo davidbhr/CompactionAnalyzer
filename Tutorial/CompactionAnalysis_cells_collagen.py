@@ -14,7 +14,6 @@ cell_list_string =  r"ExampleCells\*\C004.tif"   # ExampleCell
 output_folder = "ExampleCells_output" # base path to store results
 fiber_list,cell_list, out_list = generate_lists(fiber_list_string, cell_list_string, output_main =output_folder)
 
-
 # Set Parameters 
 scale =  0.318                  # imagescale as um per pixel
 sigma_tensor = 7/scale          # sigma of applied gauss filter / window for structure tensor analysis in px
@@ -23,7 +22,8 @@ sigma_tensor = 7/scale          # sigma of applied gauss filter / window for str
 edge = 40                       # Cutt of pixels at the edge since values at the border cannot be trusted
 segmention_thres = 1.0          # for cell segemetntion, thres 1 equals normal otsu threshold , change to detect different percentage of bright pixel
 seg_gaus1, seg_gaus2 = 6,80     # 2 gaus filters used for local contrast enhancement for segementation
-show_segmentation = False        # display the segmentation output to test parameters - script wont run further
+max_dist = None                 # optional: specify the maximal distance around cell center for the analysis (in px)
+show_segmentation = False       # display the segmentation output to test parameters - script wont run further
 sigma_first_blur  = 0.5         # slight first bluring of whole image before using structure tensor
 angle_sections = 5              # size of angle sections in degree 
 shell_width =  5/scale          # pixel width of distance shells (px-value=um-value/scale)
@@ -39,7 +39,7 @@ segmention_method="otsu"               #  use "otsu" or "yen"  as segmentation m
 load_segmentation = False        # if true enter the path of the segementation math in path_seg to
 path_seg = None                  # load in a saved.segmetnion.npy 
 
-                      
+               
 # Start the structure analysis with the above specified parameters
 StuctureAnalysisMain(fiber_list=fiber_list,
                      cell_list=cell_list, 
@@ -47,6 +47,7 @@ StuctureAnalysisMain(fiber_list=fiber_list,
                      scale=scale, 
                      sigma_tensor = sigma_tensor , 
                      edge = edge , 
+                     max_dist = max_dist,          
                      segmention_thres =segmention_thres , 
                      seg_gaus1=  seg_gaus1, 
                      seg_gaus2 = seg_gaus2 ,

@@ -38,8 +38,9 @@ seg_iter = 1                    # repetition of closing and dilation steps for s
 segmention_method="otsu"               #  use "otsu" or "yen"  as segmentation method
 load_segmentation = False        # if true enter the path of the segementation math in path_seg to
 path_seg = None                  # load in a saved.segmetnion.npy 
+regional_max_correction = True
 
-                      
+                  
 # Start the structure analysis with the above specified parameters
 StuctureAnalysisMain(fiber_list=fiber_list,
                      cell_list=cell_list, 
@@ -64,6 +65,7 @@ StuctureAnalysisMain(fiber_list=fiber_list,
                      seg_iter=seg_iter,
                      segmention_method=segmention_method,
                      load_segmentation=load_segmentation,
+                     regional_max_correction=regional_max_correction,
                      path_seg=path_seg)
 
 

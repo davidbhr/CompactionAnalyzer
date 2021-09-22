@@ -50,22 +50,25 @@ sigma_tensor = 7/scale          # sigma of applied gauss filter / windowsize for
 edge = 40                       # Cut off pixels at the edge since values at the border cannot be trusted
 segmention_thres = 1.0          # for cell segmentation, thres 1 equals normal otsu threshold , change to detect different percentage of bright pixel
 max_dist = None,                # optional: specify the maximal distance around cell center for the analysis (in px)
-seg_gaus1, seg_gaus2 = 0.5,100  # 2 gaus filters used for local contrast enhancement for segementation
-show_segmentation = False        # display the segmentation output to visualze the mask - script wont run further
-sigma_first_blur  = 0.5         # slight first bluring of whole image before using structure tensor
-angle_sections = 5              # size of angle sections in degree 
-shell_width =  5/scale          # pixel width of distance shells (px-value=um-value/scale)
-manual_segmention = False       # manual segmentation of mask by clicking the cell outline
-plotting = True                 # creates and saves plots additionally to excel files 
-dpi = 200                       # resolution of plots to be stored
-SaveNumpy = False               # saves numpy arrays for later analysis - might create lots of data
-norm1,norm2 = 1,99              # contrast spreading for input images  by setting all values below norm1-percentile to zero and
-                                # all values above norm2-percentile to 1
-seg_invert=False                # if segmentation is inverted (True) dark objects are detected inseated of bright ones
-seg_iter = 1                    # repetition of closing and dilation steps for segmentation      
-segmention_method="otsu"         #  use "otsu" or "yen" or "entropy"  as segmentation method
-load_segmentation = False        # if true enter the path of the segementation math in path_seg to
-path_seg = None                  # load in a saved segmentation *.npy - file
+seg_gaus1, seg_gaus2 = 0.5,100  # 2 gaus filters used as bandpassfilter for local contrast enhancement; For seg_gaus2 = None a single gauss filter is applied
+max_dist = None,                # optional: specify the maximal distance around cell center for analysis (in px)
+regional_max_correction = True, # background correction using regional maxima approach
+show_segmentation = False ,     # display the segmentation output (script won't run further)
+sigma_first_blur  = 0.5  ,      # slight first bluring of whole image before appplying the structure tensor
+angle_sections = 5    ,         # size of angle sections in degree 
+shell_width =  None        ,    # pixel width of distance shells (px-value=um-value/scale)
+manual_segmention = False    ,  # segmentation of mask by manual clicking the cell outline
+plotting = True     ,           # creates and saves individual figures additionally to the excel files 
+dpi = 200      ,                # resolution of figures 
+SaveNumpy = False       ,       # saves numpy arrays for later analysis - can create large data files
+norm1=1,norm2 = 99  ,           # contrast spreading for input images between norm1- and norm2-percentile; values below norm1-percentile are set to zero and
+                                # values above norm2-percentile are set to 1
+seg_invert=False,               # if segmentation is inverted dark objects are detected inseated of bright objects
+seg_iter = 1,                   # number of repetitions of  binary closing, dilation and filling holes steps
+segmention_method="otsu",       # use "otsu", "entropy" or "yen"  as segmentation method
+segmention_min_area = 1000,     # small bjects below this px-area are removed during cell segmentation
+load_segmentation = False,      # if True enter the path of the segementation.npy - file in path_seg
+path_seg = None):               # to load a mask
 ```
 
 

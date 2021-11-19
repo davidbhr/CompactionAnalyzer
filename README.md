@@ -142,5 +142,6 @@ Beneath individual cells also the compaction assay can be used on a multicellula
 
 Read more about the method in the following article
 
-DOI of the paper: TODO: Write a paper
+DOI of the paper: TODO: Write a paper \n
+
 DOI of the code: [![DOI](https://zenodo.org/badge/278071833.svg)](https://zenodo.org/badge/latestdoi/278071833)

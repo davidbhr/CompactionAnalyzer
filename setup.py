@@ -5,7 +5,7 @@ from setuptools import setup
 setup(
     name='CompactionAnalyzer',
     packages=['CompactionAnalyzer'],
-    version='1.0',
+    version='1.0.1',
     description='A Python package to analyze tissue compaction around cells in fiber materials',
     url='',
     download_url = '',

@@ -12,8 +12,12 @@ from scipy.ndimage.filters import uniform_filter
 import os
 import copy
 import numpy as np
-
-from skimage.draw import circle
+## circle funtion is calles disk in newer version
+try:
+    from skimage.draw import circle
+except:
+    from skimage.draw import disk as circle
+    
 from scipy.signal import convolve2d
 from CompactionAnalyzer.utilities import  convolution_fitler_with_nan
 

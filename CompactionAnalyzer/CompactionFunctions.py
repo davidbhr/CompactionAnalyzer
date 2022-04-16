@@ -224,7 +224,8 @@ def StuctureAnalysisMain(fiber_list,
                          segmention_method="otsu",      #  use "otsu", "entropy" or "yen"  as segmentation method
                          segmention_min_area = 1000,    # small bjects below this px-area are removed during cell segmentation
                          load_segmentation = False,     # if True enter the path of the segementation.npy - file in path_seg
-                         path_seg = None):              # to load a mask
+                         path_seg = None,               # to load a mask
+                         ignore_cell_outline=False):    # if True the cell area is not set to nan and orientation are calculted everywhere - still the cell center is calculated from segmention    
     """
     Main analysis
     
@@ -308,10 +309,17 @@ def StuctureAnalysisMain(fiber_list,
         # center of the new cropped image (to avoid edge effects)
         center_small = (segmention["centroid"][0]-edge,segmention["centroid"][1]-edge)
         
-        # set segmention mask to nan to avoid effects within cell  (maybe not needed if signal below cell makes sense)
-        im_fiber_g_forstructure = im_fiber_g.copy()
-        im_fiber_g_forstructure[segmention["mask"]] = np.nan
-     
+       
+        ## do not set cell area to nan and but only use center from segmention if activaed
+        if ignore_cell_outline is True:
+            im_fiber_g_forstructure = im_fiber_g.copy() 
+        else:
+            # set segmention mask to nan to avoid effects within cell  (maybe not needed if signal below cell makes sense)
+            im_fiber_g_forstructure = im_fiber_g.copy()    
+            im_fiber_g_forstructure[segmention["mask"]] = np.nan
+            
+            
+        
         """
         Structure tensor
         """
@@ -339,7 +347,7 @@ def StuctureAnalysisMain(fiber_list,
         """
         total image analysis
         """
-        # Angular deviation from orietation to center vector - 
+        # Angular deviation from orietation to center vector (projection to only have positive deviation angle values since negative/positive deviation does not matter here)
         angle_dev = np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) * 360/(2*np.pi) 
         # calculate oreination from angle_dev since they are normal distributed and np.abs((dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) is not
         orientation_dev_01 = angle_dev/90  

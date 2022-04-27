@@ -140,6 +140,26 @@ def plot_coherency(coherency,path_png,label="Coherency",dpi=300):
     plt.axis('off'); cbar.set_label(label,fontsize=12)
     plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0); plt.tight_layout()
     return fig
+
+
+def plot_fancy_overlay(fiber, cell, field,path_png,label="field",dpi=300,cmap_cell="Greys_r",cmap_fiber="Greys_r",
+                       cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,   # example cmaps: viridis/inferno/coolwarm 
+                       omin=-1, omax=1, scale=None):                                
+    fig =plt.figure()
+    plt.imshow(field,cmap=cmap_angle,vmin=omin,vmax=omax,alpha=alpha_ori);cbar =plt.colorbar()
+    plt.imshow(fiber, cmap=cmap_fiber,alpha=alpha_fiber) 
+    plt.imshow(cell, cmap=cmap_cell,alpha=alpha_cell) 
+    plt.axis('off');
+    cbar.set_label(label,fontsize=12)
+    if scale is not None:
+        scalebar = ScaleBar(scale, "um", length_fraction=0.1, location="lower right", box_alpha=0 , 
+                    color="k")
+        plt.gca().add_artist(scalebar)    
+    plt.tight_layout()   
+    plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
+    return fig
+
+
      
 def plot_polar(angle_plotting, something, path_png,label="something",dpi=300,
                something2 = None, something3 = None, label2 = None, label3 =None):

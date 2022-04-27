@@ -654,6 +654,20 @@ def StuctureAnalysisMain(fiber_list,
                            path_png= os.path.join(figures,"Orientation_weighted_noquiver.png"),
                            label="Orientation",dpi=dpi) 
             plt.close("all") 
+            
+            ### more fancy overlay plot of cell & fiber & orientation (notweighted)
+            plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
+                               im_cell_n[edge:-edge,edge:-edge],
+                               orientation_dev,
+                               path_png= os.path.join(figures,"Orientation_overlay.png"),                       
+                               label="Orientation",dpi=dpi,
+                               # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
+                               # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
+                                omin=-1, omax=1,scale=scale)
+  
+            plt.close("all") 
+        
+            
             # Polar plots        
             plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
                        path_png= os.path.join(figures,"polar_coherency_weighted.png"), label = "Coherency (weighted)",dpi=dpi)
@@ -698,6 +712,9 @@ def StuctureAnalysisMain(fiber_list,
                            vec1=min_evec[:,:,1], coherency_map=ori,show_n=10,
                            segmention=segmention["mask"][edge:-edge,edge:-edge], 
                            path_png=os.path.join(figures,"overlay2.png"),dpi=dpi ,scale=scale)
+            ##
+            
+            
             plt.close("all") 
             ### DISTANCE PLOTS
             # plot shells - deactived as it consumes a lot of time

@@ -1,6 +1,6 @@
 # CompactionAnalyzer 
 
-Cells apply contractile forces to their surrounding e.g. during migration, development, wound healing, or in various diseases. To study these processes, cellular forces can be measrued using traction force microscopy. However, 3D traction force microscopy can be very laborious (nonlinear FE models, rheology, regularization). In 3D fiber networks,  alignment and compaction of collagen fibers is a consequence of cellular forces (see XXX). The method here quantifies the amount of fiber allignment & fiber density. These quantities can then be used as an alternative proxy value of contractle force (see XX).
+Cells apply contractile forces to their surrounding e.g. during migration, development, wound healing, or in various diseases. To study these processes, cellular forces can be measrued using traction force microscopy. However, 3D traction force microscopy can be very laborious (nonlinear FE models, rheology, regularization). In 3D fiber networks,  alignment and compaction of collagen fibers is a consequence of cellular forces (see XXX). The method here quantifies the amount of fiber allignment & fiber density. These quantities can then be used as an alternative proxy value of contractliie force (or for different purposes; see XX).
 
 
 Add Gif here

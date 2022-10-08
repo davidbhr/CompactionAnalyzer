@@ -17,6 +17,7 @@ setup(
                       'matplotlib>=2.2.2',
                       'roipoly>=0.5.2'
 					  'pyyml',
+					  'natsort',
 					  'matplotlib-scalebar'],
     keywords = ['structure', 'contractility', 'compaction','fibrosis', 'biophysics'],
     classifiers = [],

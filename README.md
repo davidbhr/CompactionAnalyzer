@@ -4,9 +4,10 @@ Cells apply contractile forces to their surrounding e.g. during migration, devel
 
 <p align="center">
 <img src="../master//docs/images/TimelapseHSC.gif" width="600" />
+Hepatic stellate cell compacting a collagen type I hydrogel over time.
 </p>
 
-Video showing a hepatic stellate cell compacting collagen type I matrices over time.
+
 
 ## Quantification of tissue compaction around cells
 

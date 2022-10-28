@@ -159,4 +159,3 @@ Read more about the method in the following article
 
 DOI of the paper: TODO: Write a paper 
 
-DOI of the code: [![DOI](https://zenodo.org/badge/278071833.svg)](https://zenodo.org/badge/latestdoi/278071833)

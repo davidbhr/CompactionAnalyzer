@@ -69,6 +69,15 @@ def custom_mask(img,show_segmentation=True):
         dict: Dictionary with keys: mask, radius, centroid (x/y)
     """
     from roipoly import RoiPoly
+    import matplotlib
+    
+    # switch backend for roipoly
+    try:
+        mpl_backend = matplotlib.get_backend()
+        matplotlib.use('Qt5Agg')  
+    except:
+         print ("Switched to Qt5Agg Backend for Roipoly")
+         
     # need to install RoiPoly package via pip to use this function  
     height = img.shape[0]
     width  = img.shape[1]
@@ -93,7 +102,15 @@ def custom_mask(img,show_segmentation=True):
     # if show_segmentation:
     #     plt.figure()
     #     plt.subplot(121), plt.imshow(img)
-    #     plt.subplot(122), plt.imshow(mask)    
+    #     plt.subplot(122), plt.imshow(mask)
+
+    # switch to original backend
+    try:
+        matplotlib.use(mpl_backend)
+        print ("Switched Back")
+    except:
+        print ("Could not switched back")
+        
     return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)} 
 
 def regional_maxima(img):

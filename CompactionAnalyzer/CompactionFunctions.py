@@ -221,7 +221,7 @@ def StuctureAnalysisMain(fiber_list,
                          sigma_tensor = None ,          # sigma of applied gauss filter / window for structure tensor analysis in px
                                                         # should be in the order of the objects to analyze !! 
                                                         # 7 um for collagen 
-                         edge = 40   ,                  # Cutt of pixels at the edge since values at the border cannot be trusted
+                         edge = 15   ,                  # Cutt of pixels at the edge since values at the border cannot be trusted
                          segmention_thres = 1.0 ,       # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
                          seg_gaus1=0.5, seg_gaus2 = 100 , # 2 gaus filters used as bandpassfilter for local contrast enhancement; For seg_gaus2 = None a single gauss filter is applied
                          max_dist = None,               # optional: specify the maximal distance around cell center for analysis (in px)
@@ -236,6 +236,7 @@ def StuctureAnalysisMain(fiber_list,
                          SaveNumpy = False       ,      # saves numpy arrays for later analysis - can create large data files
                          norm1=1,norm2 = 99  ,          # contrast spreading for input images between norm1- and norm2-percentile; values below norm1-percentile are set to zero and
                                                         # values above norm2-percentile are set to 1
+                                                        ### use norm1= 0,norm2 = 100 if no contras enhancement desired
                          seg_invert=False,              # if segmentation is inverted dark objects are detected inseated of bright objects
                          seg_iter = 1,                  # number of repetitions of  binary closing, dilation and filling holes steps
                          segmention_method="otsu",      #  use "otsu", "entropy" or "yen"  as segmentation method
@@ -304,12 +305,12 @@ def StuctureAnalysisMain(fiber_list,
             im_cell = color.rgb2gray(im_cell)
         if len(im_fiber.shape) == 3 :
             im_fiber = color.rgb2gray(im_fiber)    
-        
+       
         # # applying normalizing/ contrast spreading
         im_cell_n = normalize(im_cell, norm1, norm2)
         im_fiber_n = normalize(im_fiber, norm1, norm2)  
         im_fiber_g = gaussian(im_fiber_n, sigma=sigma_first_blur)     # blur fiber image slightly (test with local gauss - similar)
-        
+
 
         # segment cell (either manual or automatically)
         if manual_segmention==True:
@@ -343,10 +344,13 @@ def StuctureAnalysisMain(fiber_list,
         # Structure Tensor Orientation
         # get structure tensor
         ori, max_evec, min_evec, max_eval, min_eval = analyze_local(im_fiber_g_forstructure, sigma=sigma_tensor, size=0, filter_type="gaussian")
+  
         # cut off edges as specified
         if edge != 0:
             ori, max_evec, min_evec, max_eval, min_eval = ori[edge:-edge,edge:-edge], max_evec[edge:-edge,edge:-edge], min_evec[edge:-edge,edge:-edge], \
                                                           max_eval[edge:-edge,edge:-edge], min_eval[edge:-edge,edge:-edge]
+        
+
         """
         coordinates
         """
@@ -366,11 +370,10 @@ def StuctureAnalysisMain(fiber_list,
         """
         # Angular deviation from orietation to center vector (projection to only have positive deviation angle values since negative/positive deviation does not matter here)
         angle_dev = np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) * 360/(2*np.pi) 
-        # calculate oreination from angle_dev since they are normal distributed and np.abs((dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) is not
-        orientation_dev_01 = angle_dev/90  
-        # orientation_dev_01 = np.abs((dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1]))
-        orientation_dev = -(2*orientation_dev_01-1)  # norm from -1 to 1 ; changed sign
-        
+        ## compute the orientation 
+        orientation_dev =  1 - (2 * np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1]))/ (0.5* np.pi)) 
+       
+           
         ### set values to nan if max distance is specified
         ## for following analysis then only orientation within a certtain distance to the cell are used
         if max_dist:
@@ -378,12 +381,7 @@ def StuctureAnalysisMain(fiber_list,
             ori[distance>=max_dist] = np.nan
             angle[distance>=max_dist] = np.nan # also for angular evaluation
   
-        # weighting by coherence
-        angle_dev_weighted = (angle_dev * ori) / np.nanmean(ori)     # no angle values anymore (stretched due weights) but the mean later is again an angle
-        orientation_dev_weighted_01 =  ((orientation_dev_01 * ori) / np.nanmean(ori)) 
-        orientation_dev_weighted = -(2  *orientation_dev_weighted_01 - 1)
-        
-
+      
         # weighting by coherence and image intensity
         im_fiber_g = im_fiber_g[edge:-edge,edge:-edge]
         # could also use non filtered image
@@ -391,14 +389,34 @@ def StuctureAnalysisMain(fiber_list,
         # use a threshold in the intensity image// only coherence and orientation vectors
         # corresponding to pixels in the intesity iamage above a threshold are considered.
         weight_image = gaussian(im_fiber_g,sigma=15)
+
+
+        # construct weighted array so that the mean value of these arrays later
+        # result in the weighted average of these
+        # weight by coherency
+        angle_dev_weighted = (angle_dev * ori) / np.nanmean(ori)
+        orientation_dev_weighted = (orientation_dev * ori) / np.nanmean(ori)
+        # weight by coherency & intensity
         angle_dev_weighted2 = (angle_dev_weighted *weight_image) / np.nanmean(weight_image)
-        orientation_dev_weighted2_01 = (orientation_dev_01 *weight_image*ori) / np.nanmean(weight_image*ori)
-        orientation_dev_weighted2 =  -(2 * orientation_dev_weighted2_01 - 1)
-        
-        # also weighting the coherency like this
+        orientation_dev_weighted2 = (orientation_dev *weight_image*ori) / np.nanmean(weight_image*ori)
+        # weighting coherency by intensity
         ori_weight2 = (ori * weight_image) / np.nanmean(weight_image)
         
-     
+        # old, more complicated (but equal) way
+        #  calculate oreination from angle_dev since they are normal distributed and np.abs((dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) is not
+        # orientation_dev_01 = angle_dev/90  
+        # # orientation_dev_01 = np.abs((dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1]))
+        # orientation_dev = -(2*orientation_dev_01-1)  # norm from -1 to 1 ; changed sign
+        # weighting by coherence
+        # angle_dev_weighted = (angle_dev * ori) / np.nanmean(ori)     # no angle values anymore (stretched due weights) but the mean later is again an angle
+        # orientation_dev_weighted_01 =  ((orientation_dev_01 * ori) / np.nanmean(ori)) 
+        # orientation_dev_weighted = -(2  *orientation_dev_weighted_01 - 1)
+        # ##### the last two lines are the same as ( -a/45  + 1 ) as specified in the manuscript
+        # angle_dev_weighted2 = (angle_dev_weighted *weight_image) / np.nanmean(weight_image)
+        # orientation_dev_weighted2_01 = (orientation_dev_01 *weight_image*ori) / np.nanmean(weight_image*ori)
+        # orientation_dev_weighted2 =  -(2 * orientation_dev_weighted2_01 - 1)
+
+        
         # GRADIENT towards center   
         grad_y = np.gradient(im_fiber_g, axis=0)
         grad_x = np.gradient(im_fiber_g, axis=1)
@@ -419,9 +437,7 @@ def StuctureAnalysisMain(fiber_list,
         alpha_dev_total1 = np.nanmean(angle_dev[(~segmention["mask"][edge:-edge,edge:-edge])])
         alpha_dev_total2 = np.nanmean(angle_dev_weighted[(~segmention["mask"][edge:-edge, edge:-edge])])
         alpha_dev_total3 = np.nanmean(angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])])
-        # cos_dev_total1 = np.nanmean(np.cos(2*angle_dev[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
-        # cos_dev_total2 = np.nanmean(np.cos(2*angle_dev_weighted[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))
-        # cos_dev_total3 = np.nanmean(np.cos(2*angle_dev_weighted2[(~segmention["mask"][edge:-edge, edge:-edge])]*np.pi/180))   
+
         cos_dev_total1 = np.nanmean(orientation_dev[(~segmention["mask"][edge:-edge,edge:-edge])   ])
         cos_dev_total2 = np.nanmean(orientation_dev_weighted[(~segmention["mask"][edge:-edge,edge:-edge])     ])
         cos_dev_total3 = np.nanmean(orientation_dev_weighted2[(~segmention["mask"][edge:-edge,edge:-edge])     ])
@@ -660,7 +676,7 @@ def StuctureAnalysisMain(fiber_list,
                            path_png= os.path.join(figures,"Angle_deviation_weighted.png"),label="Angle Deviation",dpi=dpi,cmap="viridis_r")
             plot_angle_dev(angle_map = orientation_dev_weighted2 ,  
                            vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-                           path_png= os.path.join(figures,"Orientation_weighted.png"),label="Orientation",dpi=dpi,cmap="viridis")
+                           path_png= os.path.join(figures,"Orientation_weighted.png"),label="Orientation",dpi=dpi,cmap="viridis") 
             plot_angle_dev(angle_map = orientation_dev,  
                            vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
                            path_png= os.path.join(figures,"Orientation.png"),label="Orientation",dpi=dpi,cmap="viridis")

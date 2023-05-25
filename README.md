@@ -23,13 +23,29 @@ Python package to quantify the tissue compaction (as a measure of the contractil
 
 ## Installation
 
+
 Simply install the CompactionAnalyzer via Pip by running following command in the console:
 
 ```python
 pip install CompactionAnalyzer
 ```
 
+
+Alternativley, you can download a standalone ".exe" executable of the 3D TFM software saenopy [here](https://github.com/davidbhr/CompactionAnalyzer/zipball/master](https://github.com/rgerum/saenopy)).
+CompactionAnalyzer is included here, if you select the "Orientation" tab.
+
+
 *Alternatively: The package can be installed by cloning this repository or downloading the repository as a zip file [here](https://github.com/davidbhr/CompactionAnalyzer/zipball/master). For installation, run the following command within the unzipped folder, in which the *setup.py* file is located: `pip install -e .`. This automatically downloads and installs all other required packages.*
+
+
+
+## Read more
+
+Read more about the method in the following article
+
+DOI of the paper: TODO: Write a paper 
+
+
 
 ## Tutorial
 
@@ -153,9 +169,4 @@ An application of the CompactionAnalyzer is resolving drug-dependend effects on 
 > Additionally, absolute forces of spheroids can be measured using the *jointforces* python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging. Absolute forces of cell can be assesed using *saenopy* [here](https://github.com/rgerum/saenopy), which requires additonal material measurements and two (larger) 3D stacks of the contracted and realaxed state per cell.
 
 
-## Read more
-
-Read more about the method in the following article
-
-DOI of the paper: TODO: Write a paper 
 

@@ -164,7 +164,7 @@ For data analysis, the `results_total.xlsx` files can be loaded again individual
 
 ## Resolving Drug Effects & Multicellular Compaction Assay
 
-An application of the CompactionAnalyzer is resolving drug-dependend effects on cell contractility. Beneath individual cells also the compaction assay can be used on a multicellular level using for example mutlicellular spheroids. This offers the advantage of uniform round shape and less movement so that even a lower sample number might be suffiecient. 
+An application of the CompactionAnalyzer is resolving drug-dependend effects on cell contractility of individual cells or mutlicellular aggregates . 
 
 > Additionally, absolute forces of spheroids can be measured using the *jointforces* python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging. Absolute forces of cell can be assesed using *saenopy* [here](https://github.com/rgerum/saenopy), which requires additonal material measurements and two (larger) 3D stacks of the contracted and realaxed state per cell.
 

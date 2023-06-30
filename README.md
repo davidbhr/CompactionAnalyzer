@@ -23,7 +23,6 @@ Python package to quantify the tissue compaction (as a measure of the contractil
 
 ## Installation
 
-
 Simply install the CompactionAnalyzer via Pip by running following command in the console:
 
 ```python
@@ -38,13 +37,12 @@ CompactionAnalyzer is included here, if you select the "Orientation" tab.
 *Alternatively: The package can be installed by cloning this repository or downloading the repository as a zip file [here](https://github.com/davidbhr/CompactionAnalyzer/zipball/master). For installation, run the following command within the unzipped folder, in which the *setup.py* file is located: `pip install -e .`. This automatically downloads and installs all other required packages.*
 
 
+## Preprint
+If you want read more or to cite saenopy you can reference our preprint.
 
-## Read more
-
-Read more about the method in the following article
-
-DOI of the paper: TODO: Write a paper 
-
+*Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility*
+David Böhringer, Andreas Bauer, Ivana Moravec, Lars Bischof, Delf Kah, Christoph Mark, Thomas J Grundy, Ekkehard Goerlach, Geraldine M O'Neill, Silvia Budday, Pamela Strissel, Reiner Strick, Andrea Malandrino, Richard Gerum, Michael Mak, Martin Rausch, Ben Fabry
+**doi:  https://doi.org/10.1101/2023.06.28.546896**
 
 
 ## Tutorial

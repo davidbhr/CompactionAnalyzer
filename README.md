@@ -38,7 +38,7 @@ CompactionAnalyzer is included here, if you select the "Orientation" tab.
 
 
 ## Preprint
-If you want read more or to cite CompactionAnalyzer you can reference our preprint.
+If you want to read more or to cite *CompactionAnalyzer* you can reference our preprint.
 
 *Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility* \
 David Böhringer, Andreas Bauer, Ivana Moravec, Lars Bischof, Delf Kah, Christoph Mark, Thomas J Grundy, Ekkehard Goerlach, Geraldine M O'Neill, Silvia Budday, Pamela Strissel, Reiner Strick, Andrea Malandrino, Richard Gerum, Michael Mak, Martin Rausch, Ben Fabry \

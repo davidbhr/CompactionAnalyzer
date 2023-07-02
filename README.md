@@ -31,14 +31,14 @@ pip install CompactionAnalyzer
 
 
 Alternativley, you can download a standalone ".exe" executable of the 3D TFM software saenopy [here](https://github.com/rgerum/saenopy).
-CompactionAnalyzer is included here, if you select the "Orientation" tab.
+CompactionAnalyzer is included here, just select the "Orientation" tab.
 
 
 *Alternatively: The package can be installed by cloning this repository or downloading the repository as a zip file [here](https://github.com/davidbhr/CompactionAnalyzer/zipball/master). For installation, run the following command within the unzipped folder, in which the *setup.py* file is located: `pip install -e .`. This automatically downloads and installs all other required packages.*
 
 
 ## Preprint
-If you want to read more or to cite *CompactionAnalyzer* you can reference our preprint.
+If you want to read more or to cite *CompactionAnalyzer* you can refer to our preprint:
 
 *Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility* \
 David Böhringer, Andreas Bauer, Ivana Moravec, Lars Bischof, Delf Kah, Christoph Mark, Thomas J Grundy, Ekkehard Goerlach, Geraldine M O'Neill, Silvia Budday, Pamela Strissel, Reiner Strick, Andrea Malandrino, Richard Gerum, Michael Mak, Martin Rausch, Ben Fabry \
@@ -57,7 +57,7 @@ In these script we start to import all necessary functions using
 from CompactionAnalyzer.CompactionFunctions import *
 ```
 
-For the analysis, we then need per cell an image of the fiber structure (e.g. 2nd harmonic, confocal reflection or stained fluorescence images; maximum intensity projection around the cells might be useful) and an image of the cell for segmentation (staining or brightfield). 
+For the analysis, we need per cell an image of the fiber structure (e.g. 2nd harmonic, confocal reflection or stained fluorescence images; maximum intensity projection around the cells might be useful) and an image of the cell for segmentation (staining or brightfield). 
 
 We define the input data for the fibers using `fiber_list_string` ant the cells using `cell_list_string` (here we can utilize the * place holder to selecet multiple images).  `generate_lists()` then searches all specified fiber and cell paths and creates the output subfolder in the specified `output_folder` directory completley automatically.
 
@@ -162,7 +162,7 @@ For data analysis, the `results_total.xlsx` files can be loaded again individual
 
 ## Resolving Drug Effects & Multicellular Compaction Assay
 
-An application of the CompactionAnalyzer is resolving drug-dependend effects on cell contractility of individual cells or mutlicellular aggregates . 
+An application of the CompactionAnalyzer is resolving drug-dependend effects on cell contractility of individual cells or mutlicellular aggregates. 
 
 > Additionally, absolute forces of spheroids can be measured using the *jointforces* python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging. Absolute forces of cell can be assesed using *saenopy* [here](https://github.com/rgerum/saenopy), which requires additonal material measurements and two (larger) 3D stacks of the contracted and realaxed state per cell.
 

@@ -225,6 +225,7 @@ def StuctureAnalysisMain(fiber_list,
                          segmention_thres = 1.0 ,       # for cell segemetntion, thres 1 equals normal otsu threshold , user also can specify gaus1 + gaus2 in segmentation if needed
                          seg_gaus1=0.5, seg_gaus2 = 100 , # 2 gaus filters used as bandpassfilter for local contrast enhancement; For seg_gaus2 = None a single gauss filter is applied
                          max_dist = None,               # optional: specify the maximal distance around cell center for analysis (in px)
+                         min_dist = None,               # optional: specify the minimals distance around cell center for analysis (in px)
                          regional_max_correction = True,# background correction using regional maxima approach
                          show_segmentation = False ,    # display the segmentation output
                          sigma_first_blur  = 0.5  ,     # slight first bluring of whole image before appplying the structure tensor
@@ -287,7 +288,7 @@ def StuctureAnalysisMain(fiber_list,
                                  'SaveNumpy': [SaveNumpy], 'norm1': [norm1], 'norm2': [norm2],
                                  'seg_invert': [seg_invert], 'seg_iter': [seg_iter], 'segmention_method': [segmention_method],
                                  'load_segmentation': [load_segmentation], 'path_seg': [path_seg],
-                                 'max_dist': [max_dist]
+                                 'max_dist': [max_dist], 'min_dist': [min_dist]
                                  
                                  },
                   'Data' :   {'fiber_list': [fiber_list], 'cell_list': [cell_list], 'out_list': [out_list]}
@@ -377,11 +378,16 @@ def StuctureAnalysisMain(fiber_list,
         ### set values to nan if max distance is specified
         ## for following analysis then only orientation within a certtain distance to the cell are used
         if max_dist:
-            angle_dev[distance>=max_dist] = np.nan
-            ori[distance>=max_dist] = np.nan
-            angle[distance>=max_dist] = np.nan # also for angular evaluation
+            angle_dev[distance>max_dist] = np.nan
+            ori[distance>max_dist] = np.nan
+            angle[distance>max_dist] = np.nan # also for angular evaluation
   
-      
+        if min_dist:
+            angle_dev[distance<min_dist] = np.nan
+            ori[distance<min_dist] = np.nan   
+            angle[distance<max_dist] = np.nan # also for angular evaluation
+            
+            
         # weighting by coherence and image intensity
         im_fiber_g = im_fiber_g[edge:-edge,edge:-edge]
         # could also use non filtered image

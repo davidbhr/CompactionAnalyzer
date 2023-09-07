@@ -30,7 +30,7 @@ pip install CompactionAnalyzer
 ```
 
 
-Alternativley, you can download a standalone ".exe" executable of the 3D TFM software saenopy [here](https://github.com/rgerum/saenopy).
+Alternativley, you can download a standalone ".exe" executable of the 3D TFM software saenopy [here](https://github.com/rgerum/saenopy/releases).
 CompactionAnalyzer is included here, just select the "Orientation" tab.
 
 

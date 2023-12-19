@@ -213,7 +213,7 @@ def quiv_coherency_center(vec0,vec1,center0,center1,coherency_map, path_png, dpi
     fig5, ax5 = show_quiver (vec0 * coherency_map, vec1 * coherency_map, filter=[f, 15], scale_ratio=0.1,width=0.003, 
                              cbar_str="Coherency", cmap="viridis")
     ax5.plot(center0,center1,"o")
-    plt.tight_layout();plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
+    plt.tight_layout();plt.savefig(path_png, dpi=dpi, pad_inches=0)
     return fig5
 
 def plot_fiber_seg(fiber_image,c0,c1,segmention, path_png,dpi=200, scale=None ):

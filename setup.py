@@ -15,7 +15,7 @@ setup(
     install_requires=['numpy>=1.16.2',
                       'pandas>=0.23.4',
                       'matplotlib>=2.2.2',
-                      'roipoly>=0.5.2'
+                      'roipoly>=0.5.2',
 					  'pyyml',
 					  'natsort',
 					  'matplotlib-scalebar'],

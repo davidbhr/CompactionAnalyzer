@@ -5,18 +5,18 @@ import matplotlib as mpl
 import numpy as np
 from qtpy import QtCore, QtGui, QtWidgets
 
-current_layout = None
 
 def setCurrentLayout(layout):
-    global current_layout
-    current_layout = layout
+    app = QtWidgets.QApplication.instance()
+    app.current_layout = layout
 
 def currentLayout():
-    return current_layout
+    app = QtWidgets.QApplication.instance()
+    return getattr(app, 'current_layout', None)
 
 def addToLayout(self, layout=None):
-    if layout is None and current_layout is not None:
-        layout = current_layout
+    if layout is None and currentLayout() is not None:
+        layout = currentLayout()
     layout.addWidget(self)
     return self
 
@@ -50,8 +50,8 @@ class QInput(QtWidgets.QWidget):
         QtWidgets.QHBoxLayout(self)
         self.layout().setContentsMargins(0, 0, 0, 0)
 
-        if layout is None and current_layout is not None:
-            layout = current_layout
+        if layout is None and currentLayout() is not None:
+            layout = currentLayout()
 
         # add me to a parent layout
         if layout is not None:
@@ -69,7 +69,7 @@ class QInput(QtWidgets.QWidget):
             self.label = QtWidgets.QLabel(name)
             self.layout().addWidget(self.label)
 
-        if tooltip is not None:
+        if tooltip is not None and not isinstance(tooltip, list):
             self.setToolTip(tooltip)
 
         if value_changed is not None:
@@ -92,12 +92,14 @@ class QInput(QtWidgets.QWidget):
         self.setValue(value)
         self._emitSignal()
 
-    def setValue(self, value):
+    def setValue(self, value, send_signal=False):
         self.no_signal = True
         if self.settings is not None:
             self.settings.setValue(self.settings_key, value)
         try:
             self._doSetValue(value)
+            if send_signal is True:
+                self.valueChanged.emit(value)
         finally:
             self.no_signal = False
 
@@ -109,12 +111,66 @@ class QInput(QtWidgets.QWidget):
         # dummy method to be overloaded by child classes
         pass
 
+class QRangeSlider(QInput):
+    editingFinished = QtCore.Signal()
+
+    def __init__(self, layout, name, min, max, **kwargs):
+        # initialize the super widget
+        QInput.__init__(self, layout, name, **kwargs)
+
+        self.input_min = QtWidgets.QSpinBox()
+        self.input_min.valueChanged.connect(self._inputBoxChange)
+        self.layout().addWidget(self.input_min)
+
+        from qtrangeslider import QRangeSlider
+        self.slider = QRangeSlider(QtCore.Qt.Horizontal).addToLayout()
+        self.slider.valueChanged.connect(self._valueChangedEvent)
+        self.layout().addWidget(self.slider)
+
+        self.input_max = QtWidgets.QSpinBox()
+        self.input_max.valueChanged.connect(self._inputBoxChange)
+        self.layout().addWidget(self.input_max)
+
+        self.setRange(min, max)
+
+        self.input_min.editingFinished.connect(self.editingFinished)
+        self.input_max.editingFinished.connect(self.editingFinished)
+        self.slider.sliderReleased.connect(self.editingFinished)
+
+    def _inputBoxChange(self):
+        self.setValue((self.input_min.value(), self.input_max.value()))
+        self._emitSignal()
+
+    def _valueChangedEvent(self, value):
+        if self.no_signal:
+            return
+        self.setValue(value)
+        self._emitSignal()
+
+    def _doSetValue(self, value):
+        self.slider.setValue(value)
+        self.input_min.setValue(value[0])
+        self.input_max.setValue(value[1])
+
+    def value(self):
+        return self.slider.value()
+
+    def setRange(self, min, max):
+        self.input_min.setRange(min, max)
+        self.input_max.setRange(min, max)
+        self.slider.setRange(min, max)
+        self._range = (min, max)
+
+    def range(self):
+        return self._range
+
+
 cast_float = float
 class QInputNumber(QInput):
     slider_dragged = False
 
     def __init__(self, layout=None, name=None, value=0, min=None, max=None, use_slider=False, float=True, decimals=2,
-                 unit=None, step=None, **kwargs):
+                 unit=None, step=None, name_post=None, log_slider=False, **kwargs):
         # initialize the super widget
         QInput.__init__(self, layout, name, **kwargs)
 
@@ -133,14 +189,20 @@ class QInputNumber(QInput):
             # slider
             self.slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
             self.layout().addWidget(self.slider)
-            self.slider.setRange(min * self.decimal_factor, max * self.decimal_factor)
-            self.slider.valueChanged.connect(lambda x: self._valueChangedEvent(x / self.decimal_factor))
+            self.log_slider = log_slider
+            if log_slider:
+                self.slider.setRange(int(np.log10(min) * self.decimal_factor), int(np.log10(max) * self.decimal_factor))
+                self.slider.valueChanged.connect(lambda x: self._valueChangedEvent(10**(x / self.decimal_factor)))
+            else:
+                self.slider.setRange(int(min * self.decimal_factor), int(max * self.decimal_factor))
+                self.slider.valueChanged.connect(lambda x: self._valueChangedEvent(x / self.decimal_factor))
             self.slider.sliderPressed.connect(lambda: self._setSliderDragged(True))
             self.slider.sliderReleased.connect(lambda: self._setSliderDragged(False))
         else:
             self.slider = None
 
         # add spin box
+        self.use_float = float
         if float:
             self.spin_box = QtWidgets.QDoubleSpinBox()
             self.spin_box.setDecimals(decimals)
@@ -162,7 +224,21 @@ class QInputNumber(QInput):
         if step is not None:
             self.spin_box.setSingleStep(step)
 
+        if name_post is not None:
+            self.label2 = QtWidgets.QLabel(name_post)
+            self.layout().addWidget(self.label2)
+
         self.setValue(value)
+
+    def setRange(self, min, max):
+        self.spin_box.setMinimum(min)
+        self.spin_box.setMaximum(max)
+        if self.slider:
+            if self.log_slider:
+                self.slider.setRange(int(np.log10(min) * self.decimal_factor), int(np.log10(max) * self.decimal_factor))
+                self.slider.valueChanged.connect(lambda x: self._valueChangedEvent(10 ** (x / self.decimal_factor)))
+            else:
+                self.slider.setRange(int(min * self.decimal_factor), int(max * self.decimal_factor))
 
     def _setSliderDragged(self, value):
         self.slider_dragged = value
@@ -177,9 +253,15 @@ class QInputNumber(QInput):
             self._emitSignal()
 
     def _doSetValue(self, value):
-        self.spin_box.setValue(value)
+        if self.use_float:
+            self.spin_box.setValue(value)
+        else:
+            self.spin_box.setValue(int(value))
         if self.slider is not None:
-            self.slider.setValue(value * self.decimal_factor)
+            if self.log_slider:
+                self.slider.setValue(int(np.log10(value) * self.decimal_factor))
+            else:
+                self.slider.setValue(int(value * self.decimal_factor))
 
     def value(self):
         return self.spin_box.value()
@@ -188,17 +270,18 @@ class QInputNumber(QInput):
 class QInputString(QInput):
     error = None
 
-    def __init__(self, layout=None, name=None, value="", allow_none=True, type=str, unit=None, **kwargs):
+    def __init__(self, layout=None, name=None, value="", allow_none=True, none_value="None", type=str, unit=None, name_post=None, validator=None, **kwargs):
         # initialize the super widget
         QInput.__init__(self, layout, name, **kwargs)
+        self.none_value = none_value
 
         if self.settings is not None:
             value = self.settings.value(self.settings_key, value)
 
         self.line_edit = QtWidgets.QLineEdit()
         self.layout().addWidget(self.line_edit)
-        self.line_edit.editingFinished.connect(lambda: self._valueChangedEvent(self.value()))
-        if type is int or type is float:
+        self.line_edit.editingFinished.connect(self.editingFinishedCall)
+        if type is int or type is float or type == "exp":
             self.line_edit.setAlignment(QtCore.Qt.AlignRight)
         if unit is not None:
             self.label_unit = QtWidgets.QLabel(unit)
@@ -206,52 +289,148 @@ class QInputString(QInput):
 
         self.allow_none = allow_none
         self.type = type
+        self.validator = validator
+
+        if name_post is not None:
+            self.label2 = QtWidgets.QLabel(name_post)
+            self.layout().addWidget(self.label2)
 
         self.setValue(value)
+        self.emitValueChanged()
 
         self.line_edit.textChanged.connect(self.emitValueChanged)
+
+    def editingFinishedCall(self):
+        try:
+            self._valueChangedEvent(self.value())
+        except ValueError:
+            return
 
     def emitValueChanged(self):
         """ connected to the textChanged signal """
         try:
             value = self.value()
+            if self.validator is not None:
+                if self.validator(value) is False:
+                    raise ValueError
             self.line_edit.setStyleSheet("")
         except ValueError as err:
             self.line_edit.setStyleSheet("background: #d56060")
 
     def _doSetValue(self, value):
-        self.line_edit.setText(str(value))
+        if self.type == "exp":
+            self.line_edit.setText(f"10**{np.format_float_positional(np.log10(float(value)), precision=2, unique=True, fractional=True, trim='-')}")
+        else:
+            self.line_edit.setText(str(value))
 
     def value(self):
         text = self.line_edit.text()
-        if self.allow_none is True and text == "None":
-            return None
+        if self.allow_none is True and (text == "None" or text == ""):
+            return self.none_value
         if self.type == int:
             return int(text)
         if self.type == float:
+            return float(text)
+        if self.type == "exp":
+            if text.startswith("1e"):
+                return 10**float(text[2:])
+            if text.startswith("10**"):
+                return 10**float(text[4:])
             return float(text)
         return text
 
 
 class QInputBool(QInput):
+    button = None
+    my_value = None
+    icon = None
+    buttons = None
 
-    def __init__(self, layout=None, name=None, value=False, **kwargs):
+    def __init__(self, layout=None, name=None, value=False, icon=None, group=False, tooltip=None, **kwargs):
         # initialize the super widget
-        QInput.__init__(self, layout, name, **kwargs)
+        QInput.__init__(self, layout, name, tooltip=tooltip, **kwargs)
+        self.tooltip = tooltip
 
         if self.settings is not None:
             value = self.settings.value(self.settings_key, value) == "true"
 
-        self.checkbox = QtWidgets.QCheckBox()
-        self.layout().addWidget(self.checkbox)
-        self.checkbox.stateChanged.connect(lambda: self._valueChangedEvent(self.value()))
+        if group is True and isinstance(icon, list):
+            self.button_group = QtWidgets.QButtonGroup()
+            self.icon = icon
+            self.buttons = []
+            for button_icon in icon:
+                button = QtWidgets.QPushButton()
+                if isinstance(button_icon, str):
+                    button.setText(button_icon)
+                else:
+                    button.setIcon(button_icon)
+                button.setCheckable(True)
+                if tooltip and isinstance(tooltip, list):
+                    button.setToolTip(tooltip[len(self.buttons)])
+                self.layout().addWidget(button)
+                #self.button_group.addButton(button)
+                self.buttons.append(button)
+                button.clicked.connect(lambda _, index=len(self.buttons): self.button_group_clicked(index-1))
+        elif icon is not None:
+            self.icon = icon
+            self.button = QtWidgets.QPushButton()
+            if isinstance(icon, list):
+                if isinstance(icon[0], str):
+                    self.button.setText(icon[0])
+                else:
+                    self.button.setIcon(icon[0])
+            else:
+                self.button.setIcon(icon)
+            self.button.setCheckable(True)
+            self.layout().addWidget(self.button)
+            if isinstance(icon, list) and len(icon) > 2:
+                self.button.clicked.connect(self.button_clicked)
+            else:
+                self.button.clicked.connect(lambda: self._valueChangedEvent(self.value()))
+        else:
+            self.checkbox = QtWidgets.QCheckBox()
+            self.layout().addWidget(self.checkbox)
+            self.checkbox.stateChanged.connect(lambda: self._valueChangedEvent(self.value()))
 
         self.setValue(value)
 
+    def button_group_clicked(self, index):
+        if self.no_signal:
+            return
+        self.my_value = index
+        #self._doSetValue(self.my_value)
+        self._valueChangedEvent(self.my_value)
+
+    def button_clicked(self):
+        self.my_value = (self.my_value + 1) % len(self.icon)
+        self._doSetValue(self.my_value)
+        self._valueChangedEvent(self.my_value)
+
     def _doSetValue(self, value):
-        self.checkbox.setChecked(value)
+        self.my_value = value
+        if self.button is not None:
+            self.button.setChecked(bool(value))
+            if isinstance(self.icon, list):
+                if isinstance(self.icon[value], str):
+                    self.button.setText(self.icon[value])
+                else:
+                    self.button.setIcon(self.icon[value])
+                if isinstance(self.tooltip, list):
+                    self.button.setToolTip(self.tooltip[value])
+        elif self.buttons is not None:
+            self.no_signal = True
+            for button in self.buttons:
+                button.setChecked(False)
+            self.buttons[value].setChecked(True)
+            self.no_signal = False
+        else:
+            self.checkbox.setChecked(bool(value))
 
     def value(self):
+        if isinstance(self.icon, list) and (len(self.icon) > 2 or self.buttons):
+            return self.my_value
+        if self.button is not None:
+            return self.button.isChecked()
         return self.checkbox.isChecked()
 
 
@@ -280,15 +459,19 @@ class QInputChoice(QInput):
             self.setValue(value)
 
     def setValues(self, new_values, value_names=None):
-        self.value_names = value_names if value_names is not None else [str(v) for v in new_values]
+        self.no_signal = True
+        try:
+            self.value_names = list(value_names) if value_names is not None else [str(v) for v in new_values]
 
-        if self.values is not None:
-            for i in range(len(self.values)):
-                self.combobox.removeItem(0)
+            if self.values is not None:
+                for i in range(len(self.values)):
+                    self.combobox.removeItem(0)
 
-        self.values = new_values
+            self.values = list(new_values)
 
-        self.combobox.addItems(self.value_names)
+            self.combobox.addItems(self.value_names)
+        finally:
+            self.no_signal = False
 
     def _doSetValue(self, value):
         if self.reference_by_index is True:
@@ -297,13 +480,26 @@ class QInputChoice(QInput):
             try:
                 self.combobox.setCurrentIndex(self.values.index(value))
             except ValueError:
-                self.combobox.setCurrentIndex(self.value_names.index(value))
+                try:
+                    self.combobox.setCurrentIndex(self.value_names.index(value))
+                except ValueError:
+                    return
 
     def value(self):
         if self.reference_by_index is True:
             return self.combobox.currentIndex()
         else:
+            if self.values is None or len(self.values) == 0:
+                return None
             return self.values[self.combobox.currentIndex()]
+
+    def valueName(self):
+        if self.reference_by_index is True:
+            return self.combobox.currentIndex()
+        else:
+            if self.values is None:
+                return None
+            return self.value_names[self.combobox.currentIndex()]
 
 
 class QInputColor(QInput):
@@ -386,10 +582,16 @@ class QInputFilename(QInput):
     def _openDialog(self):
         # open an new files
         if not self.existing:
-            filename = QtWidgets.QFileDialog.getSaveFileName(None, self.dialog_title, self.last_folder, self.file_type)
+            if "PYCHARM_HOSTED" in os.environ:
+                filename = QtWidgets.QFileDialog.getSaveFileName(None, self.dialog_title, self.last_folder, self.file_type, options=QtWidgets.QFileDialog.DontUseNativeDialog)
+            else:
+                filename = QtWidgets.QFileDialog.getSaveFileName(None, self.dialog_title, self.last_folder, self.file_type)
         # or choose an existing file
         else:
-            filename = QtWidgets.QFileDialog.getOpenFileName(None, self.dialog_title, self.last_folder, self.file_type)
+            if "PYCHARM_HOSTED" in os.environ:
+                filename = QtWidgets.QFileDialog.getOpenFileName(None, self.dialog_title, self.last_folder, self.file_type, options=QtWidgets.QFileDialog.DontUseNativeDialog)
+            else:
+                filename = QtWidgets.QFileDialog.getOpenFileName(None, self.dialog_title, self.last_folder, self.file_type)
 
         # get the string
         if isinstance(filename, tuple):  # Qt5
@@ -410,7 +612,7 @@ class QInputFilename(QInput):
         if value is None:
             return
         self.last_folder = os.path.dirname(value)
-        self.line.setText(value)
+        self.line.setText(str(value))
 
     def value(self):
         # return the color
@@ -442,7 +644,7 @@ class QInputFolder(QInput):
         self.button.clicked.connect(self._openDialog)
 
         # set the color
-        self.setValue(value)
+        self.setValue(str(value))
         if value is None:
             self.last_folder = os.getcwd()
 
@@ -474,19 +676,23 @@ class QInputFolder(QInput):
         return self.line.text()
 
 class QPushButton(QtWidgets.QPushButton):
-    def __init__(self, layout, name, connect=None):
+    def __init__(self, layout, name, connect=None, icon=None, tooltip=None):
         super().__init__(name)
-        if layout is None and current_layout is not None:
-            layout = current_layout
+        if layout is None and currentLayout() is not None:
+            layout = currentLayout()
         layout.addWidget(self)
         if connect is not None:
             self.clicked.connect(connect)
+        if icon is not None:
+            self.setIcon(icon)
+        if tooltip is not None:
+            self.setToolTip(tooltip)
 
 class QGroupBox(QtWidgets.QGroupBox):
     def __init__(self, layout, name):
         super().__init__(name)
-        if layout is None and current_layout is not None:
-            layout = current_layout
+        if layout is None and currentLayout() is not None:
+            layout = currentLayout()
         layout.addWidget(self)
         self.layout = QVBoxLayout(self)
 
@@ -498,10 +704,10 @@ class QGroupBox(QtWidgets.QGroupBox):
 
 class QTabWidget(QtWidgets.QTabWidget):
 
-    def __init__(self, layout):
-        super().__init__()
-        if layout is None and current_layout is not None:
-            layout = current_layout
+    def __init__(self, layout, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if layout is None and currentLayout() is not None:
+            layout = currentLayout()
         layout.addWidget(self)
 
     def createTab(self, name):
@@ -517,22 +723,49 @@ class QTabWidget(QtWidgets.QTabWidget):
         pass
 
 
+class QTabBarWidget(QtWidgets.QTabBar):
+
+    def __init__(self, layout, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if layout is None and currentLayout() is not None:
+            layout = currentLayout()
+        layout.addWidget(self)
+        self.widgets = []
+
+
+    def createTab(self, name):
+        tab_stack = QtWidgets.QWidget()
+        self.widgets.append(tab_stack)
+        self.addTab(name)
+        v_layout = QVBoxLayout(tab_stack)
+        return v_layout
+
+    def currentWidget(self):
+        return self.widgets[self.currentIndex()]
+
+    def widget(self, i):
+        return self.widgets[i]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
 class EnterableLayout:
     def __enter__(self):
-        global current_layout
-        self.old_layout = current_layout
-        current_layout = self.layout
+        self.old_layout = currentLayout()
+        setCurrentLayout(self.layout)
         return self.layout
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        global current_layout
-        current_layout = self.old_layout
+        setCurrentLayout(self.old_layout)
 
 
 class QVBoxLayout(QtWidgets.QVBoxLayout, EnterableLayout):
     def __init__(self, parent=None, no_margins=False):
-        if parent is None and current_layout is not None:
-            parent = current_layout
+        if parent is None and currentLayout() is not None:
+            parent = currentLayout()
         if getattr(parent, "addLayout", None) is None:
             super().__init__(parent)
         else:
@@ -545,8 +778,8 @@ class QVBoxLayout(QtWidgets.QVBoxLayout, EnterableLayout):
 
 class QHBoxLayout(QtWidgets.QHBoxLayout, EnterableLayout):
     def __init__(self, parent=None, no_margins=False):
-        if parent is None and current_layout is not None:
-            parent = current_layout
+        if parent is None and currentLayout() is not None:
+            parent = currentLayout()
         if getattr(parent, "addLayout", None) is None:#isinstance(parent, QtWidgets.QWidget):
             super().__init__(parent)
         else:
@@ -557,11 +790,35 @@ class QHBoxLayout(QtWidgets.QHBoxLayout, EnterableLayout):
             self.setContentsMargins(0, 0, 0, 0)
 
 
+def QVLine(layout=None):
+    line = QtWidgets.QFrame()
+    line.setFrameShape(QtWidgets.QFrame.VLine)
+    line.setFrameShadow(QtWidgets.QFrame.Sunken)
+
+    if currentLayout() is not None:
+        currentLayout().addWidget(line)
+    else:
+        layout.addWidget(line)
+    return line
+
+
+def QHLine(layout=None):
+    line = QtWidgets.QFrame()
+    line.setFrameShape(QtWidgets.QFrame.HLine)
+    line.setFrameShadow(QtWidgets.QFrame.Sunken)
+
+    if currentLayout() is not None:
+        currentLayout().addWidget(line)
+    else:
+        layout.addWidget(line)
+    return line
+
+
 class QSplitter(QtWidgets.QSplitter, EnterableLayout):
     def __init__(self, *args):
         super().__init__(*args)
-        if current_layout is not None:
-            current_layout.addWidget(self)
+        if currentLayout() is not None:
+            currentLayout().addWidget(self)
         self.layout = self
         self.widgets = []
 
@@ -803,3 +1060,215 @@ for index, (color, sat, val) in enumerate(zip(colors, saturations, value)):
         QtWidgets.QColorDialog.setStandardColor(index, QtGui.QColor(color_integer))  # for Qt5
     except TypeError:
         QtWidgets.QColorDialog.setStandardColor(index, color_integer)  # for Qt4
+
+
+import matplotlib.pyplot as plt
+class ColorMapChoose(QtWidgets.QDialog):
+    """ A dialog to select a colormap """
+    result = ""
+
+    def __init__(self, parent: QtWidgets.QWidget, map):
+        """ initialize the dialog with all the colormap of matplotlib """
+        QtWidgets.QDialog.__init__(self, parent)
+        main_layout = QtWidgets.QVBoxLayout(self)
+        self.layout = QtWidgets.QHBoxLayout()
+        main_layout.addLayout(self.layout)
+        button_layout = QtWidgets.QHBoxLayout()
+        main_layout.addLayout(button_layout)
+        self.button_cancel = QtWidgets.QPushButton("Cancel")
+        self.button_cancel.clicked.connect(lambda _: self.done(0))
+        button_layout.addStretch()
+        button_layout.addWidget(self.button_cancel)
+
+        self.maps = plt.colormaps()
+        self.buttons = []
+        self.setWindowTitle("Select colormap")
+
+        # Have colormaps separated into categories:
+        # http://matplotlib.org/examples/color/colormaps_reference.html
+        cmaps = [('Perceptually Uniform Sequential', [
+            'viridis', 'plasma', 'inferno', 'magma']),
+                 ('Sequential', [
+                     'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
+                     'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
+                     'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn']),
+                 ('Simple Colors', [
+                     'gray', 'red', 'orange', 'yellow', 'lime', 'green', 'mint', 'cyan', 'navy', 'blue', 'purple', 'magenta', 'grape']),
+                 ('Sequential (2)', [
+                     'binary', 'gist_yarg', 'gist_gray', 'gray', 'bone', 'pink',
+                     'spring', 'summer', 'autumn', 'winter', 'cool', 'Wistia',
+                     'hot', 'afmhot', 'gist_heat', 'copper']),
+                 ('Diverging', [
+                     'PiYG', 'PRGn', 'BrBG', 'PuOr', 'RdGy', 'RdBu',
+                     'RdYlBu', 'RdYlGn', 'Spectral', 'coolwarm', 'bwr', 'seismic']),
+                 ('Qualitative', [
+                     'Pastel1', 'Pastel2', 'Paired', 'Accent',
+                     'Dark2', 'Set1', 'Set2', 'Set3',
+                     'tab10', 'tab20', 'tab20b', 'tab20c']),
+                 ('Miscellaneous', [
+                     'turbo', 'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern',
+                     'gnuplot', 'gnuplot2', 'CMRmap', 'cubehelix', 'brg', 'hsv',
+                     'gist_rainbow', 'rainbow', 'nipy_spectral', 'gist_ncar'])]
+
+        for cmap_category, cmap_list in cmaps:
+            layout = QtWidgets.QVBoxLayout()
+            label = QtWidgets.QLabel(cmap_category)
+            layout.addWidget(label)
+            label.setFixedWidth(150)
+            for cmap in cmap_list:
+                button = QtWidgets.QPushButton(cmap)
+                button.setStyleSheet("text-align: center; border: 2px solid black; "+self.getBackground(cmap))
+                button.clicked.connect(lambda _, cmap=cmap: self.buttonClicked(cmap))
+                self.buttons.append(button)
+                layout.addWidget(button)
+            layout.addStretch()
+            self.layout.addLayout(layout)
+
+    def buttonClicked(self, text: str):
+        """ the used as selected a colormap, we are done """
+        self.result = text
+        self.done(1)
+
+    def exec(self):
+        """ execute the dialog and return the result """
+        result = QtWidgets.QDialog.exec(self)
+        return self.result, result == 1
+
+    def getBackground(self, color: str) -> str:
+        """ convert a colormap to a gradient background """
+        import matplotlib.pyplot as plt
+        import matplotlib as mpl
+        try:
+            cmap = plt.get_cmap(color)
+        except:
+            return ""
+        text = "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, "
+        N = 10
+        for i in range(N):
+            i = i / (N - 1)
+            text += f"stop: {i:.2f} {mpl.colors.to_hex(cmap(i))}, "
+        text = text[:-2] + ");"
+        return text
+
+
+class QDragableColor(QtWidgets.QLabel):
+    """ a color widget that can be dragged onto another QDragableColor widget to exchange the two colors.
+    Alternatively it can be right-clicked to select either a color or a colormap through their respective menus.
+    The button can represent either a single color or a colormap.
+    """
+
+    color_changed = QtCore.Signal(str)
+    color_changed_by_color_picker = QtCore.Signal(bool)
+    valueChanged = QtCore.Signal(str)
+
+    def __init__(self, value: str):
+        """ initialize with a color """
+        super().__init__(value)
+        import matplotlib.pyplot as plt
+        self.maps = plt.colormaps()
+        self.setAlignment(QtCore.Qt.AlignHCenter)
+        self.setColor(value, True)
+
+    def getBackground(self) -> str:
+        """ get the background of the color button """
+
+        try:
+            cmap = plt.get_cmap(self.color)
+        except:
+            return ""
+        text = "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, "
+        N = 10
+        for i in range(N):
+            i = i / (N - 1)
+            text += f"stop: {i:.2f} {mpl.colors.to_hex(cmap(i))}, "
+        text = text[:-2] + ");"
+        return text
+
+    def setColor(self, value: str, no_signal=False):
+        """ set the current color """
+        # display and save the new color
+        self.color = value
+        self.setText(value)
+        self.color_changed.emit(value)
+        self.valueChanged.emit(value)
+        if value in self.maps:
+            self.setStyleSheet("text-align: center; border: 2px solid black; padding: 0.1em; "+self.getBackground())
+        else:
+            self.setStyleSheet(f"text-align: center; background-color: {value}; border: 2px solid black; padding: 0.1em; ")
+
+    def getColor(self) -> str:
+        """ get the current color """
+        # return the color
+        return self.color
+
+    def value(self):
+        return self.color
+
+    def setValue(self, value):
+        self.setColor(value)
+
+    def mousePressEvent(self, event):
+        """ when a mouse button is pressed """
+        # a mouse button opens a color choose menu
+        if event.button() == QtCore.Qt.LeftButton:
+            self.openDialog()
+
+    def openDialog(self):
+        """ open a color chooser dialog """
+        if self.color in self.maps:
+            dialog = ColorMapChoose(self.parent(), self.color)
+            colormap, selected = dialog.exec()
+            if selected is False:
+                return
+            self.setColor(colormap)
+        else:
+            # get new color from color picker
+            qcolor = QtGui.QColor(*tuple(int(x * 255) for x in mpl.colors.to_rgb(self.getColor())))
+            color = QtWidgets.QColorDialog.getColor(qcolor, self.parent())
+            # if a color is set, apply it
+            if color.isValid():
+                color = "#%02x%02x%02x" % color.getRgb()[:3]
+                self.setColor(color)
+                self.color_changed_by_color_picker.emit(True)
+
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+try:
+    mpl.colormaps.register(LinearSegmentedColormap('red', {'red': ((0,0,0),(1,1,1)), 'green': ((0,0,0),(1,0,0)), 'blue': ((0.0,  0.0, 0.0), (1,  0, 0))}))
+    mpl.colormaps.register(LinearSegmentedColormap('orange', {'red': ((0,0,0),(1,1,1)), 'green': ((0,0,0),(1,0.5,0.5)), 'blue': ((0.0,  0.0, 0.0), (1,  0, 0))}))
+    mpl.colormaps.register(LinearSegmentedColormap('yellow', {'red': ((0,0,0),(1,1,1)), 'green': ((0,0,0),(1,1,1)), 'blue': ((0.0,  0.0, 0.0), (1,  0, 0))}))
+    mpl.colormaps.register(LinearSegmentedColormap('lime', {'red': ((0,0,0),(1,0.5,0.5)), 'green': ((0,0,0),(1,1,1)), 'blue': ((0.0,  0.0, 0.0), (1,  0, 0))}))
+    mpl.colormaps.register(LinearSegmentedColormap('green', {'red': ((0,0,0),(1,0,0)), 'green': ((0,0,0),(1,1,1)), 'blue': ((0.0,  0.0, 0.0), (1,  0, 0))}))
+    mpl.colormaps.register(LinearSegmentedColormap('mint', {'red': ((0,0,0),(1,0,0)), 'green': ((0,0,0),(1,1,1)), 'blue': ((0.0,  0.0, 0.0), (1,  0.5, 0.5))}))
+    mpl.colormaps.register(LinearSegmentedColormap('cyan', {'red': ((0,0,0),(1,0,0)), 'green': ((0,0,0),(1,1,1)), 'blue': ((0.0,  0.0, 0.0), (1, 1, 1))}))
+    mpl.colormaps.register(LinearSegmentedColormap('navy', {'red': ((0,0,0),(1,0,0)), 'green': ((0,0,0),(1,0.5,0.5)), 'blue': ((0.0,  0.0, 0.0), (1, 1, 1))}))
+    mpl.colormaps.register(LinearSegmentedColormap('blue', {'red': ((0,0,0),(1,0,0)), 'green': ((0,0,0),(1,0,0)), 'blue': ((0.0,  0.0, 0.0), (1,  1, 1))}))
+    mpl.colormaps.register(LinearSegmentedColormap('purple', {'red': ((0,0,0),(1,0.5,0.5)), 'green': ((0,0,0),(1,0,0)), 'blue': ((0.0,  0.0, 0.0), (1,  1, 1))}))
+    mpl.colormaps.register(LinearSegmentedColormap('magenta', {'red': ((0,0,0),(1,1,1)), 'green': ((0,0,0),(1,0,0)), 'blue': ((0.0,  0.0, 0.0), (1,  1, 1))}))
+    mpl.colormaps.register(LinearSegmentedColormap('grape', {'red': ((0,0,0),(1,1,1)), 'green': ((0,0,0),(1,0,0)), 'blue': ((0.0,  0.0, 0.0), (1,  0.5, 0.5))}))
+    #mpl.colormaps.register(LinearSegmentedColormap('redd', {'red': ((0.0,  0.0, 0.0), (1,  1, 1))}))
+    #mpl.colormaps.register(LinearSegmentedColormap('greenn', {'green': ((0.0,  0.0, 0.0), (1,  1, 1))}))
+except:
+    print ("Did not update colormaps since colormaps with identical names already existing. ")
+
+class SuperQLabel(QtWidgets.QLabel):
+    def __init__(self, *args, **kwargs):
+        super(SuperQLabel, self).__init__(*args, **kwargs)
+
+        self.textalignment = QtCore.Qt.AlignLeft | QtCore.Qt.TextWrapAnywhere
+        self.isTextLabel = True
+        self.align = None
+
+    def paintEvent(self, event):
+
+        opt = QtWidgets.QStyleOption()
+        opt.initFrom(self)
+        painter = QtGui.QPainter(self)
+
+        self.style().drawPrimitive(QtWidgets.QStyle.PE_Widget, opt, painter, self)
+
+        self.style().drawItemText(painter, self.rect(),
+                                  self.textalignment, self.palette(), True, self.text())
+

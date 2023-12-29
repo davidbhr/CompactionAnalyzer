@@ -8,7 +8,10 @@ and builds heavily on the method presented here http://bigwww.epfl.ch/demo/orien
 import warnings
 import matplotlib.pyplot as plt
 from skimage.filters import gaussian
-from scipy.ndimage.filters import uniform_filter
+try:
+    from scipy.ndimage import uniform_filter
+except ImportError:
+    from scipy.ndimage.filters import uniform_filter
 import os
 import copy
 import numpy as np

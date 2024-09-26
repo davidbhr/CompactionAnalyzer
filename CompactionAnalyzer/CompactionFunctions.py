@@ -641,7 +641,7 @@ def StuctureAnalysisMain(fiber_list,
     
         if SaveNumpy:
             #create output folder if not existing
-            numpy_out = os.path.join(out_list[n], r"NumpyArrays" )
+            numpy_out = os.path.join(out_list[n], "NumpyArrays" )
             if not os.path.exists(numpy_out):
                 os.makedirs(numpy_out)
                 

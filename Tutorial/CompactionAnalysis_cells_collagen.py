@@ -11,7 +11,7 @@ cell_list_string =  r"ExampleCells\*\C004.tif"   # ExampleCell
 # Generate input and output listt automatically
 # fiber_list, cell_list and out_list can also be created manual 
 # as e.g. out_list=["output/conditionx/cell1", "output/conditiony/cell2"] etc...
-output_folder = "ExampleCells_output" # base path to store results
+output_folder = r"ExampleCells_output" # base path to store results
 fiber_list,cell_list, out_list = generate_lists(fiber_list_string, cell_list_string, output_main =output_folder)
 
 # Set Parameters 

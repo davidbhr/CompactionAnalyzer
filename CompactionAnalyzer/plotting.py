@@ -86,7 +86,7 @@ def show_quiver(fx, fy, filter=[0, 1], scale_ratio=0.5, headwidth=0., headlength
                 width=None, cmap="rainbow",
                 figsize=None, cbar_str="", ax=None, fig=None
                 , vmin=None, vmax=None, cbar_axes_fraction=0.2, cbar_tick_label_size=15
-                , cbar_width="2%", cbar_height="50%", cbar_borderpad=0.1,
+                , cbar_width="2%", cbar_height="25%", cbar_borderpad=0.1,
                 cbar_style="not-clickpoints", plot_style="not-clickpoints", cbar_title_pad=1, plot_cbar=True, alpha=1,
                 ax_origin="upper", pivot = "middle", **kwargs):
     # list of all necessary quiver parameters
@@ -121,9 +121,14 @@ def show_quiver(fx, fy, filter=[0, 1], scale_ratio=0.5, headwidth=0., headlength
 
 
       
-def plot_angle_dev(angle_map,vec0,vec1,coherency_map,path_png,label="Angle Deviation",dpi=300,cmap="viridis"):
+def plot_angle_dev(angle_map,vec0,vec1,coherency_map,path_png,label="Angle Deviation",dpi=300,cmap="viridis",vmin=None,vmax=None):
      # angle deviation no weights
-    fig =plt.figure();plt.imshow(angle_map,cmap=cmap); cbar =plt.colorbar()
+    fig =plt.figure();
+    if (vmin and vmax) is not None:
+        plt.imshow(angle_map,vmin=vmin,vmax=vmax,cmap=cmap)
+    else:
+        plt.imshow(angle_map,cmap=cmap)
+    cbar =plt.colorbar()
     mx = vec0 * coherency_map
     my = vec1 * coherency_map
     mx, my, x, y = filter_values(mx, my, abs_filter=0,
@@ -135,9 +140,14 @@ def plot_angle_dev(angle_map,vec0,vec1,coherency_map,path_png,label="Angle Devia
     plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0); plt.tight_layout()
     return fig
     
-def plot_coherency(coherency,path_png,label="Coherency",dpi=300):
+def plot_coherency(coherency,path_png,label="Coherency",dpi=300,vmin=None,vmax=None,cmap="viridis"):
      # angle deviation no weights
-    fig =plt.figure();plt.imshow(coherency); cbar =plt.colorbar()
+    fig =plt.figure()
+    if (vmin and vmax) is not None:
+        plt.imshow(coherency,vmin=vmin,vmax=vmax,cmap=cmap)
+    else:
+        plt.imshow(coherency,cmap=cmap)
+    cbar =plt.colorbar()
     plt.tight_layout()
     plt.axis('off'); cbar.set_label(label,fontsize=12)
     plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0); plt.tight_layout()
@@ -163,7 +173,7 @@ def plot_fancy_overlay(fiber, cell, field,path_png,label="field",dpi=300,cmap_ce
 
 
      
-def plot_polar(angle_plotting, something, path_png,label="something",dpi=300,
+def plot_polar(angle_plotting, something, path_png,label="something",dpi=300,vmin=None,vmax=None,
                something2 = None, something3 = None, label2 = None, label3 =None):
     fig = plt.figure();ax1 = plt.subplot(111, projection="polar")
     ax1.plot(angle_plotting, something, label=label , linewidth=2, c = "C0")
@@ -171,7 +181,9 @@ def plot_polar(angle_plotting, something, path_png,label="something",dpi=300,
         ax1.plot(angle_plotting, something2, label=label2 , linewidth=2, c = "C1")
     if something3:
         ax1.plot(angle_plotting, something3, label=label3 , linewidth=2, c = "C2")    
-    plt.tight_layout();plt.legend(fontsize=12);plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
+    if (vmin and vmax) is not None:
+        plt.ylim(vmin,vmax)
+    plt.tight_layout();plt.legend(fontsize=7,frameon=False);plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0)
     return fig    
 
 def plot_triple(results_angle, results_total, path_png ,dpi=300):
@@ -180,14 +192,13 @@ def plot_triple(results_angle, results_total, path_png ,dpi=300):
            axs1 = plt.subplot(131, projection="polar")
            axs1.plot(results_angle['Angles Plotting'],  results_angle['Coherency'], label="Coherency" )
            axs1.plot(results_angle['Angles Plotting'],  results_angle['Coherency (weighted by intensity)'], label="Coherency (weighted)" )
-           plt.legend(fontsize=12)
+           plt.legend(fontsize=8,frameon=False); plt.ylim(0,1)
            ax2 = plt.subplot(132, projection="polar")
            ax2.plot(results_angle['Angles Plotting'], results_angle['Orientation'] , label="Orientation")
            ax2.plot(results_angle['Angles Plotting'], results_angle['Orientation (weighted by intensity and coherency)'] , label="Orientation weighed") 
-     
-           plt.legend(fontsize=12)
-           strings = ["Mean Coherency", "Mean Coherency\nweighted by intensity", "Mean Angle",
-                      "Mean Angle weighted\nby coherency", "Mean Angle weighted\nby coherency and intensity",
+           plt.legend(fontsize=8,frameon=False); plt.ylim(-1,1)
+           strings = ["Mean Coherency", "Mean Coherency\nweighted by intensity", "Mean Angle Dev.",
+                      "Mean Angle Dev. weighted\nby coherency", "Mean Angle Dev. weighted\nby coherency and intensity",
                       "Mean Orientation",
                       "Mean Orientation weighted\nby coherency",
                       "Mean Orientation weighted\nby coherency and intensity"]

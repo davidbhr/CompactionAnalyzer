@@ -43,7 +43,7 @@ Alternativley, you can download a standalone ".exe" executable of the 3D TFM sof
 
 
 **Graphical User Intercae:**
-CompactionAnalyzer is included within the saenopy package [here](https://github.com/rgerum/saenopy). For the Graphical User Interace simply select the "Orientation" tab.
+CompactionAnalyzer is included within the [saenopy package](https://github.com/rgerum/saenopy). For the Graphical User Interace simply select the "Orientation" tab.
 
 
 

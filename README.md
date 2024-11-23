@@ -152,7 +152,7 @@ We receive a compromised excel sheet that returns the global analysis for all ce
 ## Saving Numpy Files
 
 If you want to save the angle or coherency maps for different kind of analysis, you can specify the parameter `SaveNumpy = True`. 
-For each field you will then get numpy files containing among other things:
+Each output folder will then contain among other properties the following npy-files:
 
 
 

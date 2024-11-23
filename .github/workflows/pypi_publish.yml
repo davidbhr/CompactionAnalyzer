@@ -21,7 +21,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'  # Use a specific Python version for consistency
+        python-version: '3.x'  # Use a specific Python version for consistency
 
     # Step 3: Upgrade pip and install dependencies for building and publishing
     - name: Install dependencies

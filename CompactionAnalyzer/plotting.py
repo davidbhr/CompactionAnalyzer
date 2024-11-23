@@ -19,7 +19,7 @@ def add_colorbar(vmin, vmax, cmap="rainbow", ax=None, cbar_style="not-clickpoint
     from contextlib import suppress
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
     norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
-    sm = plt.cm.ScalarMappable(cmap=matplotlib.cm.get_cmap(cmap), norm=norm)
+    sm = plt.cm.ScalarMappable(cmap=matplotlib.colormaps.get_cmap(cmap), norm=norm)
     sm.set_array([])  # bug fix for lower matplotlib version
     if cbar_style == "clickpoints":  # colorbar inside of the plot
         cbaxes = inset_axes(ax, width=cbar_width, height=cbar_height, loc=5, borderpad=cbar_borderpad * 30)
@@ -137,7 +137,8 @@ def plot_angle_dev(angle_map,vec0,vec1,coherency_map,path_png,label="Angle Devia
                headwidth=0., headlength=0., headaxislength=0.)  #, width=0.005)
     plt.tight_layout()
     plt.axis('off'); cbar.set_label(label,fontsize=12)
-    plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0); plt.tight_layout()
+    plt.tight_layout()
+    plt.savefig(path_png, dpi=dpi, bbox_inches='tight', pad_inches=0);
     return fig
     
 def plot_coherency(coherency,path_png,label="Coherency",dpi=300,vmin=None,vmax=None,cmap="viridis"):
@@ -224,7 +225,8 @@ def quiv_coherency_center(vec0,vec1,center0,center1,coherency_map, path_png, dpi
     fig5, ax5 = show_quiver (vec0 * coherency_map, vec1 * coherency_map, filter=[f, 15], scale_ratio=0.1,width=0.003, 
                              cbar_str="Coherency", cmap="viridis")
     ax5.plot(center0,center1,"o")
-    plt.tight_layout();plt.savefig(path_png, dpi=dpi, pad_inches=0)
+    plt.tight_layout()
+    plt.savefig(path_png, dpi=dpi, pad_inches=0)
     return fig5
 
 def plot_fiber_seg(fiber_image,c0,c1,segmention, path_png,dpi=200, scale=None ):

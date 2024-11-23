@@ -2,12 +2,17 @@ import numpy as np
 from skimage import io
 from PIL import Image
 from skimage.filters import gaussian, threshold_otsu, threshold_yen
-import scipy.ndimage.morphology as scipy_morph
-import scipy.ndimage.measurements as scipy_meas
 from skimage.morphology import remove_small_objects
 import imageio
 from skimage import color
-from scipy.ndimage.morphology import distance_transform_edt
+try:
+    from scipy.ndimage import distance_transform_edt
+    import scipy.ndimage as scipy_morph
+    import scipy.ndimage as scipy_meas
+except ImportError:
+    from scipy.ndimage.morphology import distance_transform_edt
+    import scipy.ndimage.morphology as scipy_morph
+    import scipy.ndimage.measurements as scipy_meas
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
@@ -298,8 +303,8 @@ def StuctureAnalysisMain(fiber_list,
   
             
         # load images
-        im_cell  = imageio.imread(cell_list[n])  #color.rgb2gray(..)
-        im_fiber = imageio.imread(fiber_list[n])   #color.rgb2gray()
+        im_cell  = imageio.v2.imread(cell_list[n])  #color.rgb2gray(..)
+        im_fiber = imageio.v2.imread(fiber_list[n])   #color.rgb2gray()
         
         ## if 3 channels convert to grey  
         if len(im_cell.shape) == 3 :

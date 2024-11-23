@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib_scalebar.scalebar import ScaleBar
 import warnings
-matplotlib.pyplot.switch_backend("agg")
+#matplotlib.pyplot.switch_backend("agg")
 
 def scale_for_quiver(ar1, ar2, dims, scale_ratio=0.2, return_scale=False):
     scale = scale_ratio * np.max(dims) / np.nanmax(np.sqrt((ar1) ** 2 + (ar2) ** 2))

@@ -42,13 +42,13 @@ Alternativley, you can download a standalone ".exe" executable of the 3D TFM sof
 
 
 
-**Graphical User Intercae:**
+**Graphical User Interface:**
 CompactionAnalyzer is included within the [saenopy package](https://github.com/rgerum/saenopy). For the Graphical User Interace simply select the "Orientation" tab.
 
 
 
 ## Preprint
-If you want to read more or to cite *CompactionAnalyzer* you can refer to our paper:
+If you'd like to learn more about the mehtod, have a look at our paper:
 
 *Böhringer D, Bauer A, Moravec I, Bischof L, Kah D, Mark C, Grundy TJ, Görlach E, O'Neill GM, Budday S, Strissel PL, Strick R, Malandrino A, Gerum R, Mak M, Rausch M, Fabry B*. **Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility**. Matrix Biology (2023). [doi: 10.1016/j.matbio.2023.11.004](https://www.sciencedirect.com/science/article/pii/S0945053X23001166?via%3Dihub)
 
@@ -172,7 +172,6 @@ You might also use the raw angles between -180 and 180 degree (with respect to t
 * `results_total.xlsx`    - Evaluating the overall orientation within the field of view 
 * `results_distance.xlsx` - Evaluating the orientation & Intensity in distance shells towards the cell surface
 * `results_angle.xlsx`    - Evaluating  the orientation & Intensity in angle sections around the cell center
-
 
 
 

@@ -364,8 +364,10 @@ def StuctureAnalysisMain(fiber_list,
         dx_norm = (dx/distance)
         dy_norm = (dy/distance)
         dist_surface = distance_transform_edt(~segmention["mask"])[edge:-edge,edge:-edge] # dist to surface
-    
-          
+        # calculate an angle without the deviation/reference to the cell position
+        angle_no_reference = np.arctan2(min_evec[:,:,0],min_evec[:,:,1])*360/(2*np.pi)
+               
+        
         """
         total image analysis
         """
@@ -396,7 +398,6 @@ def StuctureAnalysisMain(fiber_list,
         # corresponding to pixels in the intesity iamage above a threshold are considered.
         weight_image = gaussian(im_fiber_g,sigma=15)
 
-
         # construct weighted array so that the mean value of these arrays later
         # result in the weighted average of these
         # weight by coherency
@@ -407,22 +408,7 @@ def StuctureAnalysisMain(fiber_list,
         orientation_dev_weighted2 = (orientation_dev *weight_image*ori) / np.nanmean(weight_image*ori)
         # weighting coherency by intensity
         ori_weight2 = (ori * weight_image) / np.nanmean(weight_image)
-        
-        # old, more complicated (but equal) way
-        #  calculate oreination from angle_dev since they are normal distributed and np.abs((dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) is not
-        # orientation_dev_01 = angle_dev/90  
-        # # orientation_dev_01 = np.abs((dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1]))
-        # orientation_dev = -(2*orientation_dev_01-1)  # norm from -1 to 1 ; changed sign
-        # weighting by coherence
-        # angle_dev_weighted = (angle_dev * ori) / np.nanmean(ori)     # no angle values anymore (stretched due weights) but the mean later is again an angle
-        # orientation_dev_weighted_01 =  ((orientation_dev_01 * ori) / np.nanmean(ori)) 
-        # orientation_dev_weighted = -(2  *orientation_dev_weighted_01 - 1)
-        # ##### the last two lines are the same as ( -a/45  + 1 ) as specified in the manuscript
-        # angle_dev_weighted2 = (angle_dev_weighted *weight_image) / np.nanmean(weight_image)
-        # orientation_dev_weighted2_01 = (orientation_dev_01 *weight_image*ori) / np.nanmean(weight_image*ori)
-        # orientation_dev_weighted2 =  -(2 * orientation_dev_weighted2_01 - 1)
-
-        
+          
         # GRADIENT towards center   
         grad_y = np.gradient(im_fiber_g, axis=0)
         grad_x = np.gradient(im_fiber_g, axis=1)
@@ -610,59 +596,32 @@ def StuctureAnalysisMain(fiber_list,
         excel_distance =  pd.DataFrame.from_dict(results_distance)
         excel_distance.to_excel(os.path.join(out_list[n],"results_distance.xlsx"))
         
-      
-        # Halflife values - Leave for now..
-        # # Calculate value where ntensity drops 25%
-        # distintdrop = np.abs(np.array(results_distance['Intensity Norm (individual)'])-0.75)
-        # # distance where int  drops   to 75% 
-        # halflife_int =  midofshells[np.where(distintdrop  == np.nanmin(distintdrop))[1]]
-        # # if decrease is not within range (minimum equals last value) then set to nan
-        # if halflife_int == midofshells[-1]:
-        #     halflife_int = np.nan
-        # # # Calculate value where orientation drops to 75% within maxorientation(min) to 45° (random) range 
-        # # difference to 45 degree instead of min-max range    
-        # # calculate halflife of maximal orientation over distance
-        # # difference to 45 degree for all
-        # diffdist = np.array(dist_angle_individ)-45
-        # # maximal orientation
-        # diffmax = np.nanmin(diffdist)
-        # diffmax_pos = np.where(diffmax==diffdist)[0][0]
-        # # difference  angle drops to 75% 
-        # diff2 = np.abs(diffdist-(0.75*diffmax))
-        # diff2[:diffmax_pos] = np.nan    # only look at distances on the right side /further out 
-        # halflife_ori =  midofshells[np.where(diff2 == np.nanmin(diff2))]    
-        # # if decrease is not within range (minimum equals last value) then set to nan
-        # if halflife_ori == midofshells[-1]:
-        #     halflife_ori = np.nan
-            # try:
-        #     np.savetxt(os.path.join(out_list[n],"meanangle_within10shells.txt"), [dist_angle_accum[9]]) 
-        # except:
-        #     pass
+
     
         if SaveNumpy:
             #create output folder if not existing
             numpy_out = os.path.join(out_list[n], "NumpyArrays" )
+            print (numpy_out)
             if not os.path.exists(numpy_out):
                 os.makedirs(numpy_out)
                 
             np.save(os.path.join(numpy_out, "segmention.npy" ),segmention)
-            np.save(os.path.join(numpy_out, "AngleMap.npy" ),angle_dev )    
-            np.save(os.path.join(numpy_out, "AngleMap(weight_int).npy" ),angle_dev_weighted)    
-            np.save(os.path.join(numpy_out, "AngleMap(weight_int_coh).npy"),angle_dev_weighted2 )    
+            np.save(os.path.join(numpy_out, "AngleDeviationMap.npy" ),angle_dev )    
+            #np.save(os.path.join(numpy_out, "AngleMap(weight_int).npy" ),angle_dev_weighted)    
+            np.save(os.path.join(numpy_out, "AngleDeviationMap(weight_int_coh).npy"),angle_dev_weighted2 )    
+            np.save(os.path.join(numpy_out, "AngleMap_NoReference.npy"), angle_no_reference )  
             np.save(os.path.join(numpy_out, "OrientationMap.npy" ),orientation_dev )    
-            np.save(os.path.join(numpy_out, "OrientationMap_weight_int.npy" ),orientation_dev_weighted)    
+            #np.save(os.path.join(numpy_out, "OrientationMap_weight_int.npy" ),orientation_dev_weighted)    
             np.save(os.path.join(numpy_out, "OrientationMap_weight_intcoh.npy" ),orientation_dev_weighted2 )    
             np.save(os.path.join(numpy_out, "FiberImageCrop.npy" ),normalize(im_fiber_n[edge:-edge,edge:-edge]) )      
             np.save(os.path.join(numpy_out, "CoherencyMap.npy" ),ori )  
-            np.save(os.path.join(numpy_out, "CoherencyMap(weighted_int).npy" ),ori_weight2)  
+            #np.save(os.path.join(numpy_out, "CoherencyMap(weighted_int).npy" ),ori_weight2)  
             np.save(os.path.join(numpy_out, "Vector_min_ax0.npy"),min_evec[:,:,0])  
             np.save(os.path.join(numpy_out, "Vector_min_ax1.npy"),min_evec[:,:,1])   
-            np.save(os.path.join(numpy_out, "mask_surface_shells.npy"),mask_shells['Mask_shell'])                                                                                   
-            np.save(os.path.join(numpy_out, "mask_spherical_shells.npy"),mask_shells['Mask_shell_center'])   
-                                                           
-        
-    
-    
+            #np.save(os.path.join(numpy_out, "mask_surface_shells.npy"),mask_shells['Mask_shell'])                                                                                   
+            #np.save(os.path.join(numpy_out, "mask_spherical_shells.npy"),mask_shells['Mask_shell_center'])   
+   
+
         """
         Plott results
         """
@@ -670,69 +629,103 @@ def StuctureAnalysisMain(fiber_list,
         if plotting:
             #create output folder if not existing
             figures = os.path.join(out_list[n],"Figures")
+            print (figures)
             if not os.path.exists(figures):
                 os.makedirs(figures)
-    
+            
+            plot_angle_dev(angle_map = orientation_dev,   vmin=-1,vmax=1,
+                            vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
+                            path_png= os.path.join(figures,"Orientation.png"),label="Orientation",dpi=dpi,cmap="coolwarm")
             # plot orientation and angle deviation maps together with orientation structure 
-            plot_angle_dev(angle_map = angle_dev, 
-                           vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-                           path_png= os.path.join(figures,"Angle_deviation.png"),label="Angle Deviation",dpi=dpi,cmap="viridis_r")
-            plot_angle_dev(angle_map = angle_dev_weighted2, 
-                           vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-                           path_png= os.path.join(figures,"Angle_deviation_weighted.png"),label="Angle Deviation",dpi=dpi,cmap="viridis_r")
-            plot_angle_dev(angle_map = orientation_dev_weighted2 ,  
-                           vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-                           path_png= os.path.join(figures,"Orientation_weighted.png"),label="Orientation",dpi=dpi,cmap="viridis") 
-            plot_angle_dev(angle_map = orientation_dev,  
-                           vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-                           path_png= os.path.join(figures,"Orientation.png"),label="Orientation",dpi=dpi,cmap="viridis")
-            plt.close("all") 
-            # pure coherency and pure orientation
-            plot_coherency(ori,path_png= os.path.join(figures,"coherency_noquiver.png"))
-            plot_coherency(orientation_dev_weighted2,
-                           path_png= os.path.join(figures,"Orientation_weighted_noquiver.png"),
-                           label="Orientation",dpi=dpi) 
-            plt.close("all") 
+            # plot_angle_dev(angle_map = angle_dev, vmin=0,vmax=90,
+            #                vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
+            #                path_png= os.path.join(figures,"Angle_deviation.png"),label="Angle Deviation",dpi=dpi,cmap="viridis_r")
+           
+            # # do not show the weighted ones here, as only the mean has the same range again and here angles can be smaller/large 
+            # plot_angle_dev(angle_map = angle_dev_weighted2, 
+            #                vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
+            #                path_png= os.path.join(figures,"Angle_deviation_weighted.png"),label="Angle Deviation",dpi=dpi,cmap="viridis_r")
+            #  plot_angle_dev(angle_map = orientation_dev_weighted2 ,  
+            #                vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
+            #                path_png= os.path.join(figures,"Orientation_weighted.png"),label="Orientation",dpi=dpi,cmap="viridis") 
+        
+            # # pure coherency and pure orientation
+            # plot_coherency(ori,path_png= os.path.join(figures,"coherency_noquiver.png"),
+            #                label="Coherency",vmin=0,vmax=1,cmap="turbo",dpi=dpi)
+            # plot_coherency(orientation_dev,
+            #                path_png= os.path.join(figures,"Orientation_noquiver.png"),
+            #                label="Orientation",vmin=-1,vmax=1,cmap="coolwarm",dpi=dpi) 
+
             
             ### more fancy overlay plot of cell & fiber & orientation (notweighted)
             plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
                                im_cell_n[edge:-edge,edge:-edge],
-                               orientation_dev,
+                               orientation_dev, cmap_angle="coolwarm",
                                path_png= os.path.join(figures,"Orientation_overlay.png"),                       
                                label="Orientation",dpi=dpi,
                                # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
                                # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
                                 omin=-1, omax=1,scale=scale)
+            
+            plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
+                               im_cell_n[edge:-edge,edge:-edge],
+                               ori, cmap_angle="turbo",
+                               path_png= os.path.join(figures,"Coherency_overlay.png"),                       
+                               label="Coherency",dpi=dpi,
+                               # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
+                               # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
+                                omin=0, omax=1,scale=scale)
+           
+            plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
+                               im_cell_n[edge:-edge,edge:-edge],
+                               angle_dev, cmap_angle="viridis_r",
+                               path_png= os.path.join(figures,"Angle_Deviation_overlay.png"),                       
+                               label="Angle Deviation",dpi=dpi,
+                               # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
+                               # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
+                                omin=0, omax=90,scale=scale)
+          
+            plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
+                               im_cell_n[edge:-edge,edge:-edge],
+                               angle_no_reference, cmap_angle="gist_rainbow",
+                               path_png= os.path.join(figures,"Angle_NoReference_overlay.png"),                       
+                               label="Angle (no reference)",dpi=dpi,
+                               # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
+                               # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
+                               omin=-180, omax=180,
+                               scale=scale)    
+            
   
             plt.close("all") 
         
             
-            # Polar plots        
-            plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
-                       path_png= os.path.join(figures,"polar_coherency_weighted.png"), label = "Coherency (weighted)",dpi=dpi)
-            
-                    
+            # Polar plots              
             plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
                        path_png= os.path.join(figures,"polar_coherency_double.png"), label = "Coherency (weighted)",
-                       something2 = results_angle['Coherency'], label2 = "Coherency",dpi=dpi)
-            
-            plot_polar(results_angle['Angles Plotting'], results_angle['Mean Intensity'],
-                       path_png= os.path.join(figures,"polar_intensity.png"), label = "Mean Intensity",dpi=dpi)
+                       something2 = results_angle['Coherency'], label2 = "Coherency",dpi=dpi, vmin=0,vmax=1)
             
             plot_polar(results_angle['Angles Plotting'], results_angle['Orientation (weighted by intensity and coherency)'],
-                               path_png= os.path.join(figures,"Orientation_weighted_polar.png"), label = "Orientation",dpi=dpi)
+                       path_png= os.path.join(figures,"polar_orientation_double.png"), label = "Orientation (weighted)",
+                       something2 = results_angle['Orientation'], label2 = "Orientation",dpi=dpi, vmin=-1,vmax=1)
             
-            plot_polar(results_angle['Angles Plotting'], results_angle['Orientation'],
-                               path_png= os.path.join(figures,"Orientation_polar.png"), label = "Orientation",dpi=dpi)
-            plt.close("all") 
+           # plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
+           #            path_png= os.path.join(figures,"polar_coherency_weighted.png"), label = "Coherency (weighted)",dpi=dpi) 
+            
+            # plot_polar(results_angle['Angles Plotting'], results_angle['Mean Intensity'],
+            #            path_png= os.path.join(figures,"polar_intensity.png"), label = "Mean Intensity",dpi=dpi)
+            
+            # plot_polar(results_angle['Angles Plotting'], results_angle['Orientation (weighted by intensity and coherency)'],
+            #                    path_png= os.path.join(figures,"Orientation_weighted_polar.png"), label = "Orientation",dpi=dpi)
+            
+            # plot_polar(results_angle['Angles Plotting'], results_angle['Orientation'],
+            #                    path_png= os.path.join(figures,"Orientation_polar.png"), label = "Orientation",dpi=dpi)
+            # quiver plots with center overlay   
+            # quiv_coherency_center(vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
+            #                  center0=center_small[0],center1 = center_small[1],
+            #                path_png= os.path.join(figures,"quiv_coherency_center.png"),dpi=dpi )
+
             # summarizing triple plot
             plot_triple(results_angle,results_total , path_png= os.path.join(figures,"Triple_plot.png") ,dpi=dpi)
-       
-            # quiver plots with center overlay   
-            quiv_coherency_center(vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-                             center0=center_small[0],center1 = center_small[1],
-                           path_png= os.path.join(figures,"quiv_coherency_center.png"),dpi=dpi )
-            plt.close("all") 
             # image fiber + segmention
             plot_fiber_seg(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
                            c0=center_small[0],c1=center_small[1],
@@ -746,14 +739,12 @@ def StuctureAnalysisMain(fiber_list,
                            segmention=segmention["mask"][edge:-edge,edge:-edge], 
                            path_png=os.path.join(figures,"overlay.png"),dpi=dpi ,scale=scale)
             
-            plot_overlay(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
-                           c0=center_small[0],c1=center_small[1], vec0=min_evec[:,:,0],
-                           vec1=min_evec[:,:,1], coherency_map=ori,show_n=10,
-                           segmention=segmention["mask"][edge:-edge,edge:-edge], 
-                           path_png=os.path.join(figures,"overlay2.png"),dpi=dpi ,scale=scale)
-            ##
-            
-            
+            # plot_overlay(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
+            #                c0=center_small[0],c1=center_small[1], vec0=min_evec[:,:,0],
+            #                vec1=min_evec[:,:,1], coherency_map=ori,show_n=10,
+            #                segmention=segmention["mask"][edge:-edge,edge:-edge], 
+            #                path_png=os.path.join(figures,"overlay2.png"),dpi=dpi ,scale=scale)
+
             plt.close("all") 
             ### DISTANCE PLOTS
             # plot shells - deactived as it consumes a lot of time
@@ -765,12 +756,12 @@ def StuctureAnalysisMain(fiber_list,
         
             plot_distance(results_distance,string_plot = "Intensity Norm (individual)",
               path_png=os.path.join(figures,"Intensity_distance.png"),dpi=dpi)
-            plt.close("all") 
+
+            
             # save raw cell image   
             plot_cell(im_cell_n, path_png=os.path.join(figures,"cell-raw.png"),  scale=scale, dpi=dpi)
 
-            plt.close("all")    
-            
+            plt.close("all")         
 
     return
 

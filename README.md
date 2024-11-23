@@ -163,6 +163,7 @@ fiber crop is an image of the original input data that is adjusted to the same s
 
 <img src="../master//docs/images/npy-files-2.png" width="1000" />
 
+
 The coherency can be used as a measure of anisotropy or allignment strength within the image without the specific direction of the allignment. This can be advantageous if the direcction varies e.g. in images containig multiple cells the stained stress fibers within cells are alligne in different directions. Quantifying the average coherency of these stress fibers in the cell-occupied area can still give insights into the stength of these fibers.
 
 

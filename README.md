@@ -23,7 +23,7 @@ Python package to quantify the tissue compaction (as a measure of the contractil
 
 ## Installation & Graphical User Intercae
 
-*Option A (for python users)*:
+**Option A (for python users)**:
 
 Simply install the CompactionAnalyzer via Pip by running following command in the console:
 
@@ -31,11 +31,15 @@ Simply install the CompactionAnalyzer via Pip by running following command in th
 pip install CompactionAnalyzer
 ```
 
-*Option B (without python installation)*:
+
+
+**Option B (without python installation)**:
 Alternativley, you can download a standalone ".exe" executable of the 3D TFM software saenopy [here](https://github.com/rgerum/saenopy/releases).
 
 
-*Graphical User Intercae:*
+
+
+**Graphical User Intercae:**
 CompactionAnalyzer is included within the saenopy package [here](https://github.com/rgerum/saenopy). For the Graphical User Interace simply select the "Orientation" tab.
 
 

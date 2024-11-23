@@ -38,7 +38,7 @@ sigma_list = np.arange(1.0,30,1)   ## alternative in the style of [1,2,3,4,5]
 
 
 ## main output folder
-output_folder = r"DetermineWindowSize\Output"
+output_folder = r"DetermineWindowSize_Output"
 #create output folder if not existing
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)

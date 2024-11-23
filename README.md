@@ -1,6 +1,6 @@
 # CompactionAnalyzer 
 
-Cells apply contractile forces to their surrounding e.g. during migration, development, wound healing, or in various diseases. To study these processes, cellular forces can be measured using traction force microscopy. However, 3D traction force microscopy can be very laborious (nonlinear FE models, rheology, regularization). In 3D fiber networks, alignment and compaction of fibers is a consequence of cellular forces. The method here quantifies the amount of fiber alignment & fiber density around cells in fiber matrices. These quantities can then be used as an proxy value of contractile force (or for different purposes).
+Cells apply contractile forces to their surrounding e.g. during migration, development, wound healing, or in various diseases. To study these processes, cellular forces can be measured using traction force microscopy. However, 3D traction force microscopy can be very laborious (nonlinear FE models, rheology, regularization). In 3D fiber networks, alignment and compaction of fibers is a consequence of cellular forces. The method here quantifies the amount of fiber alignment & fiber density around cells in fiber matrices. These quantities can then be used as an proxy value of contractile force and to resolve drug-induced changes in the matrix fiber arrangmet (or for different purposes)
 
 <p align="center">
 <img src="../master//docs/images/TimelapseHSC.gif" width="700" />
@@ -16,12 +16,15 @@ Python package to quantify the tissue compaction (as a measure of the contractil
 * Evaluating the directionality of fibers towards the cell center.
 * Evaluating the increased fiber intensity around the cell.  
 
+Further, the package can be used to evaluate the strength of allignment (coherency) regardless of the allignment direction, or the allignment orientation towards the x-axis (instead of the cell center). For this, see the point "Save Nummpy Files" below.
 
 <img src="../master//docs/images/Fig1-rawtostructure.png" width="1000" />
 
 
+## Installation & Graphical User Intercae
 
-## Installation
+
+**Option A (for python users)**:
 
 Simply install the CompactionAnalyzer via Pip by running following command in the console:
 
@@ -30,24 +33,29 @@ pip install CompactionAnalyzer
 ```
 
 
+
+
+**Option B (without python installation)**:
+
 Alternativley, you can download a standalone ".exe" executable of the 3D TFM software saenopy [here](https://github.com/rgerum/saenopy/releases).
-CompactionAnalyzer is included here, just select the "Orientation" tab.
 
 
-*Alternatively: The package can be installed by cloning this repository or downloading the repository as a zip file [here](https://github.com/davidbhr/CompactionAnalyzer/zipball/master). For installation, run the following command within the unzipped folder, in which the *setup.py* file is located: `pip install -e .`. This automatically downloads and installs all other required packages.*
+
+
+**Graphical User Interface:**
+CompactionAnalyzer is included within the [saenopy package](https://github.com/rgerum/saenopy). For the Graphical User Interace simply select the "Orientation" tab.
+
 
 
 ## Preprint
-If you want to read more or to cite *CompactionAnalyzer* you can refer to our preprint:
+If you'd like to learn more about the mehtod, have a look at our paper:
 
-*Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility* \
-David Böhringer, Andreas Bauer, Ivana Moravec, Lars Bischof, Delf Kah, Christoph Mark, Thomas J Grundy, Ekkehard Goerlach, Geraldine M O'Neill, Silvia Budday, Pamela Strissel, Reiner Strick, Andrea Malandrino, Richard Gerum, Michael Mak, Martin Rausch, Ben Fabry \
-**doi:  https://doi.org/10.1101/2023.06.28.546896**
+*Böhringer D, Bauer A, Moravec I, Bischof L, Kah D, Mark C, Grundy TJ, Görlach E, O'Neill GM, Budday S, Strissel PL, Strick R, Malandrino A, Gerum R, Mak M, Rausch M, Fabry B*. **Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility**. Matrix Biology (2023). [doi: 10.1016/j.matbio.2023.11.004](https://www.sciencedirect.com/science/article/pii/S0945053X23001166?via%3Dihub)
 
 
 ## Tutorial
 
-The scripts within the turorial folder might be a good start to get familiar with the analyis: The script `CompactionAnalysis_cells_collagen.py` evaluates 4 example cells that are embedded in collagen and compacted the surrounding collagen. Fiber stucture was recorded using 2nd harmonic imaging and cell outline using calcein staining. 
+The scripts within the tutorial folder might be a good start to get familiar with the analyis: The script `Example_CellCollagen.py` evaluates 4 example cells that are embedded in collagen and compacted the surrounding collagen. Fiber stucture was recorded using 2nd harmonic imaging and cell outline using calcein staining. 
 
 Further scripts `CompactionAnalysis_empty_collagen.py` & `CompactionAnalysis_artificial_data.py` evaluate empty collagen gels that show random fiber allignement and artifiacl data with random allignement. 
 
@@ -144,9 +152,34 @@ We receive a compromised excel sheet that returns the global analysis for all ce
 
 <img src="../master/docs/images/Fig3-combineexcel.png" width="800" />
 
+## Saving Numpy Files
+
+If you want to save the angle or coherency maps for different kind of analysis, you can specify the parameter `SaveNumpy = True`. 
+Each output folder will then contain among other properties the following npy-files:
+
+<img src="../master//docs/images/npy-files-1.png" width="1000" />
+
+fiber crop is an image of the original input data that is adjusted to the same size then the outout analyis  these files have (dpendn on argument xxx ) less pixels, as image border should be excluded to not have artefacts from analysis 
+
+<img src="../master//docs/images/npy-files-2.png" width="1000" />
+
+The coherency can be used as a measure of anisotropy or allignment strength within the image without the specific direction of the allignment. This can be advantageous if the direcction varies e.g. in images containig multiple cells the stained stress fibers within cells are alligne in different directions. Quantifying the average coherency of these stress fibers in the cell-occupied area can still give insights into the stength of these fibers.
+
+
+You might also use the raw angles between -180 and 180 degree (with respect to the x-axis) instead of the angle to the cell center from the following file. (You still need to specify a image-pair to start the analysis, but the cell image does not play a role in this quantity)
+
+To have these maps even on places where cell mask is (e.g. if you want to set but ignore the cell area) you might want to use the argument ignore_cell_outline=True. This will calculate these maps within the toal image
+
+
+
+TODOOO
+
+Bild
+
+
 ## Graphical User Interface (GUI)
 
-For an easy use of the CompactionAnalyzer, we provide a graphical user interface (GUI) that simplifies the execution and evaluation of several experiments. To start the GUI, just run the script `GUI.py`. Pairs of fiber and cell images can be loaded individually or batchwise by using the *-placeholder.
+For an easy use of the CompactionAnalyzer, we provide a graphical user interface (GUI) that simplifies the execution and evaluation of several experiments. This Graphical Interface is now included within the Saenopy package [here](https://github.com/rgerum/saenopy) (see Instalation). Just select the "Orientation" tab. Pairs of fiber and cell images can be loaded individually or batchwise by using the *-placeholder.
 
 <img src="../master//docs/images//GUI_readimages.png" width="800" />
 
@@ -160,11 +193,6 @@ For data analysis, the `results_total.xlsx` files can be loaded again individual
 
 
 
-## Resolving Drug Effects & Multicellular Compaction Assay
-
-An application of the CompactionAnalyzer is resolving drug-dependend effects on cell contractility of individual cells or mutlicellular aggregates. 
-
-> Additionally, absolute forces of spheroids can be measured using the *jointforces* python package [here](https://github.com/christophmark/jointforces), which requires additonal material measurements & timelapse imaging. Absolute forces of cell can be assesed using *saenopy* [here](https://github.com/rgerum/saenopy), which requires additonal material measurements and two (larger) 3D stacks of the contracted and realaxed state per cell.
 
 
 

@@ -159,12 +159,10 @@ Each output folder will then contain among other properties the following npy-fi
 
 <img src="../master//docs/images/npy-files-1.png" width="800" />
 
-fiber crop is an image of the original input data that is adjusted to the same size then the outout analyis  these files have (dpendn on argument xxx ) less pixels, as image border should be excluded to not have artefacts from analysis 
+Fiber Crop contains the original input fiber image resized to the size of the output analysis maps. These files have (depending on the argument edge) less pixels because the image edges should be excluded to avoid orientation analysis artifacts (default: 15px). The orientation map returns the orientation to the cell center (between -1 and 1) as explained above. The coherence can be used as a measure of anisotropy or orientation strength within the image, regardless of the specific direction of the orientation. This can be advantageous when the direction varies, such as in images containing multiple cells with stained stress fibers oriented in different directions. Quantifying the average coherence of these stress fibers in the cell occupied area can still provide insight into the strength of these fibers.
 
 <img src="../master//docs/images/npy-files-2.png" width="800" />
 
-
-The coherency can be used as a measure of anisotropy or allignment strength within the image without the specific direction of the allignment. This can be advantageous if the direcction varies e.g. in images containig multiple cells the stained stress fibers within cells are alligne in different directions. Quantifying the average coherency of these stress fibers in the cell-occupied area can still give insights into the stength of these fibers.
 
 
 You might also use the raw angles between -180 and 180 degree (with respect to the x-axis) instead of the angle to the cell center from the following file. (You still need to specify a image-pair to start the analysis, but the cell image does not play a role in this quantity)

@@ -159,22 +159,11 @@ Each output folder will then contain among other properties the following npy-fi
 
 <img src="../master//docs/images/npy-files-1.png" width="800" />
 
-Fiber Crop contains the original input fiber image resized to the size of the output analysis maps. These files have (depending on the argument edge) less pixels because the image edges should be excluded to avoid orientation analysis artifacts (default: 15px). The orientation map returns the orientation to the cell center (between -1 and 1) as explained above. The coherence can be used as a measure of anisotropy or orientation strength within the image, regardless of the specific direction of the orientation. This can be advantageous when the direction varies, such as in images containing multiple cells with stained stress fibers oriented in different directions. Quantifying the average coherence of these stress fibers in the cell occupied area can still provide insight into the strength of these fibers.
+'FiberImageCrop.npy' contains the original input fiber image resized to the size of the output analysis maps. These files have (depending on the argument edge) less pixels because the image edges should be excluded to avoid orientation analysis artifacts (default: 15px). 'OrientationMap.npy' includes the orientation to the cell center (between -1 and 1) as explained above. 'CoherencyMap.npy' can be used as a measure of anisotropy or orientation strength within the image, regardless of the specific direction of the orientation. This can be advantageous when the direction varies, such as in images containing multiple cells with stained stress fibers oriented in different directions. Quantifying the average coherence of these stress fibers in the cell occupied area can still provide insight into the strength of these fibers. 
 
 <img src="../master//docs/images/npy-files-2.png" width="800" />
 
-
-
-You might also use the raw angles between -180 and 180 degree (with respect to the x-axis) instead of the angle to the cell center from the following file. (You still need to specify a image-pair to start the analysis, but the cell image does not play a role in this quantity)
-
-To have these maps even on places where cell mask is (e.g. if you want to set but ignore the cell area) you might want to use the argument ignore_cell_outline=True. This will calculate these maps within the toal image
-
-
-
-TODOOO
-
-Bild
-
+'AngleDeviationMap.npy' includes the deviation of the raw angles with respect to the cell center. These angles are used to calculate the orientation map below. The raw angles with respect to the x-axis but with no respect to the cell center are included in 'AngleMap_NoReference.npy'. They are calculated from the structure vectory in x- and y- direction stored in 'Vector_min_ax0.npy' and 'Vector_min_ax1.npy'. 'segmentation.npy' contains the segmented cell mask, where no analysis is performed in the normal procedure. To compute and store all these numpy fields even in places where the cell is segmented, you can use the argument 'ignore_cell_outline=True' in the analysis pipeline. This will compute these maps within the entire image. Technically, however, you still need to specify image pairs to start the analysis.
 
 ## Graphical User Interface (GUI)
 

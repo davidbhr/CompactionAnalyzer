@@ -44,8 +44,7 @@ CompactionAnalyzer is included within the saenopy package [here](https://github.
 If you want to read more or to cite *CompactionAnalyzer* you can refer to our paper:
 
 *Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility* \
-Böhringer D, Bauer A, Moravec I, Bischof L, Kah D, Mark C, Grundy TJ, Görlach E, O'Neill GM, Budday S, Strissel PL, Strick R, Malandrino A, Gerum R, Mak M, Rausch M, Fabry B. Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility. Matrix Biol. 2023 Dec;124:39-48. \
-**doi:  10.1016/j.matbio.2023.11.004**
+Böhringer D, Bauer A, Moravec I, Bischof L, Kah D, Mark C, Grundy TJ, Görlach E, O'Neill GM, Budday S, Strissel PL, Strick R, Malandrino A, Gerum R, Mak M, Rausch M, Fabry B. **Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility**. Matrix Biology (2023). [doi: 10.1016/j.matbio.2023.11.004](10.1016/j.matbio.2023.11.004) \
 
 
 ## Tutorial

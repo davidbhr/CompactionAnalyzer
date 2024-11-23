@@ -163,7 +163,22 @@ Each output folder will then contain among other properties the following npy-fi
 
 <img src="../master//docs/images/npy-files-2.png" width="800" />
 
-`AngleDeviationMap.npy` includes the deviation of the raw angles with respect to the cell center. These angles are used to calculate the orientation map. The raw angles with respect to the x-axis (but with no respect to the cell center) are included in `AngleMap_NoReference.npy`. They are calculated from the structure vectory in x- and y- direction stored in `Vector_min_ax1.npy` and `Vector_min_ax0.npy`. `segmentation.npy` contains the segmented cell mask, where no analysis is performed in the normal procedure. To compute and store all these numpy fields even in places where the cell is segmented, you can use the argument `ignore_cell_outline=True` in the analysis pipeline. This will compute these maps within the entire image. Technically, however, you still need to specify image pairs to start the analysis.
+`AngleDeviationMap.npy` includes the deviation of the raw angles with respect to the cell center. These angles are used to calculate the orientation map. The raw angles with respect to the x-axis (but with no respect to the cell center) are included in `AngleMap_NoReference.npy` (between -90 and 90 degree). They are calculated from the structure vectory in x- and y- direction stored in `Vector_min_ax1.npy` and `Vector_min_ax0.npy`. `segmentation.npy` contains the segmented cell mask, where no analysis is performed in the normal procedure. To compute and store all these numpy fields even in places where the cell is segmented, you can use the argument `ignore_cell_outline=True` in the analysis pipeline. This will compute these maps within the entire image. 
+
+
+If you want to calculate the fiber coherency `CoherencyMap.npy` or the angle towards the x-axis  `AngleMap_NoReference.npy` (between -90 and 90 degree) without an image of the cell you can start the analysis by setting `cell_list_string = None`:
+
+```python
+fiber_list, cell_list, out_list = generate_lists(fiber_list_string, None, output_main =output_folder)
+```
+
+This setting will also automatically calculate all maps within the whole image by using `ignore_cell_outline=True`, whereby the orientation map is calculated with regards to the image center. This can be used 
+to analyze e.g. the angle of random collagen fibers towards the x-axis or image center or the coherency of collagen or actin stress fibers:
+
+
+image
+
+
 
 ## Graphical User Interface (GUI)
 

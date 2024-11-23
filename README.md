@@ -157,11 +157,11 @@ We receive a compromised excel sheet that returns the global analysis for all ce
 If you want to save the angle or coherency maps for different kind of analysis, you can specify the parameter `SaveNumpy = True`. 
 Each output folder will then contain among other properties the following npy-files:
 
+<img src="../master//docs/images/npy-files-1.png" width="1000" />
 
+fiber crop is an image of the original input data that is adjusted to the same size then the outout analyis  these files have (dpendn on argument xxx ) less pixels, as image border should be excluded to not have artefacts from analysis 
 
-BILD  coherency    angle deviation    orientation    segmentation 
-
-
+<img src="../master//docs/images/npy-files-2.png" width="1000" />
 
 The coherency can be used as a measure of anisotropy or allignment strength within the image without the specific direction of the allignment. This can be advantageous if the direcction varies e.g. in images containig multiple cells the stained stress fibers within cells are alligne in different directions. Quantifying the average coherency of these stress fibers in the cell-occupied area can still give insights into the stength of these fibers.
 
@@ -170,7 +170,7 @@ You might also use the raw angles between -180 and 180 degree (with respect to t
 
 To have these maps even on places where cell mask is (e.g. if you want to set but ignore the cell area) you might want to use the argument ignore_cell_outline=True. This will calculate these maps within the toal image
 
-fiber crop is an image of the original input data that is adjusted to the same size then the outout analyis (dpendn on argument xxx ) these files have less pixels, as image border should be excluded to not have artefacts from analysis 
+
 
 TODOOO
 

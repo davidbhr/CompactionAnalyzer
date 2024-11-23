@@ -15,7 +15,6 @@ setup(
                       'pandas>=0.23.4',
                       'matplotlib>=2.2.2',
                       'roipoly>=0.5.3',
-					  'roipoly>=0.5.3',
 					  'scikit-image>=0.24.0',			  
 					  'pyyml',
 					  'tqdm',

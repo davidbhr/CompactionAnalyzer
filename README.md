@@ -168,12 +168,11 @@ The coherency can be used as a measure of anisotropy or allignment strength with
 
 You might also use the raw angles between -180 and 180 degree (with respect to the x-axis) instead of the angle to the cell center from the following file. (You still need to specify a image-pair to start the analysis, but the cell image does not play a role in this quantity)
 
+To have these maps even on places where cell mask is (e.g. if you want to set but ignore the cell area) you might want to use the argument ignore_cell_outline=True. This will calculate these maps within the toal image
 
-* `results_total.xlsx`    - Evaluating the overall orientation within the field of view 
-* `results_distance.xlsx` - Evaluating the orientation & Intensity in distance shells towards the cell surface
-* `results_angle.xlsx`    - Evaluating  the orientation & Intensity in angle sections around the cell center
+fiber crop is an image of the original input data that is adjusted to the same size then the outout analyis (dpendn on argument xxx ) these files have less pixels, as image border should be excluded to not have artefacts from analysis 
 
-
+TODOOO
 
 Bild
 

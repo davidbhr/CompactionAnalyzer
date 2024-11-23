@@ -1,0 +1,63 @@
+Data:
+  cell_list:
+  - - ExampleCells\Cell_1\C004.tif
+    - ExampleCells\Cell_2\C004.tif
+    - ExampleCells\Cell_3\C004.tif
+    - ExampleCells\Cell_4\C004.tif
+  fiber_list:
+  - - ExampleCells\Cell_1\C003.tif
+    - ExampleCells\Cell_2\C003.tif
+    - ExampleCells\Cell_3\C003.tif
+    - ExampleCells\Cell_4\C003.tif
+  out_list:
+  - - ExampleCells_output\Cell_1\C003
+    - ExampleCells_output\Cell_2\C003
+    - ExampleCells_output\Cell_3\C003
+    - ExampleCells_output\Cell_4\C003
+Parameters:
+  SaveNumpy:
+  - true
+  angle_sections:
+  - 5
+  dpi:
+  - 200
+  edge:
+  - 40
+  load_segmentation:
+  - false
+  manual_segmention:
+  - false
+  max_dist:
+  - null
+  min_dist:
+  - null
+  norm1:
+  - 1
+  norm2:
+  - 99
+  path_seg:
+  - null
+  plotting:
+  - true
+  regional_max_correction:
+  - true
+  scale:
+  - 0.318
+  seg_gaus1:
+  - 6
+  seg_gaus2:
+  - 80
+  seg_invert:
+  - false
+  seg_iter:
+  - 1
+  segmention_method:
+  - otsu
+  shell_width:
+  - 15.723270440251572
+  show_segmentation:
+  - false
+  sigma_first_blur:
+  - 0.5
+  sigma_tensor:
+  - 22.0125786163522

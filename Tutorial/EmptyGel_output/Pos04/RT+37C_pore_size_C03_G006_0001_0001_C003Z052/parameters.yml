@@ -1,0 +1,60 @@
+Data:
+  cell_list:
+  - null
+  fiber_list:
+  - - EmptyGel\Pos01\RT+37C_pore_size_B03_G002_0001_0001_C003Z045.tif
+    - EmptyGel\Pos02\RT+37C_pore_size_C03_G006_0001_0001_C003Z028.tif
+    - EmptyGel\Pos03\RT+37C_pore_size_C03_G006_0001_0001_C003Z034.tif
+    - EmptyGel\Pos04\RT+37C_pore_size_C03_G006_0001_0001_C003Z052.tif
+  out_list:
+  - - EmptyGel_output\Pos01\RT+37C_pore_size_B03_G002_0001_0001_C003Z045
+    - EmptyGel_output\Pos02\RT+37C_pore_size_C03_G006_0001_0001_C003Z028
+    - EmptyGel_output\Pos03\RT+37C_pore_size_C03_G006_0001_0001_C003Z034
+    - EmptyGel_output\Pos04\RT+37C_pore_size_C03_G006_0001_0001_C003Z052
+Parameters:
+  SaveNumpy:
+  - false
+  angle_sections:
+  - 5
+  dpi:
+  - 200
+  edge:
+  - 40
+  load_segmentation:
+  - false
+  manual_segmention:
+  - false
+  max_dist:
+  - null
+  min_dist:
+  - null
+  norm1:
+  - 1
+  norm2:
+  - 99
+  path_seg:
+  - null
+  plotting:
+  - true
+  regional_max_correction:
+  - true
+  scale:
+  - 0.249
+  seg_gaus1:
+  - 8
+  seg_gaus2:
+  - 80
+  seg_invert:
+  - false
+  seg_iter:
+  - 1
+  segmention_method:
+  - otsu
+  shell_width:
+  - 20.080321285140563
+  show_segmentation:
+  - false
+  sigma_first_blur:
+  - 1
+  sigma_tensor:
+  - 12.048192771084338

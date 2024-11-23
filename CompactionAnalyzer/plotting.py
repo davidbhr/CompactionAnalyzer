@@ -161,7 +161,8 @@ def plot_fancy_overlay(fiber, cell, field,path_png,label="field",dpi=300,cmap_ce
     fig =plt.figure()
     plt.imshow(field,cmap=cmap_angle,vmin=omin,vmax=omax,alpha=alpha_ori);cbar =plt.colorbar()
     plt.imshow(fiber, cmap=cmap_fiber,alpha=alpha_fiber) 
-    plt.imshow(cell, cmap=cmap_cell,alpha=alpha_cell) 
+    if cell is not None:
+        plt.imshow(cell, cmap=cmap_cell,alpha=alpha_cell) 
     plt.axis('off');
     cbar.set_label(label,fontsize=12)
     if scale is not None:
@@ -242,7 +243,8 @@ def plot_fiber_seg(fiber_image,c0,c1,segmention, path_png,dpi=200, scale=None ):
     cmap.set_over('k', alpha=1)
     # plot mask and center
     plt.imshow(fiber_image, origin="upper")
-    plt.imshow(segmention, cmap=cmap, norm = my_norm, origin="upper")
+    if segmention is not None:
+        plt.imshow(segmention, cmap=cmap, norm = my_norm, origin="upper")
     plt.scatter(c0,c1, c= "w");plt.axis('off');
     if scale is not None:
         scalebar = ScaleBar(scale, "um", length_fraction=0.1, location="lower right", box_alpha=0 , 
@@ -266,8 +268,9 @@ def plot_overlay(fiber_image , c0,c1, vec0,vec1, coherency_map,
             # plot mask and center
             show_quiver (vec0 * coherency_map, vec1 * coherency_map, filter=[f, show_n],alpha=0 , scale_ratio=0.08,width=0.002, plot_cbar=False, cbar_str="coherency", cmap="viridis")
             plt.imshow(fiber_image, origin="upper")
-            plt.imshow(segmention, cmap=cmap, norm = my_norm, origin="upper", zorder=100)
-            plt.scatter(c0,c1, c= "w", zorder=200)
+            if segmention is not None:
+                plt.imshow(segmention, cmap=cmap, norm = my_norm, origin="upper", zorder=100)
+                plt.scatter(c0,c1, c= "w", zorder=200)
             if scale is not None:
                 scalebar = ScaleBar(scale, "um", length_fraction=0.1, location="lower right", box_alpha=0 , 
                             color="k")

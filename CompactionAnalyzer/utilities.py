@@ -29,16 +29,18 @@ def generate_lists(fiber_list_string, cell_list_string, output_main = "Output"):
 
     # read in images (must be in same order)
     fiber_list = natsorted(glob.glob(fiber_list_string))  
-    cell_list = natsorted(glob.glob(cell_list_string))   #check that order is same to fiber
+    if cell_list_string is not None:
+        cell_list = natsorted(glob.glob(cell_list_string))   #check that order is same to fiber
+    else:
+        cell_list = None
     # get base path (before * in glob - even works without any *)
-    base = os.path.split(cell_list_string[:cell_list_string.find("*")])[0]
+    base = os.path.split(fiber_list_string[:fiber_list_string.find("*")])[0]
     # get the rest of the path
-    rest_paths =[os.path.split(os.path.relpath(p, base))[0] for p in (cell_list)]
+    rest_paths =[os.path.split(os.path.relpath(p, base))[0] for p in (fiber_list)]
     # get the file name
-    names = [os.path.splitext(os.path.split(p)[1])[0] for p in cell_list]
+    names = [os.path.splitext(os.path.split(p)[1])[0] for p in fiber_list]
     # put together accordingly in the output_main folder
     out_list = [os.path.join(output_main,rest_path, name) for name, rest_path in zip(names, rest_paths)]
-
     return fiber_list,cell_list, out_list
     
 

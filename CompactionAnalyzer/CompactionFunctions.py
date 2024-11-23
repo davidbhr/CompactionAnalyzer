@@ -217,6 +217,24 @@ def segment_cell(img, thres=1, seg_gaus1 = 0.5, seg_gaus2=100, seg_iter=1,show_s
     return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)}
 
 
+def create_centered_circle(image_shape):
+    # Extract the height and width of the image
+    height, width = image_shape
+    # Calculate the center of the image
+    center_y, center_x = height // 2, width // 2
+    # Calculate the radius of the circle (1/4 of the image height or width)
+    radius = min(height, width) // 10
+    # Create a 2D array of zeros (background)
+    circle_array = np.zeros((height, width), dtype=int)
+    # Iterate over each point in the 2D array
+    for y in range(height):
+        for x in range(width):
+            # Calculate the distance from the center
+            distance = np.sqrt((y - center_y) ** 2 + (x - center_x) ** 2)
+            # If the distance is less than or equal to the radius, set it to 1 (circle)
+            if distance <= radius:
+                circle_array[y, x] = 1
+    return circle_array
 
 
 def StuctureAnalysisMain(fiber_list,
@@ -264,8 +282,16 @@ def StuctureAnalysisMain(fiber_list,
     None.
 
     """
-    plt.ioff()
-   # plt.ion()
+    # plt.ioff()
+    # plt.ion()
+    
+    # if no cell images are specified we conduct the analyis on the full image 
+    # for this, we create dummy images of an artificial cell and set ignore_cell_outline to True
+    # Might be usefull to look at quantities such as fiber coherency or angle towards x-axis 
+    if cell_list == None:
+        ignore_cell_outline= True
+        dummy_cell = create_centered_circle(imageio.v2.imread(fiber_list[0]).shape)
+
     
     # if not specified use 7um for tensor analysis and 5um shells
     if not sigma_tensor:
@@ -300,12 +326,14 @@ def StuctureAnalysisMain(fiber_list,
                     }  
         with open(os.path.join(out_list[n],"parameters.yml"), 'w') as yaml_file:
             yaml.dump(dict_file, yaml_file, default_flow_style=False)
-  
             
-        # load images
-        im_cell  = imageio.v2.imread(cell_list[n])  #color.rgb2gray(..)
-        im_fiber = imageio.v2.imread(fiber_list[n])   #color.rgb2gray()
-        
+        # load images      
+        im_fiber = imageio.v2.imread(fiber_list[n])     #color.rgb2gray()
+        if cell_list == None:
+            im_cell = dummy_cell
+        else:
+            im_cell  = imageio.v2.imread(cell_list[n])
+            
         ## if 3 channels convert to grey  
         if len(im_cell.shape) == 3 :
             im_cell = color.rgb2gray(im_cell)
@@ -370,8 +398,8 @@ def StuctureAnalysisMain(fiber_list,
         dy_norm = (dy/distance)
         dist_surface = distance_transform_edt(~segmention["mask"])[edge:-edge,edge:-edge] # dist to surface
         # calculate an angle without the deviation/reference to the cell position
-        angle_no_reference = np.arctan2(min_evec[:,:,0],min_evec[:,:,1])*360/(2*np.pi)
-               
+        angle_no_reference = np.abs(np.arctan2(min_evec[:,:,0],min_evec[:,:,1])*360/(2*np.pi))-90   # -90 to +90° towards x-axis
+                     
         
         """
         total image analysis
@@ -609,8 +637,9 @@ def StuctureAnalysisMain(fiber_list,
             print (numpy_out)
             if not os.path.exists(numpy_out):
                 os.makedirs(numpy_out)
-                
-            np.save(os.path.join(numpy_out, "segmention.npy" ),segmention)
+            # save data array all with the size of the evaluated arrays
+            # that are "edge" - pixels smaller to get rid of boundary artefacts
+            np.save(os.path.join(numpy_out, "segmention.npy" ),segmention["mask"][edge:-edge,edge:-edge])
             np.save(os.path.join(numpy_out, "AngleDeviationMap.npy" ),angle_dev )    
             #np.save(os.path.join(numpy_out, "AngleMap(weight_int).npy" ),angle_dev_weighted)    
             np.save(os.path.join(numpy_out, "AngleDeviationMap(weight_int_coh).npy"),angle_dev_weighted2 )    
@@ -623,8 +652,15 @@ def StuctureAnalysisMain(fiber_list,
             #np.save(os.path.join(numpy_out, "CoherencyMap(weighted_int).npy" ),ori_weight2)  
             np.save(os.path.join(numpy_out, "Vector_min_ax0.npy"),min_evec[:,:,0])  
             np.save(os.path.join(numpy_out, "Vector_min_ax1.npy"),min_evec[:,:,1])   
+            np.save(os.path.join(numpy_out, "center.npy"),center_small)  
             #np.save(os.path.join(numpy_out, "mask_surface_shells.npy"),mask_shells['Mask_shell'])                                                                                   
             #np.save(os.path.join(numpy_out, "mask_spherical_shells.npy"),mask_shells['Mask_shell_center'])   
+       
+        # check the shapes --> everything is the same format
+        # print(segmention["mask"][edge:-edge,edge:-edge].shape)    
+        # print(orientation_dev.shape)   
+        # print(normalize(im_fiber_n[edge:-edge,edge:-edge]).shape)    
+        # print(angle_no_reference.shape)   
    
 
         """
@@ -661,46 +697,74 @@ def StuctureAnalysisMain(fiber_list,
             #                path_png= os.path.join(figures,"Orientation_noquiver.png"),
             #                label="Orientation",vmin=-1,vmax=1,cmap="coolwarm",dpi=dpi) 
 
+
+            if cell_list == None:
+                plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
+                                   None,
+                                   angle_no_reference, cmap_angle="gist_rainbow",
+                                   path_png= os.path.join(figures,"Angle_NoReference_overlay_nocell.png"),                       
+                                   label="Angle (x-axis)",dpi=dpi,
+                                   # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
+                                   # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
+                                   omin=-90, omax=90,
+                                   scale=scale)    
+                plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
+                                   None,
+                                   ori, cmap_angle="turbo",
+                                   path_png= os.path.join(figures,"Coherency_overlay_nocell.png"),                       
+                                   label="Coherency",dpi=dpi,
+                                   # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
+                                   # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
+                                    omin=0, omax=1,scale=scale)
+                plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
+                                   im_cell_n[edge:-edge,edge:-edge],
+                                   orientation_dev, cmap_angle="coolwarm",
+                                   path_png= os.path.join(figures,"Orientation_overlay.png"),                       
+                                   label="Orientation",dpi=dpi,
+                                   # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
+                                   # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
+                                    omin=-1, omax=1,scale=scale)
             
-            ### more fancy overlay plot of cell & fiber & orientation (notweighted)
-            plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
-                               im_cell_n[edge:-edge,edge:-edge],
-                               orientation_dev, cmap_angle="coolwarm",
-                               path_png= os.path.join(figures,"Orientation_overlay.png"),                       
-                               label="Orientation",dpi=dpi,
-                               # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
-                               # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
-                                omin=-1, omax=1,scale=scale)
+            else:
+                ### more fancy overlay plot of cell & fiber & orientation (notweighted)
+                plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
+                                   im_cell_n[edge:-edge,edge:-edge],
+                                   orientation_dev, cmap_angle="coolwarm",
+                                   path_png= os.path.join(figures,"Orientation_overlay.png"),                       
+                                   label="Orientation",dpi=dpi,
+                                   # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
+                                   # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
+                                    omin=-1, omax=1,scale=scale)
+                
+                plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
+                                   im_cell_n[edge:-edge,edge:-edge],
+                                   ori, cmap_angle="turbo",
+                                   path_png= os.path.join(figures,"Coherency_overlay.png"),                       
+                                   label="Coherency",dpi=dpi,
+                                   # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
+                                   # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
+                                    omin=0, omax=1,scale=scale)
+               
+                plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
+                                   im_cell_n[edge:-edge,edge:-edge],
+                                   angle_dev, cmap_angle="viridis_r",
+                                   path_png= os.path.join(figures,"Angle_Deviation_overlay.png"),                       
+                                   label="Angle Deviation",dpi=dpi,
+                                   # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
+                                   # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
+                                    omin=0, omax=90,scale=scale)
+              
+                plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
+                                   im_cell_n[edge:-edge,edge:-edge],
+                                   angle_no_reference, cmap_angle="gist_rainbow",
+                                   path_png= os.path.join(figures,"Angle_NoReference_overlay.png"),                       
+                                   label="Angle (x-axis)",dpi=dpi,
+                                   # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
+                                   # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
+                                   omin=-90, omax=90,
+                                   scale=scale)    
+                
             
-            plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
-                               im_cell_n[edge:-edge,edge:-edge],
-                               ori, cmap_angle="turbo",
-                               path_png= os.path.join(figures,"Coherency_overlay.png"),                       
-                               label="Coherency",dpi=dpi,
-                               # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
-                               # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
-                                omin=0, omax=1,scale=scale)
-           
-            plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
-                               im_cell_n[edge:-edge,edge:-edge],
-                               angle_dev, cmap_angle="viridis_r",
-                               path_png= os.path.join(figures,"Angle_Deviation_overlay.png"),                       
-                               label="Angle Deviation",dpi=dpi,
-                               # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
-                               # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
-                                omin=0, omax=90,scale=scale)
-          
-            plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
-                               im_cell_n[edge:-edge,edge:-edge],
-                               angle_no_reference, cmap_angle="gist_rainbow",
-                               path_png= os.path.join(figures,"Angle_NoReference_overlay.png"),                       
-                               label="Angle (no reference)",dpi=dpi,
-                               # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
-                               # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
-                               omin=-180, omax=180,
-                               scale=scale)    
-            
-  
             plt.close("all") 
         
             
@@ -713,42 +777,31 @@ def StuctureAnalysisMain(fiber_list,
                        path_png= os.path.join(figures,"polar_orientation_double.png"), label = "Orientation (weighted)",
                        something2 = results_angle['Orientation'], label2 = "Orientation",dpi=dpi, vmin=-1,vmax=1)
             
-           # plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
-           #            path_png= os.path.join(figures,"polar_coherency_weighted.png"), label = "Coherency (weighted)",dpi=dpi) 
-            
-            # plot_polar(results_angle['Angles Plotting'], results_angle['Mean Intensity'],
-            #            path_png= os.path.join(figures,"polar_intensity.png"), label = "Mean Intensity",dpi=dpi)
-            
-            # plot_polar(results_angle['Angles Plotting'], results_angle['Orientation (weighted by intensity and coherency)'],
-            #                    path_png= os.path.join(figures,"Orientation_weighted_polar.png"), label = "Orientation",dpi=dpi)
-            
-            # plot_polar(results_angle['Angles Plotting'], results_angle['Orientation'],
-            #                    path_png= os.path.join(figures,"Orientation_polar.png"), label = "Orientation",dpi=dpi)
-            # quiver plots with center overlay   
-            # quiv_coherency_center(vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-            #                  center0=center_small[0],center1 = center_small[1],
-            #                path_png= os.path.join(figures,"quiv_coherency_center.png"),dpi=dpi )
-
             # summarizing triple plot
             plot_triple(results_angle,results_total , path_png= os.path.join(figures,"Triple_plot.png") ,dpi=dpi)
-            # image fiber + segmention
-            plot_fiber_seg(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
-                           c0=center_small[0],c1=center_small[1],
-                           segmention=segmention["mask"][edge:-edge,edge:-edge], 
-                           path_png=os.path.join(figures,"fiber_segemention.png"),dpi=dpi,scale=scale )
-        
-            # plot overlaywith fiber image 
-            plot_overlay(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
-                           c0=center_small[0],c1=center_small[1], vec0=min_evec[:,:,0],
-                           vec1=min_evec[:,:,1], coherency_map=ori, show_n=15,
-                           segmention=segmention["mask"][edge:-edge,edge:-edge], 
-                           path_png=os.path.join(figures,"overlay.png"),dpi=dpi ,scale=scale)
-            
-            # plot_overlay(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
-            #                c0=center_small[0],c1=center_small[1], vec0=min_evec[:,:,0],
-            #                vec1=min_evec[:,:,1], coherency_map=ori,show_n=10,
-            #                segmention=segmention["mask"][edge:-edge,edge:-edge], 
-            #                path_png=os.path.join(figures,"overlay2.png"),dpi=dpi ,scale=scale)
+                
+            if cell_list is not None:
+                
+                # image fiber + segmention
+                plot_fiber_seg(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
+                               c0=center_small[0],c1=center_small[1],
+                               segmention=segmention["mask"][edge:-edge,edge:-edge], 
+                               path_png=os.path.join(figures,"fiber_celloutline.png"),dpi=dpi,scale=scale )  
+                # plot overlaywith fiber image 
+                plot_overlay(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
+                               c0=center_small[0],c1=center_small[1], vec0=min_evec[:,:,0],
+                               vec1=min_evec[:,:,1], coherency_map=ori, show_n=15,
+                               segmention=segmention["mask"][edge:-edge,edge:-edge], 
+                               path_png=os.path.join(figures,"fiber_cell_structure.png"),dpi=dpi ,scale=scale)
+            else:
+                # plot overlaywith fiber image 
+                plot_overlay(fiber_image=normalize(im_fiber_n[edge:-edge,edge:-edge]) ,
+                               c0=center_small[0],c1=center_small[1], vec0=min_evec[:,:,0],
+                               vec1=min_evec[:,:,1], coherency_map=ori, show_n=15,
+                               segmention=None, 
+                               path_png=os.path.join(figures,"fiber_structure.png"),dpi=dpi ,scale=scale)
+                
+          
 
             plt.close("all") 
             ### DISTANCE PLOTS
@@ -765,6 +818,7 @@ def StuctureAnalysisMain(fiber_list,
             
             # save raw cell image   
             plot_cell(im_cell_n, path_png=os.path.join(figures,"cell-raw.png"),  scale=scale, dpi=dpi)
+            plot_cell(normalize(im_fiber_n[edge:-edge,edge:-edge]), path_png=os.path.join(figures,"fiber-raw.png"),  scale=scale, dpi=dpi)
 
             plt.close("all")         
 

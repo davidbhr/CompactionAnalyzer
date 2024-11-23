@@ -23,7 +23,7 @@ Python package to quantify the tissue compaction (as a measure of the contractil
 
 ## Installation & Graphical User Intercae
 
-Option A (for python users):
+*Option A (for python users)*:
 
 Simply install the CompactionAnalyzer via Pip by running following command in the console:
 
@@ -31,12 +31,12 @@ Simply install the CompactionAnalyzer via Pip by running following command in th
 pip install CompactionAnalyzer
 ```
 
-Option B (without python installation):
+*Option B (without python installation)*:
 Alternativley, you can download a standalone ".exe" executable of the 3D TFM software saenopy [here](https://github.com/rgerum/saenopy/releases).
 
 
-Graphical User Intercae:
-CompactionAnalyzer is included within the saenopy package [here](https://github.com/rgerum/saenopy). For the Graphical User Interace. Just select the "Orientation" tab.
+*Graphical User Intercae:*
+CompactionAnalyzer is included within the saenopy package [here](https://github.com/rgerum/saenopy). For the Graphical User Interace simply select the "Orientation" tab.
 
 
 
@@ -44,7 +44,7 @@ CompactionAnalyzer is included within the saenopy package [here](https://github.
 If you want to read more or to cite *CompactionAnalyzer* you can refer to our paper:
 
 *Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility* \
-Böhringer D, Bauer A, Moravec I, Bischof L, Kah D, Mark C, Grundy TJ, Görlach E, O'Neill GM, Budday S, Strissel PL, Strick R, Malandrino A, Gerum R, Mak M, Rausch M, Fabry B. **Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility**. Matrix Biology (2023). [doi: 10.1016/j.matbio.2023.11.004](10.1016/j.matbio.2023.11.004) \
+Böhringer D, Bauer A, Moravec I, Bischof L, Kah D, Mark C, Grundy TJ, Görlach E, O'Neill GM, Budday S, Strissel PL, Strick R, Malandrino A, Gerum R, Mak M, Rausch M, Fabry B. **Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility**. Matrix Biology (2023). [doi: 10.1016/j.matbio.2023.11.004](https://www.sciencedirect.com/science/article/pii/S0945053X23001166?via%3Dihub)
 
 
 ## Tutorial

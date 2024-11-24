@@ -219,7 +219,7 @@ def segment_cell(img, thres=1, seg_gaus1 = 0.5, seg_gaus2=100, seg_iter=1,show_s
 
 def create_centered_circle(image_shape):
     # Extract the height and width of the image
-    height, width = image_shape
+    height, width = image_shape[:2]
     # Calculate the center of the image
     center_y, center_x = height // 2, width // 2
     # Calculate the radius of the circle (1/4 of the image height or width)
@@ -333,12 +333,14 @@ def StuctureAnalysisMain(fiber_list,
             im_cell = dummy_cell
         else:
             im_cell  = imageio.v2.imread(cell_list[n])
-            
+        
+        
         ## if 3 channels convert to grey  
-        if len(im_cell.shape) == 3 :
+        if len(im_cell.shape) == 3 :      
             im_cell = color.rgb2gray(im_cell)
         if len(im_fiber.shape) == 3 :
-            im_fiber = color.rgb2gray(im_fiber)    
+            im_fiber = color.rgb2gray(im_fiber)  
+
        
         # # applying normalizing/ contrast spreading
         im_cell_n = normalize(im_cell, norm1, norm2)

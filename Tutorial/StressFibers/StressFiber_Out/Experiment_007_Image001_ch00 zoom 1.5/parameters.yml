@@ -1,0 +1,68 @@
+Data:
+  cell_list:
+  - null
+  fiber_list:
+  - - controlzoom1.5\Experiment_006_Image001_ch00 zoom 1.5.tif
+    - controlzoom1.5\Experiment_007_Image001_ch00 zoom 1.5.tif
+    - controlzoom1.5\Experiment_007_Image008_ch00 zoom 1.5.tif
+    - controlzoom1.5\Experiment_008_Image002_ch00 zoom 1.5.tif
+    - controlzoom1.5\Experiment_009_Image002_ch00 zoom 1.5.tif
+    - controlzoom1.5\Experiment_009_Image007_ch00 zoom 1.5.tif
+    - controlzoom1.5\Experiment_010_Image001_ch00 zoom 1.5.tif
+    - controlzoom1.5\Experiment_011_Image001_ch00 zoom 1.5.tif
+  out_list:
+  - - StressFiber_Out\Experiment_006_Image001_ch00 zoom 1.5
+    - StressFiber_Out\Experiment_007_Image001_ch00 zoom 1.5
+    - StressFiber_Out\Experiment_007_Image008_ch00 zoom 1.5
+    - StressFiber_Out\Experiment_008_Image002_ch00 zoom 1.5
+    - StressFiber_Out\Experiment_009_Image002_ch00 zoom 1.5
+    - StressFiber_Out\Experiment_009_Image007_ch00 zoom 1.5
+    - StressFiber_Out\Experiment_010_Image001_ch00 zoom 1.5
+    - StressFiber_Out\Experiment_011_Image001_ch00 zoom 1.5
+Parameters:
+  SaveNumpy:
+  - true
+  angle_sections:
+  - 5
+  dpi:
+  - 200
+  edge:
+  - 10
+  load_segmentation:
+  - false
+  manual_segmention:
+  - false
+  max_dist:
+  - null
+  min_dist:
+  - null
+  norm1:
+  - 1
+  norm2:
+  - 99
+  path_seg:
+  - null
+  plotting:
+  - true
+  regional_max_correction:
+  - true
+  scale:
+  - 0.48
+  seg_gaus1:
+  - 10
+  seg_gaus2:
+  - 100
+  seg_invert:
+  - false
+  seg_iter:
+  - 1
+  segmention_method:
+  - otsu
+  shell_width:
+  - 20.833333333333336
+  show_segmentation:
+  - false
+  sigma_first_blur:
+  - 0.5
+  sigma_tensor:
+  - 6.25

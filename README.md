@@ -159,7 +159,7 @@ Each output folder will then contain among other properties the following npy-fi
 
 <img src="../master//docs/images/npy-files-1.png" width="800" />
 
-`FiberImageCrop.npy` contains the original input fiber image resized to the size of the output analysis maps. These files have (depending on the argument `edge`) less pixels because the image edges should be excluded to avoid orientation analysis artifacts (default: 15px). `OrientationMap.npy` includes the orientation to the cell center (between -1 and 1) as explained above. `CoherencyMap.npy` can be used as a measure of anisotropy or orientation strength within the image (between 0 and 1), regardless of the specific direction of the orientation. This can be advantageous when the direction varies, such as in images containing multiple cells with stained stress fibers oriented in different directions. Quantifying the average coherence of these stress fibers in the cell occupied area can still provide insight into the strength of these fibers. 
+`FiberImageCrop.npy` contains the original input fiber image resized to the size of the output analysis maps. These files have (depending on the argument `edge`) less pixels because the image edges should be excluded to avoid orientation analysis artifacts (default: 15px). `OrientationMap.npy` includes the orientation to the cell center (between -1 and 1) as explained above. `CoherencyMap.npy` can be used as a measure of anisotropy or orientation strength within the image (between 0 and 1), regardless of the specific direction of the orientation. This can be advantageous when the direction varies, such as in images containing multiple cells with stained stress fibers oriented in different directions. Quantifying the average coherence of these stress fibers in the cell occupied area can still provide insight into the strength of the allignment. 
 
 <img src="../master//docs/images/npy-files-2.png" width="800" />
 
@@ -172,12 +172,9 @@ If you want to calculate the fiber coherency `CoherencyMap.npy` or the angle tow
 fiber_list, cell_list, out_list = generate_lists(fiber_list_string, None, output_main =output_folder)
 ```
 
-This setting will also automatically calculate all maps within the whole image by using `ignore_cell_outline=True`, whereby the orientation map is calculated with regards to the image center. This can be used 
-to analyze e.g. the angle of random collagen fibers towards the x-axis or image center or the coherency of collagen or actin stress fibers:
+This option will start the analysis without the second image pair of cell images and automatically compute all maps within the entire image using the `ignore_cell_outline=True` argument. The typical orientation map is calculated with respect to the image center. 
 
-
-image
-
+<img src="../master//docs/images/npy-files-3.png" width="800" />
 
 
 ## Graphical User Interface (GUI)

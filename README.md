@@ -172,12 +172,9 @@ If you want to calculate the fiber coherency `CoherencyMap.npy` or the angle tow
 fiber_list, cell_list, out_list = generate_lists(fiber_list_string, None, output_main =output_folder)
 ```
 
-This setting will also automatically calculate all maps within the whole image by using `ignore_cell_outline=True`, whereby the orientation map is calculated with regards to the image center. This can be used 
-to analyze e.g. the angle of random collagen fibers towards the x-axis or image center or the coherency of collagen or actin stress fibers:
+This option will start the analysis without the second image pair of cell images and automatically compute all maps within the entire image using the `ignore_cell_outline=True` argument. The option might be usefull to  analyze the angle of  matrix fibers with respect to the x-axis or image center, or the coherence of collagen or actin stress fibers. Additionally, the typical orientation map is calculated with respect to the image center. 
 
-
-image
-
+<img src="../master//docs/images/npy-files-3.png" width="800" />
 
 
 ## Graphical User Interface (GUI)

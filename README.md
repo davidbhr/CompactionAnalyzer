@@ -109,6 +109,7 @@ segmention_method="otsu"        # use "otsu", "entropy" or "yen"  as segmentatio
 segmention_min_area = 1000      # small bjects below this px-area are removed during cell segmentation
 load_segmentation = False       # if True enter the path of the segementation.npy - file in path_seg
 path_seg = None                 # to load a mask
+ignore_cell_outline= False      # if True also values at the cell-occupied areas are included in the analysis
 ```
 
 

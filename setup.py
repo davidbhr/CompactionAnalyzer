@@ -4,7 +4,7 @@ from setuptools import setup
 setup(
     name='CompactionAnalyzer',
     packages=['CompactionAnalyzer'],
-    version='1.0.3',
+    version='1.0.4',
     description='A python package to analyze matrix fiber alignment around cells (proxy for cellular forces)',
     url='',
     download_url = '',

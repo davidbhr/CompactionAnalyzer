@@ -16,7 +16,7 @@ Python package to quantify the tissue compaction (as a measure of the contractil
 * Evaluating the directionality of fibers towards the cell center.
 * Evaluating the increased fiber intensity around the cell.  
 
-Further, the package can be used to evaluate the strength of allignment (coherency) regardless of the allignment direction, or the allignment orientation towards the x-axis (instead of the cell center). For this, see the point "Save Nummpy Files" below.
+Further, the package can be used to evaluate the strength of allignment (coherency) regardless of the allignment direction, or the allignment orientation towards the x-axis (instead of the cell center). For this, see the point "Save Numpy Files" below.
 
 <img src="../master//docs/images/Fig1-rawtostructure.png" width="1000" />
 

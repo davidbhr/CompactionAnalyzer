@@ -47,7 +47,7 @@ CompactionAnalyzer is included within the [saenopy package](https://github.com/r
 
 
 
-## Preprint
+## Read More
 If you'd like to learn more about the mehtod, have a look at our paper:
 
 *Böhringer D, Bauer A, Moravec I, Bischof L, Kah D, Mark C, Grundy TJ, Görlach E, O'Neill GM, Budday S, Strissel PL, Strick R, Malandrino A, Gerum R, Mak M, Rausch M, Fabry B*. **Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility**. Matrix Biology (2023). [doi: 10.1016/j.matbio.2023.11.004](https://www.sciencedirect.com/science/article/pii/S0945053X23001166?via%3Dihub)
@@ -153,7 +153,7 @@ We receive a compromised excel sheet that returns the global analysis for all ce
 
 <img src="../master/docs/images/Fig3-combineexcel.png" width="800" />
 
-## Saving Numpy Files
+## Save Numpy Files
 
 If you want to save the angle or coherency maps for different kind of analysis, you can specify the parameter `SaveNumpy = True`. 
 Each output folder will then contain among other properties the following npy-files:

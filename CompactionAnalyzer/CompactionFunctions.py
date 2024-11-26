@@ -146,7 +146,10 @@ def segment_cell(img, thres=1, seg_gaus1 = 0.5, seg_gaus2=100, seg_iter=1,show_s
     height = img.shape[0]
     width = img.shape[1]
     
-    
+    ## if 3 channels convert to grey  
+    if len(img.shape) == 3 :      
+        img = color.rgb2gray(img)
+
     # local gaussian (or single gaussian if gaus2 == None)  
     if seg_gaus2 is not None:
         img = np.abs(gaussian(img, sigma=seg_gaus1) - gaussian(img, sigma=seg_gaus2))

@@ -260,7 +260,8 @@ def StuctureAnalysisMain(fiber_list,
                          manual_segmention = False    , # segmentation of mask by manual clicking the cell outline
                          plotting = True     ,          # creates and saves individual figures additionally to the excel files 
                          dpi = 200      ,               # resolution of figures 
-                         SaveNumpy = False       ,      # saves numpy arrays for later analysis - can create large data files
+                         SaveNumpy = True  ,            # saves numpy arrays for later analysis
+                         SaveExcel = True  ,            # saves Excel files for later analysis
                          norm1=1,norm2 = 99  ,          # contrast spreading for input images between norm1- and norm2-percentile; values below norm1-percentile are set to zero and
                                                         # values above norm2-percentile are set to 1
                                                         ### use norm1= 0,norm2 = 100 if no contras enhancement desired
@@ -270,7 +271,13 @@ def StuctureAnalysisMain(fiber_list,
                          segmention_min_area = 1000,    # small bjects below this px-area are removed during cell segmentation
                          load_segmentation = False,     # if True enter the path of the segementation.npy - file in path_seg
                          path_seg = None,               # to load a mask
-                         ignore_cell_outline=False):    # if True the cell area is not set to nan and orientation are calculted everywhere - still the cell center is calculated from segmention    
+                         ignore_cell_outline=False,     # if True the cell area is not set to nan and orientation are calculted everywhere - still the cell center is calculated from segmention    
+
+                         
+                         mode_saenopy=False):           # only used for the Saenopy Version to return data files directly after single run   
+    
+    
+    
     """
     Main analysis
     
@@ -491,7 +498,8 @@ def StuctureAnalysisMain(fiber_list,
         results_total['Orientation (weighted by intensity and coherency)'].append(cos_dev_total3)
         
         excel_total = pd.DataFrame.from_dict(results_total)
-        excel_total.to_excel(os.path.join(out_list[n],"results_total.xlsx"))
+        if SaveExcel:
+            excel_total.to_excel(os.path.join(out_list[n],"results_total.xlsx"))
     
     
         """
@@ -546,14 +554,18 @@ def StuctureAnalysisMain(fiber_list,
 
         # create excel sheet with results for angle analysis       
         excel_angles= pd.DataFrame.from_dict(results_angle)
-        excel_angles.to_excel(os.path.join(out_list[n],"results_angles.xlsx"))
+        if SaveExcel:
+            excel_angles.to_excel(os.path.join(out_list[n],"results_angles.xlsx"))
     
-    
+   
         """
         Distance Evaluation
         """
         
-         # initialize result dictionary
+        
+         #  def distance_analysis(shells,shell_width,dist_surface,scale,angle_dev, ori, orientation_dev, weight_image,im_fiber_g):
+
+          # initialize result dictionary
         results_distance = {'Shell_mid (px)': [], 'Shell_mid (µm)': [], 'Intensity (accumulated)': [], 
                             'Intensity (individual)': [], 'Intensity Norm (individual)': [],
                             'Intensity Norm (accumulated)': [],  'Angle (accumulated)': [],  'Angle (individual)': [],  'Angle (individual-weightInt)': [], 
@@ -565,7 +577,7 @@ def StuctureAnalysisMain(fiber_list,
                             'Angle disttocenter (accumulated)': [],  'Angle disttocenter (individual)': [],  
                             'Orientation disttocenter (accumulated)': [], 'Orientation disttocenter (individual)': [], 
                             'Angle disttocenter (individual)': []            
-                         }      
+                          }      
     
         mask_shells = {'Mask_shell': [], 'Mask_shell_center': [] } 
         # shell distances
@@ -598,7 +610,7 @@ def StuctureAnalysisMain(fiber_list,
                 results_distance['Orientation (individual-weightInt)'].append(np.nanmean(orientation_dev[mask_shell]*ori[mask_shell]*weight_image[mask_shell]/np.nanmean(ori[mask_shell]*weight_image[mask_shell]) ))    
                
         
-               # mean intensity
+                # mean intensity
                 results_distance['Intensity (accumulated)'].append(np.nanmean(im_fiber_g[mask_shell_lower]))          # accumulation of lower shells
                 results_distance['Intensity (individual)'].append(np.nanmean(im_fiber_g[mask_shell])  )    # exclusively in certain shell
       
@@ -632,7 +644,8 @@ def StuctureAnalysisMain(fiber_list,
         results_distance['Intensity Norm disttocenter (accumulated)'].extend(list(norm_accum_int_c) )    
         # create excel sheet with results for angle analysis       
         excel_distance =  pd.DataFrame.from_dict(results_distance)
-        excel_distance.to_excel(os.path.join(out_list[n],"results_distance.xlsx"))
+        if SaveExcel:
+            excel_distance.to_excel(os.path.join(out_list[n],"results_distance.xlsx"))
         
 
     
@@ -661,11 +674,11 @@ def StuctureAnalysisMain(fiber_list,
             #np.save(os.path.join(numpy_out, "mask_surface_shells.npy"),mask_shells['Mask_shell'])                                                                                   
             #np.save(os.path.join(numpy_out, "mask_spherical_shells.npy"),mask_shells['Mask_shell_center'])   
        
-        # check the shapes --> everything is the same format
-        # print(segmention["mask"][edge:-edge,edge:-edge].shape)    
-        # print(orientation_dev.shape)   
-        # print(normalize(im_fiber_n[edge:-edge,edge:-edge]).shape)    
-        # print(angle_no_reference.shape)   
+            # check the shapes --> everything is the same format
+            # print(segmention["mask"][edge:-edge,edge:-edge].shape)    
+            # print(orientation_dev.shape)   
+            # print(normalize(im_fiber_n[edge:-edge,edge:-edge]).shape)    
+            # print(angle_no_reference.shape)   
    
 
         """
@@ -682,25 +695,7 @@ def StuctureAnalysisMain(fiber_list,
             plot_angle_dev(angle_map = orientation_dev,   vmin=-1,vmax=1,
                             vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
                             path_png= os.path.join(figures,"Orientation.png"),label="Orientation",dpi=dpi,cmap="coolwarm")
-            # plot orientation and angle deviation maps together with orientation structure 
-            # plot_angle_dev(angle_map = angle_dev, vmin=0,vmax=90,
-            #                vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-            #                path_png= os.path.join(figures,"Angle_deviation.png"),label="Angle Deviation",dpi=dpi,cmap="viridis_r")
-           
-            # # do not show the weighted ones here, as only the mean has the same range again and here angles can be smaller/large 
-            # plot_angle_dev(angle_map = angle_dev_weighted2, 
-            #                vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-            #                path_png= os.path.join(figures,"Angle_deviation_weighted.png"),label="Angle Deviation",dpi=dpi,cmap="viridis_r")
-            #  plot_angle_dev(angle_map = orientation_dev_weighted2 ,  
-            #                vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
-            #                path_png= os.path.join(figures,"Orientation_weighted.png"),label="Orientation",dpi=dpi,cmap="viridis") 
-        
-            # # pure coherency and pure orientation
-            # plot_coherency(ori,path_png= os.path.join(figures,"coherency_noquiver.png"),
-            #                label="Coherency",vmin=0,vmax=1,cmap="turbo",dpi=dpi)
-            # plot_coherency(orientation_dev,
-            #                path_png= os.path.join(figures,"Orientation_noquiver.png"),
-            #                label="Orientation",vmin=-1,vmax=1,cmap="coolwarm",dpi=dpi) 
+          
 
 
             if cell_list == None:
@@ -726,8 +721,6 @@ def StuctureAnalysisMain(fiber_list,
                                    orientation_dev, cmap_angle="coolwarm",
                                    path_png= os.path.join(figures,"Orientation_overlay.png"),                       
                                    label="Orientation",dpi=dpi,
-                                   # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
-                                   # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
                                     omin=-1, omax=1,scale=scale)
             
             else:
@@ -771,7 +764,6 @@ def StuctureAnalysisMain(fiber_list,
                 
             
             plt.close("all") 
-        
             
             # Polar plots              
             plot_polar(results_angle['Angles Plotting'], results_angle['Coherency (weighted by intensity)'],
@@ -807,7 +799,6 @@ def StuctureAnalysisMain(fiber_list,
                                path_png=os.path.join(figures,"fiber_structure.png"),dpi=dpi ,scale=scale)
                 
           
-
             plt.close("all") 
             ### DISTANCE PLOTS
             # plot shells - deactived as it consumes a lot of time
@@ -825,8 +816,10 @@ def StuctureAnalysisMain(fiber_list,
             plot_cell(im_cell_n, path_png=os.path.join(figures,"cell-raw.png"),  scale=scale, dpi=dpi)
             plot_cell(normalize(im_fiber_n[edge:-edge,edge:-edge]), path_png=os.path.join(figures,"fiber-raw.png"),  scale=scale, dpi=dpi)
 
-            plt.close("all")         
-
+            plt.close("all")      
+            
+            if mode_saenopy == True: # only evaluates a single item at each call and returns the arrays
+                return excel_total, excel_angles, excel_distance
     return
 
 

@@ -410,8 +410,8 @@ def StuctureAnalysisMain(fiber_list,
         dy_norm = (dy/distance)
         dist_surface = distance_transform_edt(~segmention["mask"])[edge:-edge,edge:-edge] # dist to surface
         # calculate an angle without the deviation/reference to the cell position
-        angle_no_reference = np.abs(np.arctan2(min_evec[:,:,0],min_evec[:,:,1])*360/(2*np.pi))-90   # -90 to +90° towards x-axis
-                     
+        angle_no_reference = ((np.arctan2(min_evec[:,:,0],min_evec[:,:,1])*360/(2*np.pi))%180)-90   # -90 to +90° towards x-axis
+
         
         """
         total image analysis

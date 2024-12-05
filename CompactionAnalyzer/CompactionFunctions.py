@@ -819,7 +819,7 @@ def StuctureAnalysisMain(fiber_list,
             plt.close("all")      
             
             if mode_saenopy == True: # only evaluates a single item at each call and returns the arrays
-                return excel_total, excel_angles, excel_distance
+                return angle_no_reference, orientation_dev, ori, min_evec, excel_total, excel_angles, excel_distance
     return
 
 

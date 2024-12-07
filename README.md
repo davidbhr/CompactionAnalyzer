@@ -54,7 +54,7 @@ If you'd like to learn more about the mehtod, have a look at our paper:
 
 ## Tutorial (saenopy)
 
-If you are using Saenopy with its graphical user interface, simply click and load a sample data set.
+If you are using Saenopy with its graphical user interface, simply click and load a example data set.
 
 ## Tutorial (python API)
 

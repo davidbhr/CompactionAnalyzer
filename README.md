@@ -52,10 +52,13 @@ If you'd like to learn more about the mehtod, have a look at our paper:
 
 *Böhringer D, Bauer A, Moravec I, Bischof L, Kah D, Mark C, Grundy TJ, Görlach E, O'Neill GM, Budday S, Strissel PL, Strick R, Malandrino A, Gerum R, Mak M, Rausch M, Fabry B*. **Fiber alignment in 3D collagen networks as a biophysical marker for cell contractility**. Matrix Biology (2023). [doi: 10.1016/j.matbio.2023.11.004](https://www.sciencedirect.com/science/article/pii/S0945053X23001166?via%3Dihub)
 
+## Tutorial (saenopy)
 
-## Tutorial
+If you are using Saenopy with its graphical user interface, simply click and load a sample data set.
 
-The scripts within the tutorial folder might be a good start to get familiar with the analyis: The script `Example_CellCollagen.py` evaluates 4 example cells that are embedded in collagen and compacted the surrounding collagen. Fiber stucture was recorded using 2nd harmonic imaging and cell outline using calcein staining. 
+## Tutorial (python API)
+
+To use the python API, the scripts within the tutorial folder might be a good start to get familiar with the analyis: The script `Example_CellCollagen.py` evaluates 4 example cells that are embedded in collagen and compacted the surrounding collagen. Fiber stucture was recorded using 2nd harmonic imaging and cell outline using calcein staining. 
 
 Further scripts `CompactionAnalysis_empty_collagen.py` & `CompactionAnalysis_artificial_data.py` evaluate empty collagen gels that show random fiber allignement and artifiacl data with random allignement. 
 

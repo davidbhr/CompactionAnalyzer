@@ -682,7 +682,7 @@ def StuctureAnalysisMain(fiber_list,
    
 
         """
-        Plott results
+        Plotting results
         """
         
         if plotting:
@@ -818,8 +818,26 @@ def StuctureAnalysisMain(fiber_list,
 
             plt.close("all")      
             
-            if mode_saenopy == True: # only evaluates a single item at each call and returns the arrays
-                return angle_no_reference, orientation_dev, ori, min_evec, excel_total, excel_angles, excel_distance
+        if mode_saenopy == True: # only evaluates a single item at each call and returns the arrays
+             return angle_no_reference, orientation_dev, ori, min_evec, excel_total, excel_angles, excel_distance
+            
+            # np.save(os.path.join(numpy_out, "segmention.npy" ),segmention["mask"][edge:-edge,edge:-edge])
+            # np.save(os.path.join(numpy_out, "AngleDeviationMap.npy" ),angle_dev )    
+            # #np.save(os.path.join(numpy_out, "AngleMap(weight_int).npy" ),angle_dev_weighted)    
+            # np.save(os.path.join(numpy_out, "AngleDeviationMap(weight_int_coh).npy"),angle_dev_weighted2 )    
+            # np.save(os.path.join(numpy_out, "AngleMap_NoReference.npy"), angle_no_reference )  
+            # np.save(os.path.join(numpy_out, "OrientationMap.npy" ),orientation_dev )    
+            # #np.save(os.path.join(numpy_out, "OrientationMap_weight_int.npy" ),orientation_dev_weighted)    
+            # np.save(os.path.join(numpy_out, "OrientationMap_weight_intcoh.npy" ),orientation_dev_weighted2 )    
+            # np.save(os.path.join(numpy_out, "FiberImageCrop.npy" ),normalize(im_fiber_n[edge:-edge,edge:-edge]) )      
+            # np.save(os.path.join(numpy_out, "CoherencyMap.npy" ),ori )  
+            # #np.save(os.path.join(numpy_out, "CoherencyMap(weighted_int).npy" ),ori_weight2)  
+            # np.save(os.path.join(numpy_out, "Vector_min_ax0.npy"),min_evec[:,:,0])  
+            # np.save(os.path.join(numpy_out, "Vector_min_ax1.npy"),min_evec[:,:,1])   
+            # np.save(os.path.join(numpy_out, "center.npy"),center_small)  
+            
+            
+            
     return
 
 

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Measure fiber orientation relative to a cell, X/Y axes, a point or a line with CompactionAnalyzer.">
+  <title>CompactionAnalyzer · Measure fiber orientation</title>
+  <link rel="stylesheet" href="style.css"><script src="app.js" defer></script><script src="compare.js" defer></script>
+</head>
+<body><main>
+  <header class="intro"><div><a class="brand" href="https://github.com/davidbhr/CompactionAnalyzer">CompactionAnalyzer</a><h1>Measure fiber orientation</h1></div><div class="examples"><label for="example">Example</label><select id="example" aria-label="Example image"><option value="cell">Cell in collagen</option><option value="phalloidin">Stress fibers · same-image mask</option><option value="cardiomyocyte">Cardiomyocytes · second-image mask</option><option value="point">Synthetic fibers · point</option><option value="line">Cardiomyocytes · line</option></select><button id="load-example" class="secondary" disabled>Load</button></div></header>
+  <nav class="view-tabs" role="tablist" aria-label="Workspace"><button id="image-tab" role="tab" aria-selected="true" aria-controls="image-view">Analyze image</button><button id="compare-tab" role="tab" aria-selected="false" aria-controls="compare-view">Compare data</button></nav>
+  <div id="image-view" role="tabpanel" aria-labelledby="image-tab">
+  <section class="settings" aria-label="Analysis setup">
+    <div class="mode-options" role="radiogroup" aria-label="Orientation reference">
+      <label class="mode cell"><input type="radio" name="mode" value="full" checked><img src="schemes/cell.svg" alt="Fibers around a cell"><b>Relative to a cell</b></label>
+      <label class="mode axis"><input type="radio" name="mode" value="axis"><img src="schemes/axes.svg" alt="Fibers relative to image axes"><b>Relative to X and Y</b></label>
+      <label class="mode point"><input type="radio" name="mode" value="point_orientation"><img src="schemes/point.svg" alt="Fibers around a chosen point"><b>Relative to a point</b></label>
+      <label class="mode line"><input type="radio" name="mode" value="line_orientation"><img src="schemes/line.svg" alt="Fibers along a chosen line"><b>Relative to a line</b></label>
+    </div>
+    <div class="input-row">
+      <label class="dropzone" id="orientation-drop" for="orientation-file" tabindex="0" role="button"><span>Orientation image</span><strong id="orientation-name">Drop image or browse</strong></label><input id="orientation-file" type="file" accept=".tif,.tiff,.png,.jpg,.jpeg" class="visually-hidden">
+      <div id="region-control" hidden><label for="region">Analysis area</label><select id="region"><option value="whole">Whole image · no mask</option><option value="same">Mask from the same image</option><option value="second">Mask from a second image</option></select></div>
+      <div id="second-control"><label for="mask-file" class="dropzone" id="mask-drop" tabindex="0" role="button"><span id="second-label">Cell image</span><strong id="mask-name">Choose image</strong></label><input id="mask-file" type="file" accept=".tif,.tiff,.png,.jpg,.jpeg" class="visually-hidden"></div>
+      <button id="analyze" class="primary" disabled>Analyze →</button>
+    </div>
+    <div class="parameter-row" aria-label="Settings">
+      <div class="primary-field"><label for="sigma">Tensor window σ (px)</label><input id="sigma" type="number" min="0.1" max="100" step="any" value="7"></div>
+      <div class="primary-field"><label for="pixel-size">Pixel size (µm/px)</label><input id="pixel-size" type="number" min="0.000001" step="any" placeholder="For Saenopy export" aria-describedby="download-error"></div>
+      <div id="threshold-control" class="threshold-field is-disabled"><div class="threshold-heading"><label for="threshold">Mask threshold</label><input id="threshold" type="number" min="0" max="3" step="0.05" value="1" disabled></div><div class="threshold-slider-row"><input id="threshold-range" aria-label="Mask threshold slider" type="range" min="0" max="3" step="0.05" value="1" disabled><button id="preview-mask" class="text-button" disabled>Preview mask</button></div></div>
+      <details class="advanced" id="settings-details"><summary>More settings</summary><div class="settings-fields">
+      <div class="field-row"><label for="edge">Edge crop (px)</label><input id="edge" type="number" min="0" step="1" value="15"></div>
+      <div class="field-row"><label for="blur">Image smoothing σ (px)</label><input id="blur" type="number" min="0" max="20" step="0.1" value="0.5"></div>
+      <div class="field-row" id="mask-blur-field"><label for="mask-blur">Mask smoothing σ (px)</label><input id="mask-blur" type="number" min="0" max="100" step="1" value="5"></div>
+      <div id="cell-settings"><div class="field-row"><label for="cell-blur">Cell smoothing σ (px)</label><input id="cell-blur" type="number" min="0" max="100" step="0.5" value="6"></div><div class="field-row"><label for="background-blur">Background smoothing σ (px)</label><input id="background-blur" type="number" min="0" max="200" step="1" value="80"></div></div>
+      <label id="invert-control" class="checkbox"><input id="invert" type="checkbox"> Invert segmentation</label>
+    </div></details></div>
+    <div class="options-row"><span id="image-dimensions">TIFF, PNG or JPEG</span><span id="status" role="status" aria-live="polite">Loading analysis engine…</span><i id="status-dot" hidden></i><button id="cancel" class="text-button" hidden>Cancel</button><button id="retry" class="text-button" hidden>Retry</button></div>
+    <div id="reference-control" hidden><span id="reference-hint"></span><div class="reference-values" id="reference-values"></div><button id="clear-reference" class="text-button">Reset</button></div>
+  </section>
+  <div id="error" class="error" role="alert" hidden></div>
+  <div class="workspace">
+    <section class="panel image-panel" aria-label="Input image"><div class="panel-heading"><h2>Image</h2><label class="checkbox" id="overlay-control" hidden><input type="checkbox" id="show-mask" checked> Mask</label></div><div class="image-stage" id="image-stage"><div class="empty-state" id="empty-state">Load an image or try an example.</div><canvas id="input-canvas" hidden aria-label="Orientation image. Click to place a point or line reference." tabindex="0"></canvas></div><div class="image-footer"><span id="preview-caption"></span><span id="mode-badge" hidden></span><span id="mask-status" hidden></span></div></section>
+    <section id="before-results" class="panel before-results"><h2>Results</h2><span>Analyze to see angle, alignment and coherency.</span></section>
+    <section id="results" hidden aria-label="Analysis results"><h2 id="results-title" class="visually-hidden">Results</h2><div class="metrics"><div><span id="alignment-label">Alignment</span><strong id="alignment-value">—</strong></div><div><span id="deviation-label">Angular deviation</span><strong id="deviation-value">—</strong></div><div><span>Coherency</span><strong id="coherency-value">—</strong></div></div>
+      <article class="panel map-panel"><div class="plot-controls"><label for="map-choice" class="visually-hidden">Result map</label><select id="map-choice"><option value="alignment_reference">Alignment to reference</option><option value="angle_reference">Angle to reference</option><option value="angle">Angle</option><option value="alignment">Axis alignment</option><option value="coherency">Coherency</option></select><div class="axis-switch" id="axis-switch" role="group" aria-label="Image axis"><button data-axis="x" aria-pressed="true">X</button><button data-axis="y" aria-pressed="false">Y</button></div><button id="save-map" class="text-button">PNG ↓</button></div><img id="map-image" alt="Calculated orientation map"></article>
+      <details class="histogram-panel"><summary>Angle histogram <span>probability per bin</span></summary><img id="histogram-image" alt="Calculated angle histogram"><button id="save-histogram" class="text-button">Save histogram PNG ↓</button></details>
+      <div class="download-actions"><button id="save-numpy" class="secondary">NumPy ↓</button><button id="save-all" class="secondary">All results ↓</button><button id="save-saenopy" class="secondary">Saenopy ↓</button></div><div id="download-error" class="error download-error" role="alert" hidden></div><span id="run-info"></span>
+    </section>
+  </div>
+  </div>
+  <section id="compare-view" role="tabpanel" aria-labelledby="compare-tab" hidden>
+    <div class="compare-heading"><div><h2>Compare conditions</h2><p>Drop evaluated Saenopy orientation files into a condition. No source images needed.</p><span id="compare-engine-status" role="status">Preparing analysis engine…</span><button id="compare-retry" class="text-button" hidden>Retry loading</button></div><button id="compare-demo" class="secondary">Load example comparison</button></div>
+    <div class="compare-layout">
+      <section class="condition-panel" aria-label="Conditions"><div class="condition-toolbar"><label for="condition-name" class="visually-hidden">New condition</label><input id="condition-name" type="text" maxlength="80" placeholder="New condition"><button id="add-condition" class="secondary">Add</button></div><div id="conditions"></div><p id="compare-import-status" class="compare-note" role="status" aria-live="polite">Select a condition, then add result files.</p><div id="compare-error" class="error" role="alert" hidden></div></section>
+      <section class="panel compare-plot-panel" aria-label="Combined results"><div class="compare-controls"><label for="compare-metric">Measurement</label><select id="compare-metric"></select><button id="compare-plot" class="primary">Plot</button></div><p id="compare-note" class="compare-note">Each image counts equally. Bars show mean ± SEM and individual measurements.</p><div id="compare-empty" class="compare-empty">Add measurements or load the example comparison.</div><img id="compare-image" alt="Comparison between conditions" hidden><div id="compare-results" hidden><p id="compare-count" class="compare-note"></p><div class="download-actions"><button id="compare-png" class="secondary">PNG ↓</button><button id="compare-svg" class="secondary">SVG ↓</button><button id="compare-csv" class="secondary">Individual values CSV ↓</button><button id="compare-summary" class="secondary">Summary CSV ↓</button></div></div></section>
+    </div>
+    <input id="compare-files" type="file" multiple accept=".saenopyOrientation" class="visually-hidden">
+  </section>
+  <footer>For full analysis and batch processing, use the <a href="https://github.com/davidbhr/CompactionAnalyzer">CompactionAnalyzer Python package</a> or the <a href="https://github.com/rgerum/saenopy#fiber-orientation">Saenopy GUI</a>.</footer>
+</main></body></html>

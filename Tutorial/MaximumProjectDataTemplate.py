@@ -1,35 +1,43 @@
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import imageio 
-import glob as glob
-# from skimage import io
 import os
-# from PIL import Image
-# import matplotlib.image as mpimg
+import sys
+
+# Resolve inputs relative to this script and use the package from this checkout.
+tutorial_folder = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.dirname(tutorial_folder))
+
+import glob as glob
 from tqdm import tqdm
 from natsort import natsorted
-from .CompactionFunctions import normalize,max_projection
-from .utilities import load_stack
+from CompactionAnalyzer.CompactionFunctions import max_projection
+from CompactionAnalyzer.utilities import load_stack
 
 
 
-# list of folders for individual cells from which we create the max intensity projections
-folders = glob.glob(r"..//data//Day*//*frames")  
+# Template for your own 2D TIFF slices; these raw stacks are not bundled.
+# Example input: data/Day1/cell1_frames/z01_C003.tif, z02_C003.tif, ...
+folder_pattern = os.path.join(tutorial_folder, "..", "data", "Day*", "*frames")
+output_folder = os.path.join(tutorial_folder, "Max_all")
+channels = ["C003", "C004", "C001"]  # Adjust to the channels present in your data.
+folders = natsorted([path for path in glob.glob(folder_pattern) if os.path.isdir(path)])
+if not folders:
+    raise FileNotFoundError(f"No frame folders found; set folder_pattern for your data: {folder_pattern}")
 
 #loop through these folders
 for f in tqdm(folders):
-            # read in the existing channels individually 
-            for channel in  ["C003","C004","C001"]:       
-                    # read image stack
-                    img_list = natsorted(glob.glob(f+"\\*"+channel+"*"))   # total 80 um step 2.5 um   now 30um stack
-                    stack = load_stack(img_list)
-                    #maxproj 
-                    maxproj = max_projection(stack)
-                    #create outfolder HERE AS SUBFOLDER OF CURRENT SCRIPT
-                    outfolder = "Max_all//"+f.split(os.sep)[1]+"//"+f.split(os.sep)[2] #+ "//"+ f.split(os.sep)[2]   # cut-7to7
-                    if not os.path.exists(outfolder):
-                        os.makedirs(outfolder)
-                    maxproj.save(outfolder+ "//" + channel + ".tif" )
+    # Read each channel separately, using only TIFF images.
+    for channel in channels:
+        img_list = natsorted([path for path in glob.glob(os.path.join(f, "*"+channel+"*"))
+                             if os.path.isfile(path) and os.path.splitext(path)[1].lower() in (".tif", ".tiff")])
+        if not img_list:
+            raise FileNotFoundError(f"No TIFF slices for channel {channel} in {f}; check channels")
+        stack = load_stack(img_list)
+        # As before, max_projection rescales each projection to 8-bit (0..255).
+        # This template does not preserve the original absolute intensity scale.
+        maxproj = max_projection(stack)
+        outfolder = os.path.join(output_folder, os.path.basename(os.path.dirname(f)), os.path.basename(f))
+        if not os.path.exists(outfolder):
+            os.makedirs(outfolder)
+        maxproj.save(os.path.join(outfolder, channel + ".tif"))
 
 
 

@@ -18,8 +18,11 @@ import numpy as np
 ## circle funtion is calles disk in newer version
 try:
     from skimage.draw import circle
-except:
-    from skimage.draw import disk as circle
+except ImportError:
+    from skimage.draw import disk
+
+    def circle(r, c, radius, shape=None):
+        return disk((r, c), radius, shape=shape)
     
 from scipy.signal import convolve2d
 from CompactionAnalyzer.utilities import  convolution_fitler_with_nan
@@ -194,6 +197,14 @@ def get_principal_vectors(ot_xx, ot_yx, ot_yy):
     # sometimes minimal vector is not defined, in this case create min eigenvector perpendicular to max eigenvector
     min_not_defined = np.logical_and(np.isnan(min_evec), ~np.isnan(max_evec))
     min_evec[min_not_defined] = rotate_vector_field(np.pi / 2, max_evec)[min_not_defined]
+
+    # The analytic eigenvector formula can also be undefined for the MAXIMUM
+    # eigenvalue of an axis-aligned tensor (e.g. perfectly vertical fibers).
+    # Recover it from a defined minimum vector, just as above in the other
+    # direction. Its sign is immaterial for axial angles. Isotropic/flat
+    # regions with neither vector defined remain NaN, not an invented angle.
+    max_not_defined = np.logical_and(np.isnan(max_evec), ~np.isnan(min_evec))
+    max_evec[max_not_defined] = rotate_vector_field(np.pi / 2, min_evec)[max_not_defined]
 
     # fill nans with zeros --> makes sense because later weighting with coherency would set zero  anyway
     # min_evec[np.isnan(min_evec)] = 0
@@ -402,10 +413,13 @@ def normalize(image, lb=0.1, ub=99.9):
 
 
 if __name__ == "__main__":
-    # reading an image
-    # use r"path\path\file.png" on windows
-    im = plt.imread("/home/user/Desktop/ingo_fiber_orientations/7500_17022020/MAX_7500_17022020.lif - Series002.tif")[:,
-         :, 0]
+    from pathlib import Path
+
+    # Read a bundled collagen image, independent of the working directory.
+    image_path = Path(__file__).resolve().parents[1] / "Tutorial/ExampleCells/Cell_1/C004.tif"
+    im = plt.imread(image_path)
+    if im.ndim == 3:
+        im = im[..., 0]
 
     # standard deviation of gaussian filter used for blurring
     # needs to remove all structures smaller the the structure we want to analyze

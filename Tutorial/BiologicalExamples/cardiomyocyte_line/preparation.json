@@ -1,0 +1,32 @@
+{
+  "source_image": 1,
+  "rotation_degrees_ccw": 20.0,
+  "pixel_size_um": 0.1559814924839538,
+  "image_interpolation": "bilinear",
+  "crop_yx": [
+    [
+      150,
+      875
+    ],
+    [
+      150,
+      875
+    ]
+  ],
+  "output_shape": [
+    725,
+    725
+  ],
+  "minimum_padding_distance_px": 48.104053883222775,
+  "analysis_region": "whole input image; no selection mask",
+  "reference_line_xy": [
+    [
+      69,
+      469
+    ],
+    [
+      655,
+      255
+    ]
+  ]
+}

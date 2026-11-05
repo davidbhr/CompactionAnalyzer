@@ -373,3 +373,50 @@ Tutorial/EmptyGel_output/Pos04/Cell/Figures/Triple_plot.png
 Tutorial/EmptyGel_output/Pos04/Cell/results_angles.xlsx
 Tutorial/EmptyGel_output/Pos04/Cell/results_distance.xlsx
 Tutorial/EmptyGel_output/Pos04/Cell/results_total.xlsx
+
+# Generated tutorial results and local authoring files (keep example inputs tracked)
+/Tutorial/ExampleCells_output/
+/Tutorial/ExampleCells_axis_output/
+/Tutorial/EmptyGel_output/
+/Tutorial/DetermineWindowSize_Output/
+/Tutorial/AxisOrientation_output/
+/Tutorial/ActininMask_output/
+/Tutorial/ActininMaskData/
+/Tutorial/Test/
+/Tutorial/ExampleCells/Combine_Set1/
+/Tutorial/StressFibers/StressFiber_Out/
+/Tutorial/Max_all/
+# Optional raw stacks for MaximumProjectDataTemplate.py (not bundled examples)
+/data/
+/Tutorial/_notforpushing/
+.pytest_cache/
+Thumbs.db
+
+# Axis orientation with a second-channel validity mask
+Tutorial/AxisOrientationMasked_output/
+
+# Local credentials and private environment settings
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+.pypirc
+.netrc
+_netrc
+.aws/
+.ssh/
+id_rsa
+id_ed25519
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local caches and editor/OS artifacts
+.venv/
+.pytest_cache/
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp

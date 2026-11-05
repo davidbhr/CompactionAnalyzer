@@ -240,6 +240,26 @@ def create_centered_circle(image_shape):
     return circle_array
 
 
+def _cell_reference_coordinates(shape, center):
+    """Shared cell-center geometry for the batch pipeline and direct API."""
+    y, x = np.indices(shape)
+    dx = x - center[0]
+    dy = y - center[1]
+    distance = np.sqrt(dx ** 2 + dy ** 2)
+    angle = np.arctan2(dy, dx) * 360 / (2 * np.pi)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        dx_norm, dy_norm = dx / distance, dy / distance
+    return distance, angle, dx_norm, dy_norm
+
+
+def _cell_orientation_fields(min_evec, dx_norm, dy_norm):
+    """Original cell-relative angle and linear alignment; no export/statistics."""
+    projection = np.abs(dx_norm * min_evec[:, :, 0] + dy_norm * min_evec[:, :, 1])
+    angle = np.arccos(projection) * 360 / (2 * np.pi)
+    alignment = 1 - (2 * np.arccos(projection) / (0.5 * np.pi))
+    return angle, alignment
+
+
 def StuctureAnalysisMain(fiber_list,
                          cell_list, 
                          out_list,
@@ -274,7 +294,12 @@ def StuctureAnalysisMain(fiber_list,
                          ignore_cell_outline=False,     # if True the cell area is not set to nan and orientation are calculted everywhere - still the cell center is calculated from segmention    
 
                          
-                         mode_saenopy=False):           # only used for the Saenopy Version to return data files directly after single run   
+                         mode_saenopy=False,            # only used for the Saenopy return values
+                         analysis_mode="full",           # full, axis_orientation_only, axis_orientation_masked
+                         mask_sigma=5,                  # gaussian blur of the second channel, in pixels
+                         mask_threshold=0.6,            # threshold_otsu(blurred_mask_image * mask_threshold)
+                         mask_invert=False,             # select dark regions instead of bright regions
+                         return_segmentation=False):     # append full-mode segmentation to Saenopy return tuple
     
     
     
@@ -292,6 +317,23 @@ def StuctureAnalysisMain(fiber_list,
     None.
 
     """
+    # Reduced mode exits before the dummy cell, segmentation and radial analysis.
+    # Keep full as the default, including all existing positional arguments.
+    if analysis_mode not in ("full", "axis_orientation_only", "axis_orientation_masked"):
+        raise ValueError("analysis_mode must be 'full', 'axis_orientation_only' or 'axis_orientation_masked'")
+    if analysis_mode != "full":
+        if analysis_mode == "axis_orientation_only" and cell_list is not None:
+            raise ValueError("axis_orientation_only requires cell_list=None")
+        if analysis_mode == "axis_orientation_masked" and cell_list is None:
+            raise ValueError("axis_orientation_masked requires second-channel images in cell_list")
+        if manual_segmention or load_segmentation or show_segmentation or path_seg is not None:
+            raise ValueError("Cell segmentation options require analysis_mode='full'; use mask_sigma/threshold/invert for axis masks")
+        if min_dist is not None or max_dist is not None:
+            raise ValueError("Cell distances require analysis_mode='full'")
+        return _axis_orientation_only(fiber_list, out_list, scale, sigma_tensor, edge,
+                                      sigma_first_blur, norm1, norm2, plotting, dpi, SaveNumpy,
+                                      cell_list, mask_sigma, mask_threshold, mask_invert, mode_saenopy)
+
     # plt.ioff()
     # plt.ion()
     
@@ -334,6 +376,10 @@ def StuctureAnalysisMain(fiber_list,
                                  },
                   'Data' :   {'fiber_list': [fiber_list], 'cell_list': [cell_list], 'out_list': [out_list]}
                     }  
+        dict_file["analysis_mode"] = analysis_mode
+        # An absolute source also works when plotting from another working folder.
+        dict_file["source"] = os.path.abspath(fiber_list[n])
+        dict_file["axis_angle_convention"] = "degrees [-90,90); x right, positive upwards; y=wrap180(x-90)"
         with open(os.path.join(out_list[n],"parameters.yml"), 'w') as yaml_file:
             yaml.dump(dict_file, yaml_file, default_flow_style=False)
             
@@ -401,13 +447,7 @@ def StuctureAnalysisMain(fiber_list,
         coordinates
         """
         # Calculate Angle + Distances 
-        y,x = np.indices(ori.shape)
-        dx = x - center_small[0]
-        dy = y - center_small[1]
-        distance = np.sqrt(dx ** 2 + dy ** 2)  # dist to center
-        angle = np.arctan2(dy, dx) *360/(2*np.pi)
-        dx_norm = (dx/distance)
-        dy_norm = (dy/distance)
+        distance, angle, dx_norm, dy_norm = _cell_reference_coordinates(ori.shape, center_small)
         dist_surface = distance_transform_edt(~segmention["mask"])[edge:-edge,edge:-edge] # dist to surface
         # calculate an angle without the deviation/reference to the cell position
         angle_no_reference = ((np.arctan2(min_evec[:,:,0],min_evec[:,:,1])*360/(2*np.pi))%180)-90   # -90 to +90° towards x-axis
@@ -417,9 +457,8 @@ def StuctureAnalysisMain(fiber_list,
         total image analysis
         """
         # Angular deviation from orietation to center vector (projection to only have positive deviation angle values since negative/positive deviation does not matter here)
-        angle_dev = np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1])) * 360/(2*np.pi) 
+        angle_dev, orientation_dev = _cell_orientation_fields(min_evec, dx_norm, dy_norm)
         ## compute the orientation 
-        orientation_dev =  1 - (2 * np.arccos(np.abs(dx_norm * min_evec[:,:,0] + dy_norm*min_evec[:,:,1]))/ (0.5* np.pi)) 
        
            
         ### set values to nan if max distance is specified
@@ -649,7 +688,14 @@ def StuctureAnalysisMain(fiber_list,
         
 
     
+        # The same maps and filenames are used by both analysis modes.
+        # Keep the once-normalized fiber for plotting; saving normalizes it again
+        # exactly as the original FiberImageCrop.npy export did.
+        if SaveNumpy or plotting:
+            axis_maps = _get_axis_arrays(min_evec, max_evec, ori, im_fiber_n[edge:-edge,edge:-edge])
+
         if SaveNumpy:
+            _save_axis_arrays(out_list[n], axis_maps)
             #create output folder if not existing
             numpy_out = os.path.join(out_list[n], "NumpyArrays" )
             print (numpy_out)
@@ -661,15 +707,10 @@ def StuctureAnalysisMain(fiber_list,
             np.save(os.path.join(numpy_out, "AngleDeviationMap.npy" ),angle_dev )    
             #np.save(os.path.join(numpy_out, "AngleMap(weight_int).npy" ),angle_dev_weighted)    
             np.save(os.path.join(numpy_out, "AngleDeviationMap(weight_int_coh).npy"),angle_dev_weighted2 )    
-            np.save(os.path.join(numpy_out, "AngleMap_NoReference.npy"), angle_no_reference )  
             np.save(os.path.join(numpy_out, "OrientationMap.npy" ),orientation_dev )    
             #np.save(os.path.join(numpy_out, "OrientationMap_weight_int.npy" ),orientation_dev_weighted)    
             np.save(os.path.join(numpy_out, "OrientationMap_weight_intcoh.npy" ),orientation_dev_weighted2 )    
-            np.save(os.path.join(numpy_out, "FiberImageCrop.npy" ),normalize(im_fiber_n[edge:-edge,edge:-edge]) )      
-            np.save(os.path.join(numpy_out, "CoherencyMap.npy" ),ori )  
             #np.save(os.path.join(numpy_out, "CoherencyMap(weighted_int).npy" ),ori_weight2)  
-            np.save(os.path.join(numpy_out, "Vector_min_ax0.npy"),min_evec[:,:,0])  
-            np.save(os.path.join(numpy_out, "Vector_min_ax1.npy"),min_evec[:,:,1])   
             np.save(os.path.join(numpy_out, "center.npy"),center_small)  
             #np.save(os.path.join(numpy_out, "mask_surface_shells.npy"),mask_shells['Mask_shell'])                                                                                   
             #np.save(os.path.join(numpy_out, "mask_spherical_shells.npy"),mask_shells['Mask_shell_center'])   
@@ -692,6 +733,11 @@ def StuctureAnalysisMain(fiber_list,
             if not os.path.exists(figures):
                 os.makedirs(figures)
             
+            # Same overlay style as before; only the axis names and extra maps
+            # are new. No 90-angle flip is applied to the stored fiber direction.
+            plot_axis_orientation_arrays(axis_maps, figures, scale=scale, dpi=dpi,
+                cell=None if cell_list is None else im_cell_n[edge:-edge,edge:-edge])
+
             plot_angle_dev(angle_map = orientation_dev,   vmin=-1,vmax=1,
                             vec0=min_evec[:,:,0] ,vec1=min_evec[:,:,1] ,coherency_map=ori,
                             path_png= os.path.join(figures,"Orientation.png"),label="Orientation",dpi=dpi,cmap="coolwarm")
@@ -699,15 +745,6 @@ def StuctureAnalysisMain(fiber_list,
 
 
             if cell_list == None:
-                plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
-                                   None,
-                                   angle_no_reference, cmap_angle="gist_rainbow",
-                                   path_png= os.path.join(figures,"Angle_NoReference_overlay_nocell.png"),                       
-                                   label="Angle (x-axis)",dpi=dpi,
-                                   # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
-                                   # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
-                                   omin=-90, omax=90,
-                                   scale=scale)    
                 plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
                                    None,
                                    ori, cmap_angle="turbo",
@@ -752,15 +789,6 @@ def StuctureAnalysisMain(fiber_list,
                                    # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
                                     omin=0, omax=90,scale=scale)
               
-                plot_fancy_overlay(im_fiber_n[edge:-edge,edge:-edge], 
-                                   im_cell_n[edge:-edge,edge:-edge],
-                                   angle_no_reference, cmap_angle="gist_rainbow",
-                                   path_png= os.path.join(figures,"Angle_NoReference_overlay.png"),                       
-                                   label="Angle (x-axis)",dpi=dpi,
-                                   # ,cmap_cell="Greys_r",cmap_fiber="Greys_r", ### use default values here
-                                   # cmap_angle="viridis", alpha_ori =0.8,  alpha_cell = 0.4, alpha_fiber = 0.4,
-                                   omin=-90, omax=90,
-                                   scale=scale)    
                 
             
             plt.close("all") 
@@ -819,7 +847,8 @@ def StuctureAnalysisMain(fiber_list,
             plt.close("all")      
             
         if mode_saenopy == True: # only evaluates a single item at each call and returns the arrays
-             return angle_no_reference, orientation_dev, ori, min_evec, excel_total, excel_angles, excel_distance
+             values = (angle_no_reference, orientation_dev, ori, min_evec, excel_total, excel_angles, excel_distance)
+             return values + (segmention,) if return_segmentation else values
             
             # np.save(os.path.join(numpy_out, "segmention.npy" ),segmention["mask"][edge:-edge,edge:-edge])
             # np.save(os.path.join(numpy_out, "AngleDeviationMap.npy" ),angle_dev )    
@@ -845,6 +874,206 @@ def StuctureAnalysisMain(fiber_list,
 
 
 
+
+def _get_axis_arrays(min_evec, max_evec, ori, fiber):
+    """Keep both eigenvectors; add only the fiber angles towards x and y."""
+    angle_x, angle_y = vectors_to_axis_angles(min_evec)
+    return {"min_x": angle_x, "min_y": angle_y,
+            "min_vx": min_evec[:,:,0], "min_vy": min_evec[:,:,1],
+            "max_vx": max_evec[:,:,0], "max_vy": max_evec[:,:,1],
+            "coherency": ori, "fiber": fiber}
+
+
+def _save_axis_arrays(output_folder, arrays):
+    """Common NumPy subset; retain the old angle filename for existing readers."""
+    numpy_out = os.path.join(output_folder, "NumpyArrays")
+    os.makedirs(numpy_out, exist_ok=True)
+    # This optional output belongs to the masked mode and is rewritten below
+    # for that mode. A rerun without a mask must not inherit an earlier mask.
+    mask_file = os.path.join(numpy_out, "ValidityMask.npy")
+    if os.path.isfile(mask_file):
+        os.remove(mask_file)
+    for name, filename in AXIS_ARRAY_FILENAMES.items():
+        values = arrays[name]
+        if name == "fiber":
+            values = normalize(values)  # Original second normalization after cropping.
+        np.save(os.path.join(numpy_out, filename), values)
+    np.save(os.path.join(numpy_out, "AngleMap_NoReference.npy"), arrays["min_x"])
+    for axis in ("x", "y"):
+        np.save(os.path.join(numpy_out, f"Alignment_{axis}_axis.npy"), axis_alignment(arrays[f"min_{axis}"]))
+
+
+def _axis_orientation_only(fiber_list, out_list, scale, sigma_tensor, edge,
+                           sigma_first_blur, norm1, norm2, plotting, dpi, SaveNumpy,
+                           cell_list=None, mask_sigma=5, mask_threshold=0.6,
+                           mask_invert=False, mode_saenopy=False):
+    """The original fiber steps without dummy cells or radial cell analysis.
+
+    Kept next to StuctureAnalysisMain to make comparison with full mode easy.
+    normalize, gaussian and analyze_local are the same functions used above.
+    """
+    import yaml
+    if fiber_list is None or out_list is None or len(fiber_list) != len(out_list) or not len(fiber_list):
+        raise ValueError("fiber_list and out_list must be nonempty lists of equal length")
+    if cell_list is not None and len(cell_list) != len(fiber_list):
+        raise ValueError("cell_list must contain one mask-channel image per fiber image")
+    if mode_saenopy and len(fiber_list) != 1:
+        raise ValueError("mode_saenopy returns one result; provide exactly one fiber image")
+    if len({os.path.normcase(os.path.abspath(p)) for p in out_list}) != len(out_list):
+        raise ValueError("Each image needs a distinct output directory")
+    if not np.isfinite(scale) or scale <= 0:
+        raise ValueError("scale must be positive and finite")
+    if not sigma_tensor:
+        sigma_tensor = 7/scale
+    if not np.isfinite(sigma_tensor) or sigma_tensor <= 0:
+        raise ValueError("sigma_tensor must be positive and finite")
+
+    for n,i in tqdm(enumerate(fiber_list)):
+        im_fiber = imageio.v2.imread(fiber_list[n])
+        if len(im_fiber.shape) == 3 and im_fiber.shape[-1] == 3:
+            im_fiber = color.rgb2gray(im_fiber)
+        if len(im_fiber.shape) != 2:
+            raise ValueError("Analyze one 2D fiber image at a time, not a t/z stack")
+        if not isinstance(edge, (int, np.integer)) or edge < 0 or 2*edge >= min(im_fiber.shape):
+            raise ValueError("edge must be a nonnegative integer leaving a nonempty image")
+
+        im_fiber_n = normalize(im_fiber, norm1, norm2)
+        im_fiber_g = gaussian(im_fiber_n, sigma=sigma_first_blur)
+        ori, max_evec, min_evec, max_eval, min_eval = analyze_local(
+            im_fiber_g, sigma=sigma_tensor, size=0, filter_type="gaussian")
+        # slice(None) handles edge=0; [0:-0] would be empty.
+        crop = slice(edge, -edge) if edge else slice(None)
+        axis_maps = _get_axis_arrays(min_evec[crop,crop], max_evec[crop,crop],
+                                     ori[crop,crop], im_fiber_n[crop,crop])
+
+        # Segment AFTER cropping the raw second channel, as in the actinin
+        # reader. Never multiply the fiber image by this mask before the tensor.
+        mask_image = None
+        validity_mask = np.ones(axis_maps["min_x"].shape, dtype=bool)
+        if cell_list is not None:
+            mask_image = imageio.v2.imread(cell_list[n])
+            if mask_image.ndim == 3 and mask_image.shape[-1] == 3:
+                mask_image = color.rgb2gray(mask_image)
+            if mask_image.shape != im_fiber.shape:
+                raise ValueError("Fiber and mask-channel images must have identical 2D shapes")
+            mask_image = mask_image[crop,crop]
+            validity_mask = create_axis_mask(mask_image, mask_sigma, mask_threshold, mask_invert)
+        # Statistics use the exported intensity convention. This shallow copy
+        # keeps the once-normalized background of the historical overlays.
+        summary_maps = dict(axis_maps)
+        fiber_crop = axis_maps["fiber"]
+        summary_maps["fiber"] = normalize(fiber_crop) if np.isfinite(fiber_crop).all() and np.ptp(fiber_crop) > 0 else np.zeros(fiber_crop.shape)
+        summary, histogram = summarize_axis_orientation(summary_maps, validity_mask)
+        if summary["Valid pixels"] == 0:
+            warnings.warn("No valid orientation pixels: alignment is NaN and the histogram is empty", RuntimeWarning)
+
+        os.makedirs(out_list[n], exist_ok=True)
+        dict_file = {"analysis_mode": "axis_orientation_only" if cell_list is None else "axis_orientation_masked",
+                     "cell_list": None if cell_list is None else [os.path.abspath(cell_list[n])],
+                     "cell_analysis": "not performed", "source": os.path.abspath(fiber_list[n]),
+                     "scale": float(scale), "sigma_tensor": float(sigma_tensor), "edge": int(edge),
+                     "sigma_first_blur": float(sigma_first_blur), "norm1": float(norm1), "norm2": float(norm2),
+                     "plotting": bool(plotting), "SaveNumpy": bool(SaveNumpy),
+                     "axis_angle_convention": "degrees [-90,90); x right, positive upwards; y=wrap180(x-90)",
+                     "vector_components": "[x, y_down]; min=fiber, max=gradient"}
+        dict_file["alignment_definition"] = "1 - abs(angle_degrees)/45; mean of valid pixels"
+        if cell_list is not None:
+            dict_file.update(mask_sigma=float(mask_sigma), mask_threshold=float(mask_threshold),
+                             mask_invert=bool(mask_invert), mask_source=os.path.abspath(cell_list[n]))
+        with open(os.path.join(out_list[n], "parameters.yml"), "w", encoding="utf-8") as yaml_file:
+            yaml.safe_dump(dict_file, yaml_file, sort_keys=False)
+        if SaveNumpy:
+            import csv
+            _save_axis_arrays(out_list[n], axis_maps)
+            numpy_out = os.path.join(out_list[n], "NumpyArrays")
+            if cell_list is not None:
+                np.save(os.path.join(numpy_out, "ValidityMask.npy"), validity_mask)
+                for axis in ("x", "y"):
+                    alignment = axis_alignment(axis_maps[f"min_{axis}"])
+                    np.save(os.path.join(numpy_out, f"Alignment_{axis}_axis.npy"),
+                            np.where(validity_mask, alignment, np.nan))
+            # Small CSVs make statistics available without Excel or pandas.
+            with open(os.path.join(out_list[n], "results_axis.csv"), "w", newline="", encoding="utf-8") as file:
+                writer = csv.DictWriter(file, fieldnames=list(summary))
+                writer.writeheader()
+                writer.writerow(summary)
+            np.savetxt(os.path.join(out_list[n], "histogram_axis.csv"), histogram, delimiter=",",
+                       header="bin_left_deg,bin_right_deg,count_x,count_y", comments="",
+                       fmt=["%.8g", "%.8g", "%d", "%d"])
+        if plotting:
+            figures = os.path.join(out_list[n], "Figures")
+            plot_axis_orientation_arrays(axis_maps, figures, scale=scale, dpi=dpi,
+                                         mask=validity_mask if cell_list is not None else None)
+            plot_axis_histogram(histogram, summary, os.path.join(figures, "Histogram_axis_orientation.png"), dpi=dpi)
+            if mask_image is not None:
+                plot_axis_channels(axis_maps, mask_image, validity_mask, figures, scale=scale, dpi=dpi)
+        if mode_saenopy:
+            # Full mode retains its historical seven-item tuple. Axis modes
+            # return a named dictionary: no fake cell-center or distance data.
+            return {"arrays": summary_maps, "validity_mask": validity_mask,
+                    "summary": summary, "histogram": histogram}
+
+
+def create_axis_mask(image, sigma=5, threshold=0.6, invert=False):
+    """Select all positive regions, without the full mode's largest-cell rule.
+
+    Input is the raw, already edge-cropped second channel. The threshold is
+    intentionally computed on filtered * threshold, matching the old reader
+    including its finite histogram bins. No normalization or hole filling.
+    """
+    image = np.asarray(image)
+    if image.ndim != 2 or not image.size or not np.isfinite(image).all():
+        raise ValueError("Mask image must be a nonempty finite 2D array")
+    if not np.isfinite(sigma) or sigma < 0 or not np.isfinite(threshold) or threshold <= 0:
+        raise ValueError("mask_sigma must be nonnegative and mask_threshold must be positive and finite")
+    filtered = gaussian(image, sigma=sigma)
+    mask = filtered > threshold_otsu(filtered * threshold)
+    return ~mask if invert else mask
+
+
+def axis_alignment(angles):
+    """Original package's linear score: parallel +1, 45 degrees 0, perpendicular -1.
+
+    This is NOT cos(2*theta). Average scores per pixel, not signed angles: the
+    latter have a wrap at +/-90 degrees. y alignment equals minus x alignment.
+    """
+    return 1 - np.abs(wrap_axis_angle(angles)) / 45.0
+
+
+def summarize_axis_orientation(arrays, mask=None):
+    """Equal-pixel means and explicitly named optional weighted means.
+
+    Histograms use the same finite fiber pixels for both axes (36 fixed bins).
+    Empty masks or zero total weights yield NaN, never an apparent alignment.
+    """
+    x = arrays["min_x"]
+    y = arrays["min_y"]
+    if mask is None:
+        mask = arrays.get("validity_mask", np.ones(x.shape, dtype=bool))
+    mask = np.asarray(mask, dtype=bool)
+    if mask.shape != x.shape:
+        raise ValueError("Validity mask shape does not match the angle maps")
+    valid = mask & np.isfinite(x) & np.isfinite(y)
+    summary = {"Selected pixels": int(mask.sum()), "Valid pixels": int(valid.sum())}
+    # Accept the exported FiberImageCrop convention directly, so re-reading
+    # the saved maps reproduces all CSV values without a third normalization.
+    intensity = arrays["fiber"]
+    for axis, angles in (("x", x), ("y", y)):
+        score = axis_alignment(angles)[valid]
+        summary[f"Alignment {axis}"] = float(np.mean(score)) if score.size else np.nan
+        # Use the same cropped intensity normalization as exported FiberImageCrop.
+        for label, weights in (("coherency", arrays["coherency"]),
+                               ("intensity and coherency", intensity * arrays["coherency"])):
+            weights = weights[valid]
+            keep = np.isfinite(weights) & (weights > 0)
+            summary[f"Alignment {axis} (weighted by {label})"] = (
+                float(np.average(score[keep], weights=weights[keep])) if keep.any() else np.nan)
+    bins = np.linspace(-90, 90, 37)
+    counts_x, _ = np.histogram(x[valid], bins=bins)
+    counts_y, _ = np.histogram(y[valid], bins=bins)
+    return summary, np.column_stack([bins[:-1], bins[1:], counts_x, counts_y])
+
+
 def SummarizeResultsTotal(data, output_folder= None):
     if not output_folder:
         output_folder=os.path.join(data,"CombinedFiles")
@@ -852,7 +1081,9 @@ def SummarizeResultsTotal(data, output_folder= None):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)    
     
-    list_total = glob.glob(data+"\\**\\results_total.xlsx", recursive=True)
+    list_total = glob.glob(os.path.join(data, "**", "results_total.xlsx"), recursive=True)
+    if not list_total:
+        raise FileNotFoundError(f"No results_total.xlsx found in {data}; run full mode with SaveExcel=True first")
 
     
     
@@ -892,7 +1123,9 @@ def SummarizeResultsDistance(data, output_folder= None, dpi=200):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)   
     
-    list_distance = glob.glob(data+"\\**\\results_distance.xlsx", recursive=True)    
+    list_distance = glob.glob(os.path.join(data, "**", "results_distance.xlsx"), recursive=True)
+    if not list_distance:
+        raise FileNotFoundError(f"No results_distance.xlsx found in {data}; run full mode with SaveExcel=True first")
      # initialize a combining distance result dictionary for all cells
     results_distance_combined = { 'Path':[], 'Shell_mid (µm)': [], 'Intensity': [],
                               'Intensity Norm': [], 'Orientation': [],

@@ -1,0 +1,12 @@
+[
+  {
+    "original_filename": "MAX_20260922_NRVC_P3_250k_ST_SD800_I_siControl_phall_1.tif",
+    "file": "phalloidin_original.tif",
+    "sha256": "1c15dc2f1df17b91924f7a040db0842aa93f07f9ffb77fa9f98d4854604baab7"
+  },
+  {
+    "original_filename": "MAX_20260922_NRVC_P3_250k_ST_SD800_I_siControl_actn_1.tif",
+    "file": "actinin_original.tif",
+    "sha256": "5080ec2965a783a8534ba8a38d6310fcb3ad806106b6d73e864f492d276a27ac"
+  }
+]

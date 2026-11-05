@@ -1,0 +1,93 @@
+{
+  "cell": {
+    "mode": "full",
+    "region": "second",
+    "settings": {
+      "sigma": 22.0125786163522,
+      "edge": 40,
+      "blur": 0.5,
+      "threshold": 1,
+      "mask-blur": 5,
+      "cell-blur": 6,
+      "background-blur": 80
+    },
+    "pixel_size": 0.318,
+    "image": "cell_orientation.tif",
+    "mask": "cell_mask.tif"
+  },
+  "phalloidin": {
+    "mode": "axis",
+    "region": "same",
+    "settings": {
+      "sigma": 6.25,
+      "edge": 10,
+      "blur": 0.5,
+      "threshold": 0.25,
+      "mask-blur": 5,
+      "cell-blur": 6,
+      "background-blur": 80
+    },
+    "pixel_size": 0.48,
+    "image": "phalloidin_orientation.tif"
+  },
+  "cardiomyocyte": {
+    "mode": "axis",
+    "region": "second",
+    "settings": {
+      "sigma": 8,
+      "edge": 15,
+      "blur": 0.5,
+      "threshold": 0.65,
+      "mask-blur": 8,
+      "cell-blur": 6,
+      "background-blur": 80
+    },
+    "pixel_size": 0.1559814924839538,
+    "image": "cardiomyocyte_orientation.tif",
+    "mask": "cardiomyocyte_mask.tif"
+  },
+  "line": {
+    "mode": "line_orientation",
+    "region": "whole",
+    "settings": {
+      "sigma": 8,
+      "edge": 15,
+      "blur": 0.5,
+      "threshold": 0.5,
+      "mask-blur": 5,
+      "cell-blur": 6,
+      "background-blur": 80
+    },
+    "pixel_size": 0.1559814924839538,
+    "image": "line_orientation.tif",
+    "line": [
+      [
+        69,
+        469
+      ],
+      [
+        655,
+        255
+      ]
+    ]
+  },
+  "point": {
+    "mode": "point_orientation",
+    "region": "second",
+    "settings": {
+      "sigma": 5,
+      "edge": 15,
+      "blur": 0.5,
+      "threshold": 0.5,
+      "mask-blur": 0,
+      "cell-blur": 6,
+      "background-blur": 80
+    },
+    "point": [
+      255.5,
+      255.5
+    ],
+    "image": "point_orientation.tif",
+    "mask": "point_mask.tif"
+  }
+}

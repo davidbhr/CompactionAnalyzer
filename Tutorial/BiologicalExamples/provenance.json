@@ -1,0 +1,36 @@
+[
+  {
+    "source": "MAX_20260922_NRVC_P3_250k_ST_SD800_I_siControl_phall_5.tif",
+    "file": "cardiomyocyte_05/phalloidin.tif",
+    "sha256": "faa1acb791f63bab3abd26367b4f60e5add1c8bd178d746166ade74c36148b41",
+    "operation": "Unmodified extracted TIFF; pixel-identical to frame 5 of the original stack."
+  },
+  {
+    "source": "MAX_20260922_NRVC_P3_250k_ST_SD800_I_siControl_actn_5.tif",
+    "file": "cardiomyocyte_05/actinin.tif",
+    "sha256": "5123a7cbdfe27d57147d1b3534e433dedfafb6424ed2224c7919a58622536498",
+    "operation": "Unmodified extracted TIFF; pixel-identical to frame 5 of the original stack."
+  },
+  {
+    "source": "well5_20210528-182559_Mic3_rep000_pos00_x00_y00_modeFluo4_z0.tif.png",
+    "file": "spheroid/source.png",
+    "sha256": "dd254548bb1a8cf75466748eba19233f15274a0b81c2dc3d14fb90c913700bc3",
+    "operation": "Red display channel extracted as grayscale, without resizing. This PNG-derived demonstration is not a raw-intensity measurement.",
+    "reference_point_xy": [
+      1200,
+      910
+    ],
+    "selection": "Smoothed red intensity >70; 290<radius<650 px"
+  },
+  {
+    "source": "MAX_2023-06-28_VimKO+DesR406W_CollR.lif - Series019.png",
+    "file": "lamellipodia/source.png",
+    "sha256": "141db629dc8d587b61f0e507ced63508398228b5201364b44c04fb1835056b01",
+    "operation": "Red display channel extracted as grayscale, without resizing. This PNG-derived demonstration is not a raw-intensity measurement.",
+    "reference_point_xy": [
+      390,
+      325
+    ],
+    "selection": "Smoothed red intensity >35; 80<radius<200 px"
+  }
+]

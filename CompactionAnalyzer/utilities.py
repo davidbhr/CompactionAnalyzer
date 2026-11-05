@@ -109,7 +109,7 @@ def create_circular_mask(h, w, center=None, radius=None):
     
     # EXAMPLE CODE TO CREATE A white blob in image of same shape as fiber image
     # from PIL import Image
-    # fiber = plt.imread(r"U:\Dropbox\software-github\CompactionAnalyzer\TestData\Random1\Fiber.tif")
+    # fiber = plt.imread("orientation.tif")
     # mask = create_circular_mask(fiber.shape[0],fiber.shape[1],radius=60).astype("uint8")
     # img = Image.fromarray(mask*256)
     # img.save("cell_rand.tif")

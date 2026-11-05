@@ -4,7 +4,7 @@ from setuptools import setup
 setup(
     name='CompactionAnalyzer',
     packages=['CompactionAnalyzer'],
-    version='1.0.7',
+    version='1.0.8',
     description='A python package to analyze matrix fiber alignment around cells (proxy for cellular forces)',
     url='',
     download_url = '',
@@ -16,7 +16,7 @@ setup(
                       'matplotlib>=2.2.2',
                       'roipoly>=0.5.3',
 					  'scikit-image>=0.24.0',			  
-					  'pyyml',
+					  'PyYAML',
 					  'tqdm',
 					  'openpyxl',
 					  'natsort',

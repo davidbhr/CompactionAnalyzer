@@ -175,8 +175,7 @@ cell-type classification or identification of individual cells.
 The required actinin data are not bundled. Set `numpy_folder`, `actinin_file`,
 `output_folder`, `scale` and `edge` for your own experiment. The image and maps
 must belong to the same position and z plane (or the same MAX projection), with
-the same pixel grid and crop. Shape mismatches raise an error. Use an output
-directory outside Dropbox if the checkout is synchronized.
+the same pixel grid and crop. Shape mismatches raise an error.
 
 The mask retains the local reader's calculation: crop the original actinin
 image, smooth with Gaussian sigma=5, then compare it with
@@ -293,7 +292,7 @@ edge=10, first blur=0.5 and normalization percentiles 1/99 from the existing
 StressFibers script. Results go to the ignored `Tutorial/AxisOrientation_output`.
 The full StressFibers script remains available for comparison.
 
-`Tutorial/Example_CellCollagenTODOCoherency analysis.py` demonstrates the same
+`Tutorial/Example_CollagenAxisOrientation.py` demonstrates the same
 mode on the four collagen channels, without using the associated cell images.
 It retains its previous fiber parameters and exposes `analysis_mode` explicitly.
 The cell/collagen and empty-gel examples retain full mode and their Excel summaries.
@@ -301,7 +300,3 @@ The cell/collagen and empty-gel examples retain full mode and their Excel summar
 The stress-fiber example needs no actinin mask or second image. The separate
 actinin-mask tutorial demonstrates selection of already analyzed pixel values;
 it requires the user's own matching channels and analysis settings.
-
-Git ignore rules prevent generated results from being committed; they do not
-exclude files from Dropbox or other cloud synchronization. Set `output_folder`
-to a directory outside a synchronized checkout when running examples there.

@@ -18,7 +18,7 @@
         <DimensionDescription DimID="Y" NumberOfElements="1024" Origin="0.00" Length="490.93" Unit="µm" BitInc="0" BytesInc="1024" LogicalUnit="pixels" Voxel="0.480">
         </DimensionDescription>
       </Dimensions>
-      <FileLocation>F:\LUB9CAF oxy IF 22-09-22\LIF\New Folder\Experiment_006.lif</FileLocation>
+      <FileLocation>Experiment_006.lif</FileLocation>
       <StartTime>10/8/2022 1:26:38 AM.270</StartTime>
       <EndTime>10/8/2022 1:26:38 AM.270</EndTime>
       <FrameCount>2 (2 channels, 1 frames)</FrameCount>

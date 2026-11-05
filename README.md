@@ -41,7 +41,7 @@ The cell image supplies the segmentation and the cell center. The fiber image su
 
 The analysis uses **2D images**, such as individual optical sections or maximum-intensity projections of a 3D matrix. The measured orientations lie in the image plane; the package does not reconstruct a 3D orientation field. **Cell-relative analysis is the default in the batch pipeline (`StuctureAnalysisMain`).**
 
-<img src="docs/images/Fig1-rawtostructure.png" alt="Cell-relative analysis from fiber and cell images to structure tensor orientation" width="1000" />
+<a href="docs/images/Fig1-rawtostructure.png"><img src="docs/images/previews/Fig1-rawtostructure.jpg" alt="Cell-relative analysis from fiber and cell images to structure tensor orientation" width="1000" /></a>
 
 </details>
 
@@ -134,7 +134,7 @@ For cell-relative analysis, select a fiber image and a cell image. For X/Y analy
 
 Set the pixel size and analysis parameters. Adjust the segmentation or mask threshold and inspect the red overlay, then run **find orientations** or **run all**.
 
-<img src="docs/images/GUI_evaluation.png" alt="Cell segmentation and orientation evaluation in the original viewer" width="800" />
+<a href="docs/images/GUI_evaluation.png"><img src="docs/images/previews/GUI_evaluation.jpg" alt="Cell segmentation and orientation evaluation in the original viewer" width="800" /></a>
 
 The **Angle** tab switches between X and Y. **Coherency** shows the local strength of alignment. Cell measurements also show orientation towards the cell center; X/Y measurements show **Axis alignment**. Each measurement displays the tabs for its selected mode.
 
@@ -151,7 +151,7 @@ The GUI saves **`.saenopyOrientation`** files. Drag them into the measurement vi
 
 For **Point**, use **Choose reference point** and click the image. For **Line**, use **Choose reference line** and click two distinct points. Run **find orientations** after setting or changing the reference. In line mode, **Angle** and **Alignment (line)** switch between **Line / X / Y**. Alignment is +1 parallel and −1 perpendicular to the line.
 
-<img src="docs/images/GUI_reference_line.png" alt="Saenopy showing two selected points and their reference line" width="1000" />
+<a href="docs/images/GUI_reference_line.png"><img src="docs/images/previews/GUI_reference_line.jpg" alt="Saenopy showing two selected points and their reference line" width="1000" /></a>
 
 The reference and mask are saved with each measurement. **Data Analysis** also provides line-relative alignment, angular deviation and an angle histogram. The example below combines three synthetic fiber images with a preferred 25° deviation from the reference line and varying local directions.
 
@@ -176,8 +176,8 @@ a main example below; expand the named alternatives to see the other cases.
 
 | Analysis mode | Examples | Python script | API call | Saenopy |
 |---|---|---|---|---|
-| 🔵 **Cell-relative orientation**<br>Marker of contractility | [Cell in collagen](#-cell-relative-orientation--marker-of-contractility) | [Cell example](Tutorial/Example_Quickstart.py) | [Cell alignment](#cell-relative-alignment-collagen) | [Open in GUI](https://github.com/rgerum/saenopy#orientation-examples) |
-| 🟢 **Orientation to X/Y axes** | [α-Actinin mask](#mask-from-a-second-image)<br>[Whole collagen image](#whole-image)<br>[Stress fibers in the cell area](#mask-from-the-same-image) | [Cardiomyocytes](Tutorial/Example_BiologicalOrientation.py)<br>[Collagen / stress fibers](Tutorial/Example_GeneralOrientation.py) | [Second-image mask](#mask-from-a-second-image)<br>[Whole image](#whole-image-orientation)<br>[Same-image mask](#orientation-inside-a-mask) | [Open in GUI](https://github.com/rgerum/saenopy#orientation-examples) |
+| 🔵 **Cell-relative orientation**<br>Marker of contractility | [Cell in collagen](#-cell-relative-orientation--marker-of-contractility) | [Cell example](Tutorial/Example_Quickstart.py) | [Cell alignment](#cell-relative-alignment-collagen) | [Open in GUI](https://github.com/rgerum/saenopy#fiber-orientation) |
+| 🟢 **Orientation to X/Y axes** | [α-Actinin mask](#mask-from-a-second-image)<br>[Whole collagen image](#whole-image)<br>[Stress fibers in the cell area](#mask-from-the-same-image) | [Cardiomyocytes](Tutorial/Example_BiologicalOrientation.py)<br>[Collagen / stress fibers](Tutorial/Example_GeneralOrientation.py) | [Second-image mask](#mask-from-a-second-image)<br>[Whole image](#whole-image-orientation)<br>[Same-image mask](#orientation-inside-a-mask) | [Open in GUI](https://github.com/rgerum/saenopy#fiber-orientation) |
 | 🟣 **Orientation towards a point** | [Spheroid center](#spheroid-center)<br>[Point in a cell](#lamellipodia-around-a-cell-point)<br>[Synthetic fiber field](#synthetic-fiber-field-around-a-point) | [Spheroid / cell](Tutorial/Example_BiologicalOrientation.py)<br>[Synthetic field](Tutorial/Example_SyntheticReferences.py) | [Spheroid](#spheroid-center)<br>[Cell](#lamellipodia-around-a-cell-point)<br>[Synthetic point](#orientation-towards-a-point) | [Open / create results](#biological-examples-in-saenopy) |
 | 🟣 **Orientation relative to a line** | [Cardiomyocytes](#cardiomyocytes-aligned-along-a-line)<br>[Synthetic fibers](#synthetic-fibers) | [Cardiomyocytes](Tutorial/Example_CardiomyocyteLine.py)<br>[Synthetic fibers](Tutorial/Example_SyntheticReferences.py) | [Cell image](#cardiomyocytes-aligned-along-a-line)<br>[Synthetic line](#orientation-relative-to-a-line) | [Open / create results](#biological-examples-in-saenopy) |
 
@@ -191,7 +191,7 @@ link to its Python API call. Run the commands from the repository root.
 Collagen alignment towards the center of a calcein-stained cell.
 The cell image supplies the segmentation and the reference center.
 
-![Collagen, stained cell and cell-relative alignment](docs/images/collagen-api-quickstart.png)
+[![Collagen, stained cell and cell-relative alignment](docs/images/previews/collagen-api-quickstart.jpg)](docs/images/collagen-api-quickstart.png)
 
 *Left: collagen. Middle: cell stain and segmentation. Right: alignment towards
 the cell center, from −1 tangential to +1 radial.*
@@ -212,7 +212,7 @@ a mask. The **mask from a second image** mode then measures the orientation of
 phalloidin-labeled actin within this mask, relative to the X and Y axes.
 α-Actinin supplies the cell region; phalloidin supplies the orientation signal.
 
-![Phalloidin-labeled actin, its alpha-actinin selection mask and angles to X](docs/images/example-cardiomyocyte.png)
+[![Phalloidin-labeled actin, its alpha-actinin selection mask and angles to X](docs/images/previews/example-cardiomyocyte.jpg)](docs/images/example-cardiomyocyte.png)
 
 *Left: phalloidin. Middle: α-actinin with the selected area in red. Right: phalloidin
 orientation within the mask. Scale bars: 20 µm; TIFF calibration: 0.156 µm/pixel.*
@@ -248,7 +248,7 @@ noise has much lower coherency and approximately symmetric diagonal peaks.
 Those noise peaks reflect the pixel-grid response of the gradient calculation.
 A near-zero alignment alone does not establish isotropy.
 
-![Cell-free collagen and Gaussian pixel noise, their X-angle maps and overlaid angle histograms](docs/images/example-whole-image.png)
+[![Cell-free collagen and Gaussian pixel noise, their X-angle maps and overlaid angle histograms](docs/images/previews/example-whole-image.jpg)](docs/images/example-whole-image.png)
 
 *Top: collagen and its angle map; scale bars: 50 µm. Bottom: one of eight
 independent noise fields and its angle map. Right: collagen (green), noise
@@ -281,7 +281,7 @@ for the orientation analysis and to select the stained cell area. The mask
 excludes the surrounding background from the maps and averages. It selects
 stained regions rather than segmenting individual cells.
 
-![Phalloidin cell-area mask, stress-fiber angles to X and local coherency](docs/images/example-same-image-mask.png)
+[![Phalloidin cell-area mask, stress-fiber angles to X and local coherency](docs/images/previews/example-same-image-mask.jpg)](docs/images/example-same-image-mask.png)
 
 *Left: selected cell area in red. Middle: angle to X within this area. Right:
 coherency, from 0 (isotropic) to 1 (strongly directional), independent of the
@@ -309,7 +309,7 @@ Place the reference point in the center of the spheroid to measure
 the orientation of surrounding cell structures towards it. A peripheral mask
 excludes the spheroid core, background and the annotation in the supplied image.
 
-![Spheroid in grayscale, alignment towards its center and deviation histogram](docs/images/example-spheroid.png)
+[![Spheroid in grayscale, alignment towards its center and deviation histogram](docs/images/previews/example-spheroid.jpg)](docs/images/example-spheroid.png)
 
 *Yellow cross: selected point. Pink outline: analyzed region. Alignment is +1
 radial and −1 tangential. Each histogram bin contains a fraction of the selected
@@ -338,7 +338,7 @@ Place a point in the mouse fibroblast and measure the orientation of its cell
 membrane relative to that point. The mask selects the lamellipodial region and
 excludes the central nuclear region and the other cells.
 
-![Lamellipodia in grayscale, point-relative alignment and deviation histogram](docs/images/example-lamellipodia.png)
+[![Lamellipodia in grayscale, point-relative alignment and deviation histogram](docs/images/previews/example-lamellipodia.jpg)](docs/images/example-lamellipodia.png)
 
 ```python
 import imageio.v2 as imageio
@@ -360,7 +360,7 @@ from the selected point. The same mask selects the lamellipodial area within
 each ring. Here, the ring width is 10 pixels; distances are shown in pixels
 because this image has no known physical calibration.
 
-![Mouse fibroblast with distance rings, mean point-relative alignment and coherency over distance](docs/images/example-lamellipodia-distance.png)
+[![Mouse fibroblast with distance rings, mean point-relative alignment and coherency over distance](docs/images/previews/example-lamellipodia-distance.jpg)](docs/images/example-lamellipodia-distance.png)
 
 *One image: each point on a curve is the mean of the selected pixels in that
 ring. Empty rings have no value. Alignment is +1 radial and −1 tangential;
@@ -413,7 +413,7 @@ have a preferred deviation of 25° from the radial
 direction, with smooth random bending and added intensity noise. An annular mask
 excludes the unresolved center and image margins.
 
-![Synthetic fiber field around a point, point-relative alignment and angular-deviation histogram](docs/images/example-point-reference.png)
+[![Synthetic fiber field around a point, point-relative alignment and angular-deviation histogram](docs/images/previews/example-point-reference.jpg)](docs/images/example-point-reference.png)
 
 *Left: the reference point in yellow and mask boundary in pink. Middle: alignment
 within the mask. Right: mean histogram from three synthetic images in 1° bins. The bin
@@ -444,7 +444,7 @@ points along it to define a reference line. Here, the line follows the main long
 phalloidin-stained cardiomyocytes. Orientation is measured throughout the image
 relative to this line, without a mask.
 
-![Cardiomyocytes, whole-image alignment to a selected line and line-angle histogram](docs/images/example-cardiomyocyte-line.png)
+[![Cardiomyocytes, whole-image alignment to a selected line and line-angle histogram](docs/images/previews/example-cardiomyocyte-line.jpg)](docs/images/example-cardiomyocyte-line.png)
 
 *Yellow points define the reference line along the cells. Alignment is +1
 parallel and −1 perpendicular to the line. Here, mean alignment is
@@ -478,7 +478,7 @@ adds local variation, and intensity noise adds image grain. The selected line
 lies at 30°, giving a preferred deviation of 25°. An elliptical mask selects
 the analyzed area.
 
-![Synthetic aligned fibers, line-relative alignment and line-angle histogram](docs/images/example-line-reference.png)
+[![Synthetic aligned fibers, line-relative alignment and line-angle histogram](docs/images/previews/example-line-reference.jpg)](docs/images/example-line-reference.png)
 
 *Left: the reference line in yellow and mask boundary in pink. Middle: alignment
 within the mask. Right: mean histogram from three synthetic images in 1° bins. The bin
@@ -554,7 +554,7 @@ Both aligned networks have high local coherency, regardless of their direction.
 Crossings reduce local coherency because several directions occur within the
 same analysis window.
 
-<img src="docs/images/Example_condition_comparison.png" alt="Horizontal, crossing and vertical synthetic fibers compared using image means for alignment to the same horizontal line and local coherency" width="1100" />
+<a href="docs/images/Example_condition_comparison.png"><img src="docs/images/previews/Example_condition_comparison.jpg" alt="Horizontal, crossing and vertical synthetic fibers compared using image means for alignment to the same horizontal line and local coherency" width="1100" /></a>
 
 *Each dot represents one image. Bars show the group mean ± SEM. The dashed line
 is the orientation reference; the outline marks the analyzed area. These are
@@ -783,7 +783,7 @@ To compare cells, we can use the overall orientation within a matched field of v
 
 `parameters.yml` records the input/settings. With `plotting=True`, figures are saved under `Figures`; with `SaveNumpy=True`, maps are saved under `NumpyArrays`. These switches are independent. Reusing an output directory overwrites matching filenames and leaves other existing files in place, so use separate directories when comparing modes or settings.
 
-<img src="docs/images/Fig2-orientationeval.png" width="1000" />
+<a href="docs/images/Fig2-orientationeval.png"><img src="docs/images/previews/Fig2-orientationeval.jpg" width="1000" /></a>
 
 ### Combine full-mode results
 
@@ -828,8 +828,8 @@ The existing full-mode maps include:
 | `CoherencyMap.npy`, `FiberImageCrop.npy` | Coherency and normalized fiber-image crop |
 | `AngleMap_NoReference.npy` | Compatibility name for the x-axis fiber angle |
 
-<img src="docs/images/npy-files-1.png" width="800" />
-<img src="docs/images/npy-files-2.png" width="800" />
+<a href="docs/images/npy-files-1.png"><img src="docs/images/previews/npy-files-1.jpg" width="800" /></a>
+<a href="docs/images/npy-files-2.png"><img src="docs/images/previews/npy-files-2.jpg" width="800" /></a>
 
 The screenshots show the historical full-mode outputs. Both direction vectors keep their names and components: `Vector_min_ax0.npy` and `Vector_min_ax1.npy` contain the fiber direction; `Vector_max_ax0.npy` and `Vector_max_ax1.npy` contain the perpendicular structure-tensor gradient direction. For both, `ax0` is the x component and `ax1` is the downward y component in image coordinates. The additional x/y angle maps describe the fiber direction only. Separate maximum-eigenvector angle maps are redundant and are not exported. Existing result folders remain readable.
 
@@ -857,7 +857,7 @@ fiber_list, cell_list, out_list = generate_lists(
 
 For a new measurement without a cell reference, choose the X/Y mode described next. To choose the reference explicitly, use the point mode below.
 
-<img src="docs/images/npy-files-3.png" width="800" />
+<a href="docs/images/npy-files-3.png"><img src="docs/images/previews/npy-files-3.jpg" width="800" /></a>
 
 </details>
 
@@ -890,7 +890,7 @@ StuctureAnalysisMain(fiber_list=fiber_list,
 
 `plotting=False` skips figures while `SaveNumpy=True` still saves arrays. `SaveExcel` has no effect in axis-only mode. Do not call the cell-based Excel summaries on these outputs.
 
-![Bundled stress-fiber image and its orientation towards x and y](docs/images/axis-orientation-example.png)
+[![Bundled stress-fiber image and its orientation towards x and y](docs/images/previews/axis-orientation-example.jpg)](docs/images/axis-orientation-example.png)
 
 *Cropped stress-fiber input and fiber angles towards x and y. These unmasked tensor maps show the same fiber directions using different reference axes.*
 
@@ -1013,7 +1013,7 @@ print(cell["mean_alignment_cell"], cell["mean_angle_cell"])
 For this image and these settings, the mean alignment is about **0.395** and the
 mean angular deviation is **27.2°**. Alignment is +1 radial, 0 at 45° and −1 tangential.
 
-![Bundled collagen image, cell stain with segmentation, and calculated cell-relative alignment](docs/images/collagen-api-quickstart.png)
+[![Bundled collagen image, cell stain with segmentation, and calculated cell-relative alignment](docs/images/previews/collagen-api-quickstart.jpg)](docs/images/collagen-api-quickstart.png)
 
 *Left: collagen. Middle: cell stain with the returned segmentation in red.
 Right: collagen with the cell-relative alignment map. All three panels show the

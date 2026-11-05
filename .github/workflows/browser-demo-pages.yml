@@ -1,7 +1,14 @@
 name: Publish browser demo to GitHub Pages
 
-# Deliberately manual: committing the demo does not publish it.
+# Pushes validate the build; publishing remains manual.
 on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/browser-demo-pages.yml"
+      - "webapp/**"
+      - "CompactionAnalyzer/**"
+      - "LICENSE"
   workflow_dispatch:
 
 permissions:
@@ -21,11 +28,11 @@ jobs:
           python-version: '3.12'
       - name: Build from the current Python analysis code
         run: python webapp/build.py
-      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
           path: webapp/dist
   deploy:
+    if: github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -35,6 +42,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/configure-pages@v5
       - name: Publish
         id: deployment
         uses: actions/deploy-pages@v4

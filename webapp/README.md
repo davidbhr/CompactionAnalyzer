@@ -64,8 +64,8 @@ are skipped. Conditions remain in browser memory until the page is reloaded.
 
 ## Publish on GitHub Pages
 
-The prepared workflow runs manually. No page is published merely by committing
-these files, and no publishing credentials are stored in this directory.
+Changes to the website or analysis code on `master` build the website automatically.
+Publishing remains manual: use **Run workflow** to update the public website.
 
 1. Commit and push `webapp/`, `.github/workflows/browser-demo-pages.yml`, and
    the current `CompactionAnalyzer` source, including `api.py` and `distance.py`.

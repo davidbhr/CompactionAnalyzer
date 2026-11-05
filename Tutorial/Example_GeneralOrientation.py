@@ -1,6 +1,6 @@
 """X/Y orientation in collagen or phalloidin images, with an optional phalloidin mask.
 
-The whole-image figure compares collagen with independent Gaussian pixel noise.
+The whole-image figure compares collagen with isotropic, spatially correlated Gaussian noise.
 Both use the same image dimensions, tensor window, initial blur and edge crop.
 
 python Tutorial/Example_GeneralOrientation.py --case phalloidin --figure phalloidin.png
@@ -16,15 +16,21 @@ sys.path.insert(0, str(ROOT))
 from CompactionAnalyzer import analyze_image
 
 
-def analyze_noise_reference(shape, scale, sigma_tensor, edge, count=8, seed=100):
+def analyze_noise_reference(shape, scale, sigma_tensor, edge, count=32, seed=100,
+                            sigma_first_blur=.5, correlation_sigma=3.):
     """Average independent noise fields, with no imposed preferred direction.
 
     Seeds are fixed for reproducibility. Each image's histogram sums to one
     before averaging. The first image is shown; the curve uses all images.
-    Pixel noise is not smoothed before the common analysis pipeline.
+    An isotropic Gaussian filter creates spatial correlation in the input.
+    This sets a feature scale, not a preferred direction. Both image types then
+    use the same analysis settings. This is not a white-pixel-noise control.
     """
     import numpy as np
+    from scipy.ndimage import gaussian_filter
 
+    if correlation_sigma <= 0 or not np.isfinite(correlation_sigma):
+        raise ValueError("correlation_sigma must be positive and finite.")
     if count < 2:
         raise ValueError('Use at least two noise images to calculate a SEM.')
     bins = np.arange(-90, 91, 5)
@@ -32,9 +38,10 @@ def analyze_noise_reference(shape, scale, sigma_tensor, edge, count=8, seed=100)
     example = {}
     for index in range(count):
         image = np.random.default_rng(seed + index).normal(size=shape)
+        image = gaussian_filter(image, sigma=correlation_sigma, mode="wrap")
         values = analyze_image(
             image, mode='axis_orientation_only', scale=scale,
-            sigma_tensor=sigma_tensor, edge=edge,
+            sigma_tensor=sigma_tensor, edge=edge, sigma_first_blur=sigma_first_blur,
             outputs=['angle_x', 'mean_alignment_x', 'mean_deviation_x', 'mean_coherency'],
         )
         angles = values['angle_x']
@@ -45,7 +52,8 @@ def analyze_noise_reference(shape, scale, sigma_tensor, edge, count=8, seed=100)
         if index == 0:
             example = {'image': image, 'angle_x': angles}
     return dict(**example, bins=bins, histograms=np.asarray(histograms),
-                per_image=measurements, count=count,
+                per_image=measurements, count=count, sigma_first_blur=sigma_first_blur,
+                correlation_sigma=correlation_sigma,
                 **{key: float(np.mean([row[key] for row in measurements]))
                    for key in measurements[0]})
 
@@ -54,8 +62,9 @@ def run(case, figure=None):
     data = ROOT/'Tutorial'
     if case == 'whole':
         source = sorted((data/'EmptyGel/Pos01').glob('*C003*.tif'))[0]
-        scale, edge, sigma_um = .249, 40, 7.
-        mode, parameters = 'axis_orientation_only', {}
+        # Exclude the tensor-filter boundary in both collagen and noise.
+        scale, edge, sigma_um = .249, 128, 7.
+        mode, parameters = 'axis_orientation_only', {'sigma_first_blur': .5}
     elif case in ('phalloidin', 'mask'):
         source = sorted((data/'StressFibers/controlzoom1.5').glob('*.tif'))[0]
         scale, edge, sigma_um = .48, 10, 3.
@@ -69,11 +78,12 @@ def run(case, figure=None):
     )
     print(case, {name: value for name, value in result.items() if name.startswith('mean_')})
     if figure is not None:
-        save_figure(source, result, case, scale, edge, figure, sigma_tensor=sigma_um/scale)
+        save_figure(source, result, case, scale, edge, figure, sigma_tensor=sigma_um/scale,
+                    sigma_first_blur=parameters.get('sigma_first_blur', .5))
     return result
 
 
-def save_figure(source, result, case, scale, edge, output, noise_reference=None, sigma_tensor=None):
+def save_figure(source, result, case, scale, edge, output, noise_reference=None, sigma_tensor=None, sigma_first_blur=.5):
     import imageio.v2 as imageio
     import matplotlib
     matplotlib.use('Agg')
@@ -87,7 +97,8 @@ def save_figure(source, result, case, scale, edge, output, noise_reference=None,
     if case == 'whole':
         if noise_reference is None:
             noise_reference = analyze_noise_reference(
-                raw.shape, scale, 7/scale if sigma_tensor is None else sigma_tensor, edge)
+                raw.shape, scale, 7/scale if sigma_tensor is None else sigma_tensor, edge,
+                sigma_first_blur=sigma_first_blur)
         print('noise reference', {key: value for key, value in noise_reference.items()
                                   if key.startswith('mean_')})
         return save_noise_comparison(raw, result, noise_reference, scale, edge, output)
@@ -125,20 +136,22 @@ def save_figure(source, result, case, scale, edge, output, noise_reference=None,
 
 
 def save_noise_comparison(raw, result, noise, scale, edge, output):
-    """Show both inputs, their angle maps and the measured histogram overlay."""
+    """Compare mean X alignment and angle distributions for both image types."""
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     import numpy as np
 
-    fig = plt.figure(figsize=(13.2, 7.3), constrained_layout=True)
-    grid = fig.add_gridspec(2, 3, width_ratios=[1, 1.1, 1.4])
+    fig = plt.figure(figsize=(13.8, 8.0), constrained_layout=True)
+    grid = fig.add_gridspec(2, 3, width_ratios=[1, 1.1, 1.5])
     input_axes = [fig.add_subplot(grid[row, 0]) for row in (0, 1)]
     angle_axes = [fig.add_subplot(grid[row, 1]) for row in (0, 1)]
-    histogram = fig.add_subplot(grid[:, 2])
+    comparison = grid[:, 2].subgridspec(2, 1, height_ratios=[1, 1.5])
+    alignment = fig.add_subplot(comparison[0])
+    histogram = fig.add_subplot(comparison[1])
     colors = ['#258172', '#8865ad']
     examples = [('Cell-free collagen', raw, result),
-                ('Gaussian noise · example field', noise['image'], noise)]
+                ('Correlated noise · example field', noise['image'], noise)]
     for row, (title, image, values) in enumerate(examples):
         cropped = image[edge:-edge, edge:-edge] if edge else image
         low, high = np.percentile(cropped, [1, 99])
@@ -162,6 +175,23 @@ def save_noise_comparison(raw, result, noise, scale, edge, output):
                            ticks=[-90, -45, 0, 45, 90], shrink=.8)
     colorbar.set_label('Angle to X axis (°)', fontsize=10)
 
+    means = [result['mean_alignment_x'], noise['mean_alignment_x']]
+    noise_alignment = np.array([row['mean_alignment_x'] for row in noise['per_image']])
+    alignment_sem = noise_alignment.std(ddof=1) / np.sqrt(noise['count'])
+    alignment.bar([0, 1], means, width=.58, color=colors, alpha=.85)
+    alignment.errorbar(1, means[1], yerr=alignment_sem, fmt='none',
+                       color='#4b375f', capsize=4, lw=1.4)
+    alignment.axhline(0, color='#777777', lw=.9)
+    alignment.set(ylim=(-1, 1), yticks=[-1, -.5, 0, .5, 1],
+                  xticks=[0, 1], xticklabels=['Collagen', 'Correlated noise'],
+                  ylabel='Alignment', title='Mean alignment to X')
+    for index, value in enumerate(means):
+        alignment.text(index, -.28, f'{value:.3f}', ha='center', fontsize=10,
+                       color=colors[index])
+    alignment.spines[['top', 'right']].set_visible(False)
+    alignment.text(.5, -.22, f'Collagen: one image · Noise: mean ± SEM, n = {noise["count"]}',
+                   transform=alignment.transAxes, ha='center', fontsize=9, color='#555555')
+
     bins = noise['bins']
     angles = result['angle_x']
     counts, _ = np.histogram(angles[np.isfinite(angles)], bins=bins)
@@ -171,7 +201,7 @@ def save_noise_comparison(raw, result, noise, scale, edge, output):
     histogram.stairs(probability, bins, color=colors[0], lw=1.8, label='Collagen · one image')
     histogram.stairs(probability, bins, color=colors[0], fill=True, alpha=.12)
     histogram.stairs(noise_mean, bins, color=colors[1], lw=1.8,
-                     label=f"Noise · mean ± SEM, n = {noise['count']}")
+                     label=f"Correlated noise · mean ± SEM, n = {noise['count']}")
     histogram.fill_between(bins, np.r_[noise_mean-noise_sem, (noise_mean-noise_sem)[-1]],
                            np.r_[noise_mean+noise_sem, (noise_mean+noise_sem)[-1]],
                            step='post', color=colors[1], alpha=.18)
@@ -181,7 +211,7 @@ def save_noise_comparison(raw, result, noise, scale, edge, output):
                   xticks=[-90, -45, 0, 45, 90], xlabel='Angle to X axis (°)',
                   ylabel='Probability per 5° bin', title='Local tensor directions')
     histogram.spines[['top', 'right']].set_visible(False)
-    histogram.legend(frameon=False, fontsize=9, loc='upper left')
+    histogram.legend(frameon=False, fontsize=8, loc='upper left')
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output, dpi=160, facecolor='white')

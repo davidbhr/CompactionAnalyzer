@@ -5,6 +5,7 @@ Analysis stays in CompactionAnalyzer; its full workflow supplies the complete
 cell-relative statistics when a desktop project is requested.
 """
 import io
+import json
 import tempfile
 import zipfile
 from pathlib import Path
@@ -35,7 +36,7 @@ def flatten(data):
 
 def export_project(last, images, scale):
     if scale is None or not np.isfinite(scale) or scale <= 0:
-        raise ValueError('A measured positive pixel size is required for Saenopy export.')
+        raise ValueError('A positive pixel size is required for Saenopy export.')
     values, metadata = last['arrays'], last['metadata']
     mode = metadata['analysis_mode']
     p = metadata['parameters'].copy()
@@ -45,6 +46,9 @@ def export_project(last, images, scale):
     op = dict(sigma_tensor=p['sigma_tensor'], sigma_tensor_type='pixel', edge=p['edge'],
               sigma_first_blur=p['sigma_first_blur'], max_dist=None, ignore_cell_outline=False,
               angle_sections=5, shell_width=5., shell_width_type='pixel', SaveNumpy=False, plotting=False)
+    sigma_input = metadata.get('sigma_input', {})
+    if sigma_input.get('unit') == 'µm':
+        op.update(sigma_tensor=sigma_input['value'], sigma_tensor_type='µm')
     sp = dict(thresh=p.get('segmention_thres', 1.), gauss1=p.get('seg_gaus1',6.),
               gauss2=p.get('seg_gaus2',80.), invert=p.get('seg_invert',False),
               mask_sigma=p.get('mask_sigma',5.), mask_threshold=p.get('mask_threshold',.5),
@@ -126,6 +130,7 @@ def export_project(last, images, scale):
     archive=io.BytesIO()
     with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED) as output:
         output.writestr('measurement.saenopyOrientation',measurement.getvalue())
+        output.writestr('calibration.json', json.dumps(metadata.get('calibration', {}), indent=2))
         for name,array in [('orientation',image),('mask',second if source!='same' else None)]:
             if array is None:
                 continue
@@ -137,5 +142,7 @@ def export_project(last, images, scale):
             'Drag measurement.saenopyOrientation into the Orientation GUI.\n'
             'Use the updated Saenopy version supporting ResultOrientation 1.1 and all reference modes.\n'
             'The images are the full-resolution grayscale inputs used for this analysis.\n'
+            + ('Pixel size is an assumed 1 µm/px. Check calibration before interpreting physical distances.\n'
+               if metadata.get('calibration', {}).get('assumed') else '') +
             'Full cell-relative desktop exports also contain the original weighted statistics and distance shells.\n')
     return archive.getvalue()

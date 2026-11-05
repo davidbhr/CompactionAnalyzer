@@ -1,21 +1,58 @@
 "use strict";
 const $ = id => document.getElementById(id);
 const state = {ready:false, busy:false, images:{}, blobs:{}, point:null, line:[], overlay:null,
-  result:null, axis:"x", revision:0, manifest:null, worker:null, requests:new Map(), nextId:0};
+  result:null, axis:"x", revision:0, manifest:null, worker:null, requests:new Map(), nextId:0,
+  calibration:null, sigmaUnit:"pixel", inputView:"orientation"};
 let maskTimer, bootTimer;
 const labels = {full:["Cell-relative", "Cell-relative alignment", "cell"], axis:["X / Y axes", "Orientation relative to X and Y", "axis"],
   point_orientation:["Point reference", "Orientation towards a point", "reference"], line_orientation:["Line reference", "Orientation relative to a line", "reference"]};
 function mode() { return document.querySelector('input[name="mode"]:checked').value; }
 function setStatus(message, loading=false, failed=false) { $("status").textContent=message; $("status-dot").className="status-dot"+(loading?" loading":"")+(failed?" failed":""); document.dispatchEvent(new Event("analysis-status-change")); }
-function errorMessage(error) { console.error(error); const text=String(error.message || error); return text.split("\n").filter(Boolean).at(-1).replace(/^(ValueError|RuntimeError|Error):\s*/, ""); }
+function errorMessage(error) { console.error(error); const text=String(error.message || error); if(/MemoryError|out of memory|Cannot enlarge memory/i.test(text))return "The browser has run out of memory. Reload this page to free memory, or use the Saenopy GUI for this image."; return text.split("\n").filter(Boolean).at(-1).replace(/^(ValueError|RuntimeError|Error):\s*/, ""); }
 function showError(error) { $("error").textContent=errorMessage(error); $("error").hidden=false; }
 function clearDownloadError() { $("download-error").hidden=true; $("download-error").textContent=""; $("pixel-size").removeAttribute("aria-invalid"); }
 function showDownloadError(message) { $("download-error").textContent=message; $("download-error").hidden=false; }
 function clearError() { $("error").hidden=true; clearDownloadError(); }
+function assumedCalibration(){return {pixel_size_um:1,source:"assumed",assumed:true,note:"Default 1 µm/px; check this value."};}
+function currentCalibration(){
+  const size=Number($("pixel-size").value);
+  return {...state.calibration,pixel_size_um:Number.isFinite(size)&&size>0?size:null};
+}
+function updateSigmaUnits(){
+  const size=currentCalibration().pixel_size_um,physical=$("sigma-unit").value==="µm",value=Number($("sigma").value);
+  const factor=physical&&size?size:1;
+  $("sigma").min=String(.1*factor);$("sigma").max=String(100*factor);
+  const converted=physical?value/size:value*size;
+  $("sigma-equivalent").textContent=size&&Number.isFinite(converted)?
+    `≈ ${Number(converted.toPrecision(5))} ${physical?"px":"µm"}${state.calibration?.assumed?" (assumed scale)":""}`:
+    "Enter a pixel size to convert units.";
+}
+function setCalibration(calibration){
+  state.calibration=calibration||assumedCalibration();
+  $("pixel-size").value=state.calibration.pixel_size_um;
+  $("pixel-size-field").classList.toggle("is-assumed",state.calibration.assumed);
+  $("calibration-note").textContent=state.calibration.note;
+  updateSigmaUnits();
+}
+function changeSigmaUnit(){
+  const next=$("sigma-unit").value,size=currentCalibration().pixel_size_um;
+  if(!size){$("sigma-unit").value=state.sigmaUnit;showError("Enter a positive pixel size to change sigma units.");return;}
+  const value=Number($("sigma").value),pixels=state.sigmaUnit==="µm"?value/size:value;
+  $("sigma").value=String(next==="µm"?pixels*size:pixels);state.sigmaUnit=next;
+  updateSigmaUnits();invalidate();
+}
 function hasMaskInput() {
   if(!state.images.orientation)return false;
   const region=mode()==="full"?"second":$("region").value;
   return region==="same" || (region==="second" && !!state.images.mask);
+}
+function hasSecondImageView() {
+  return !!(state.images.orientation && state.images.mask && (mode()==="full" || $("region").value==="second"));
+}
+function setInputView(view) {
+  if(view==="mask"&&!hasSecondImageView())return;
+  state.inputView=view;drawInput();
+  if(view==="mask"&&!state.overlay)previewMask();
 }
 function updateButtons() {
   document.querySelectorAll(".settings input,.settings select,.settings button,#example,#load-example").forEach(el=>el.disabled=state.busy || !state.ready);
@@ -46,6 +83,8 @@ function startEngine() {
   if(state.worker)state.worker.terminate();
   for(const entry of state.requests.values()){clearTimeout(entry.timeout);entry.reject(new Error("Analysis cancelled."));}
   state.requests.clear(); state.ready=false; state.busy=false; state.images={}; state.blobs={};state.point=null;state.line=[];
+  state.inputView="orientation";
+  $("sigma-unit").value="pixel";state.sigmaUnit="pixel";$("sigma").value=7;setCalibration(assumedCalibration());
   invalidate(); $("orientation-name").textContent="Drop image or browse"; $("mask-name").textContent="Choose image";
   $("preview-caption").textContent="";$("image-dimensions").textContent="TIFF, PNG or JPEG";
   $("retry").hidden=true; $("cancel").hidden=true;
@@ -65,9 +104,10 @@ function startEngine() {
   updateButtons();updateMode(false);
 }
 function configuration() {
+  if($("sigma-unit").value==="µm"&&!currentCalibration().pixel_size_um)throw new Error("Enter a positive pixel size to use sigma in µm.");
   for(const id of ["sigma","edge","blur","threshold","cell-blur","background-blur","mask-blur"]){if(!$(id).checkValidity()){$(id).reportValidity();throw new Error("Check the analysis settings.");}}
   return {mode:mode(),region:mode()==="full"?"second":$("region").value,
-    sigma:Number($("sigma").value),edge:Number($("edge").value),blur:Number($("blur").value),
+    sigma:Number($("sigma").value),sigma_unit:$("sigma-unit").value,calibration:currentCalibration(),edge:Number($("edge").value),blur:Number($("blur").value),
     threshold:Number($("threshold").value),mask_blur:Number($("mask-blur").value),cell_blur:Number($("cell-blur").value),
     background_blur:Number($("background-blur").value),invert:$("invert").checked,
     point:state.point,line:state.line.length===2?state.line:null};
@@ -109,12 +149,14 @@ function renderCoordinates() {
 }
 function loadBitmap(data) { return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error("Image preview failed."));image.src="data:image/png;base64,"+data;}); }
 async function loadFile(file,slot) {
-  if(file.size>32*1024*1024)throw new Error("Choose an image smaller than 32 MB for this browser demo.");
+  if(file.size>128*1024*1024)throw new Error("Choose an image smaller than 128 MB for this browser demo.");
   delete state.images[slot];delete state.blobs[slot];drawInput();
   const data=await workerCall("load",{slot,name:file.name},await file.arrayBuffer());
   const image=await loadBitmap(data.preview);
   state.images[slot]={...data,image,name:file.name};state.blobs[slot]=file;
   if(slot==="orientation"){
+    state.inputView="orientation";
+    setCalibration(data.calibration);
     state.point=null;state.line=[];$("orientation-name").textContent=file.name;
     $("preview-caption").textContent=file.name;$("image-dimensions").textContent=`${data.width} × ${data.height} px`;
   }else $("mask-name").textContent=file.name;
@@ -125,19 +167,29 @@ async function chooseFile(file,slot) {
   invalidate();setBusy(true,"Reading image…");
   try{
     if(slot==="orientation"){
-      $("pixel-size").value="";
+      setCalibration(assumedCalibration());
       delete state.images.mask;delete state.blobs.mask;await workerCall("clear",{slot:"mask"});$("mask-name").textContent="Choose an image on the same pixel grid";
     }
     await loadFile(file,slot);setStatus("Image loaded · ready to analyze");
   }catch(error){showError(error);setStatus("Check the selected image",false,true);}finally{setBusy(false);}
 }
 function drawInput() {
-  const canvas=$("input-canvas"),item=state.images.orientation;
+  const secondAvailable=hasSecondImageView();
+  if(!secondAvailable)state.inputView="orientation";
+  $("input-image-switch").hidden=!secondAvailable;
+  $("input-image-switch").dataset.view=state.inputView;
+  document.querySelectorAll("[data-input-view]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.inputView===state.inputView)));
+  const canvas=$("input-canvas"),item=state.images[state.inputView],orientation=state.images.orientation;
   canvas.hidden=!item;$("empty-state").hidden=!!item;
+  $("preview-caption").textContent=item?item.name:"";
+  const aligned=!!(item&&orientation&&item.width===orientation.width&&item.height===orientation.height);
+  canvas.setAttribute("aria-label",state.inputView==="mask"?"Mask image with segmentation overlay.":"Orientation image. Click to place a point or line reference.");
+  canvas.classList.toggle("picking",aligned&&["point_orientation","line_orientation"].includes(mode()));
   if(!item)return;
   canvas.width=item.width;canvas.height=item.height;
   const ctx=canvas.getContext("2d");ctx.drawImage(item.image,0,0);
-  if(state.overlay&&$("show-mask").checked)ctx.drawImage(state.overlay,0,0);
+  if(aligned&&state.overlay&&$("show-mask").checked)ctx.drawImage(state.overlay,0,0);
+  if(!aligned)return;
   const width=Math.max(2,item.width/280),radius=item.width/110;
   ctx.strokeStyle="#ffe28a";ctx.fillStyle="#ffe28a";ctx.lineWidth=width;
   function marker([x,y]){ctx.beginPath();ctx.moveTo(x-radius,y);ctx.lineTo(x+radius,y);ctx.moveTo(x,y-radius);ctx.lineTo(x,y+radius);ctx.stroke();ctx.beginPath();ctx.arc(x,y,2*width,0,2*Math.PI);ctx.stroke();}
@@ -188,7 +240,7 @@ async function runAnalysis() {
   state.result=null;$("results").hidden=true;setBusy(true,"Analyzing image…");$("cancel").hidden=false;
   try{const result=await workerCall("analyze",config);renderResult(result);setStatus("Analysis complete");}
   catch(error){showError(error);setStatus("Analysis could not be completed",false,true);}
-  finally{setBusy(false);$("cancel").hidden=true;}
+  finally{setBusy(false);$("cancel").hidden=true;if(state.result&&hasMaskInput()&&!state.overlay)await previewMask();}
 }
 function saveBlob(data,name,type){const url=URL.createObjectURL(new Blob([data],{type}));const link=document.createElement("a");link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
 function savePng(key){
@@ -205,7 +257,7 @@ async function download(format){
     showDownloadError("Enter a positive pixel size (µm/px) above to download a Saenopy project. PNG, NumPy and All results work without it.");return;
   }
   setBusy(true,format==="saenopy"?"Preparing Saenopy project…":"Preparing download…");
-  try{const bytes=await workerCall("export",{format,scale:scale>0?scale:null});saveBlob(bytes,format==="npz"?"compaction_arrays.npz":format==="saenopy"?"compaction_saenopy.zip":"compaction_results.zip","application/octet-stream");setStatus("Download ready");}
+  try{const bytes=await workerCall("export",{format,scale:scale>0?scale:null,calibration:currentCalibration()});saveBlob(bytes,format==="npz"?"compaction_arrays.npz":format==="saenopy"?"compaction_saenopy.zip":"compaction_results.zip","application/octet-stream");setStatus(format==="saenopy"&&state.calibration.assumed?"Download ready · assumed pixel size: 1 µm/px":"Download ready");}
   catch(error){showDownloadError(errorMessage(error));setStatus("Download could not be prepared",false,true);}finally{setBusy(false);}
 }
 async function loadExample() {
@@ -215,13 +267,15 @@ async function loadExample() {
     delete state.images.mask;await workerCall("clear",{slot:"mask"});
     document.querySelector(`input[name="mode"][value="${preset.mode}"]`).checked=true;
     $("region").value=preset.region||"whole";
-    $("pixel-size").value=preset.pixel_size||"";
+    $("sigma-unit").value="pixel";state.sigmaUnit="pixel";setCalibration(assumedCalibration());
     for(const [name,value]of Object.entries(preset.settings))$(name).value=value;
     $("invert").checked=false;$("threshold-range").value=$("threshold").value;updateMode(false);
     for(const [slot,path]of [["orientation",preset.image],["mask",preset.mask]]){
       if(!path)continue;const response=await fetch("examples/"+path);if(!response.ok)throw new Error("The example image could not be loaded.");
       await loadFile(new File([await response.blob()],path.split("/").at(-1)),slot);
     }
+    if(preset.pixel_size)setCalibration({pixel_size_um:preset.pixel_size,source:"example",assumed:false,note:"Example calibration; editable."});
+    updateSigmaUnits();
     state.point=preset.point||null;state.line=preset.line||[];renderCoordinates();drawInput();setStatus("Example loaded · ready to analyze");
   }catch(error){showError(error);setStatus("Could not load the example",false,true);}finally{setBusy(false);}
   if(state.images.orientation&&(mode()==="full"||$("region").value!=="whole"))await previewMask();
@@ -236,11 +290,15 @@ for(const slot of ["orientation","mask"]){
 }
 document.querySelectorAll('input[name="mode"]').forEach(input=>input.addEventListener("change",()=>{invalidate();updateMode();}));
 $("region").addEventListener("change",()=>{invalidate();updateMode(false);});
-for(const id of ["sigma","edge","blur","threshold","cell-blur","background-blur","mask-blur","invert"]){$(id).addEventListener("input",()=>{invalidate();if(id==="threshold")$("threshold-range").value=$(id).value;});}
+for(const id of ["sigma","edge","blur","threshold","cell-blur","background-blur","mask-blur","invert"]){$(id).addEventListener("input",()=>{invalidate();if(id==="sigma")updateSigmaUnits();if(id==="threshold")$("threshold-range").value=$(id).value;});}
+$("sigma-unit").addEventListener("change",changeSigmaUnit);
 $("threshold-range").addEventListener("input",()=>{$("threshold").value=$("threshold-range").value;invalidate();if(hasMaskInput())maskTimer=setTimeout(previewMask,450);});
 $("show-mask").addEventListener("change",drawInput);$("preview-mask").addEventListener("click",previewMask);
+document.querySelectorAll("[data-input-view]").forEach(button=>button.addEventListener("click",()=>setInputView(button.dataset.inputView)));
 $("input-canvas").addEventListener("click",event=>{
   if(state.busy||!state.images.orientation)return;
+  const item=state.images[state.inputView],orientation=state.images.orientation;
+  if(!item||item.width!==orientation.width||item.height!==orientation.height)return;
   const canvas=event.currentTarget,rect=canvas.getBoundingClientRect(),x=Math.max(0,Math.min(canvas.width-1,(event.clientX-rect.left)*canvas.width/rect.width)),y=Math.max(0,Math.min(canvas.height-1,(event.clientY-rect.top)*canvas.height/rect.height));
   const point=[Math.round(x*2)/2,Math.round(y*2)/2];
   if(mode()==="point_orientation")state.point=point;else if(mode()==="line_orientation"){if(state.line.length===2)state.line=[];state.line.push(point);}else return;
@@ -252,7 +310,13 @@ $("map-choice").addEventListener("change",showMap);document.querySelectorAll("[d
 $("save-map").addEventListener("click",()=>savePng(currentMapKey()));$("save-histogram").addEventListener("click",()=>savePng("histogram"));
 $("save-numpy").addEventListener("click",()=>download("npz"));$("save-all").addEventListener("click",()=>download("zip"));
 $("save-saenopy").addEventListener("click",()=>download("saenopy"));
-$("pixel-size").addEventListener("input",()=>{const scale=Number($("pixel-size").value);if(Number.isFinite(scale)&&scale>0&&$("pixel-size").checkValidity())clearDownloadError();});
+$("pixel-size").addEventListener("input",()=>{
+  const size=currentCalibration().pixel_size_um;
+  state.calibration={pixel_size_um:size,source:"manual",assumed:false,note:size?"Entered manually.":"Enter a positive pixel size."};
+  $("pixel-size-field").classList.remove("is-assumed");$("calibration-note").textContent=state.calibration.note;
+  updateSigmaUnits();if($("sigma-unit").value==="µm")invalidate();
+  if(size&&$("pixel-size").checkValidity())clearDownloadError();
+});
 $("retry").addEventListener("click",startEngine);$("cancel").addEventListener("click",()=>{startEngine();setStatus("Restarting after cancellation. Load your image again when ready.",true);});
 fetch("examples/manifest.json").then(response=>{if(!response.ok)throw new Error("Could not load example list.");return response.json();}).then(data=>state.manifest=data).catch(showError);
 startEngine();

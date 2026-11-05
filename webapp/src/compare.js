@@ -87,7 +87,7 @@ async function importMeasurements(files,groupId){
       $("compare-import-status").textContent=`Reading ${index+1}/${incoming.length}: ${file.name}`;
       try{
         if(!file.name.toLowerCase().endsWith(".saenopyorientation"))throw new Error("Choose an evaluated .saenopyOrientation file.");
-        if(file.size>128*1024*1024)throw new Error("This file exceeds the 128 MB browser limit.");
+        if(file.size>512*1024*1024)throw new Error("This file exceeds the 512 MB browser comparison limit.");
         const measurement=await workerCall("compare_import",{name:file.name},await file.arrayBuffer());
         if(comparisonFiles().some(item=>item.id===measurement.id)){duplicates++;continue;}
         group.files.push({...measurement,included:true});added++;

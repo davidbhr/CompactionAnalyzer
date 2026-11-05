@@ -14,10 +14,11 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
 from CompactionAnalyzer import analyze_image
+from calibration import assumed_calibration, tiff_calibration, sigma_in_pixels
 
 IMAGES = {}
 LAST = None
-MAX_PIXELS = 2_500_000
+MAX_PIXELS = 12_000_000
 plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 10,
                      'axes.spines.top': False, 'axes.spines.right': False,
                      'axes.labelcolor': '#475569', 'text.color': '#172b43',
@@ -50,8 +51,9 @@ def png(array):
     return base64.b64encode(stream.getvalue()).decode()
 
 
-def read_image(path, filename):
+def read_image(path, filename, return_calibration=False):
     # Inspect dimensions before decoding; stacks are deliberately not flattened.
+    calibration = assumed_calibration()
     if filename.lower().endswith(('.tif', '.tiff')):
         with tifffile.TiffFile(path) as handle:
             series = handle.series[0]
@@ -59,12 +61,13 @@ def read_image(path, filename):
             if len(handle.pages) != 1:
                 raise ValueError('Choose one 2D image, not a TIFF stack. Export one plane first.')
             if len(shape) not in (2, 3) or np.prod(shape[:2]) > MAX_PIXELS:
-                raise ValueError('Use a single image with at most 2.5 million pixels for this browser demo.')
+                raise ValueError('Use one 2D image with at most 12 million pixels (for example 4000 × 3000). For larger images, use the desktop GUI or Python API.')
             array = series.asarray()
+            calibration = tiff_calibration(handle)
     else:
         with Image.open(path) as handle:
             if handle.width * handle.height > MAX_PIXELS:
-                raise ValueError('Use an image with at most 2.5 million pixels for this browser demo.')
+                raise ValueError('Use an image with at most 12 million pixels (for example 4000 × 3000). For larger images, use the desktop GUI or Python API.')
             if getattr(handle, 'n_frames', 1) != 1:
                 raise ValueError('Choose one still image, not an image stack or animation.')
             if handle.mode in ('P', 'RGBA', 'LA'):
@@ -76,7 +79,8 @@ def read_image(path, filename):
         raise ValueError('Choose a 2D grayscale or RGB image, at least 16 pixels on each side.')
     if array.dtype.kind not in 'buif' or not np.isfinite(array).all():
         raise ValueError('The image must contain finite numeric pixel values.')
-    return array.astype(float)
+    array = array.astype(float, copy=False)
+    return (array, calibration) if return_calibration else array
 
 
 def request_arguments(request):
@@ -93,7 +97,7 @@ def request_arguments(request):
     elif region == 'same':
         second = image
     api_mode = ('axis_orientation_only' if region == 'whole' else 'axis_orientation_masked') if mode == 'axis' else mode
-    parameters = dict(sigma_tensor=float(request['sigma']), edge=int(request['edge']),
+    parameters = dict(sigma_tensor=sigma_in_pixels(request), edge=int(request['edge']),
                       sigma_first_blur=float(request['blur']))
     if mode == 'full':
         parameters.update(segmention_thres=float(request['threshold']),
@@ -212,6 +216,8 @@ def analyze(request):
                 'mask_image': IMAGES.get('mask', {}).get('name') if second is not None and request.get('region') != 'same' else None,
                 'mask_source': 'cell_image' if mode == 'full' else request.get('region', 'whole'),
                 'parameters': parameters, 'input_shape_yx': list(image.shape),
+                'calibration': request.get('calibration', assumed_calibration()),
+                'sigma_input': {'value': float(request['sigma']), 'unit': request.get('sigma_unit', 'pixel')},
                 'map_shape_yx': list(values['coherency'].shape),
                 'coordinates': 'Original zero-based pixels: x right, y down. Maps are edge-cropped.',
                 'statistics': 'Unweighted means over valid selected pixels. Alignment = 1 - abs(angle)/45.',
@@ -236,10 +242,10 @@ def handle_request(raw):
             raise ValueError('Invalid image slot')
         # A failed replacement clears the previous image, preventing stale analysis.
         IMAGES.pop(slot, None)
-        array = read_image('/tmp/incoming-image', request['name'])
-        IMAGES[slot] = {'array': array, 'name': request['name']}
+        array, calibration = read_image('/tmp/incoming-image', request['name'], return_calibration=True)
+        IMAGES[slot] = {'array': array, 'name': request['name'], 'calibration': calibration}
         value = {'preview': png((gray_preview(array) * 255).astype('uint8')),
-                 'width': array.shape[1], 'height': array.shape[0]}
+                 'width': array.shape[1], 'height': array.shape[0], 'calibration': calibration}
     elif command == 'clear':
         IMAGES.pop(request['slot'], None)
         LAST = None
@@ -257,6 +263,12 @@ def export_result(raw):
     request = json.loads(raw)
     if LAST is None:
         raise ValueError('Run an analysis first.')
+    calibration = request.get('calibration', LAST['metadata'].get('calibration', assumed_calibration()))
+    previous = LAST['metadata'].get('calibration', {})
+    if (LAST['metadata'].get('sigma_input', {}).get('unit') == 'µm'
+            and calibration.get('pixel_size_um') != previous.get('pixel_size_um')):
+        raise ValueError('Pixel size changed. Run the analysis again for sigma in µm.')
+    LAST['metadata']['calibration'] = calibration
     if request.get('format') == 'saenopy':
         from saenopy_export import export_project
         return export_project(LAST, IMAGES, request.get('scale'))

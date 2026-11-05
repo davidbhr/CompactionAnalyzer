@@ -14,6 +14,8 @@ MODULES = ('__init__.py', 'api.py', 'CompactionFunctions.py', 'StructureTensor.p
 def build(repo, output):
     output.mkdir(parents=True, exist_ok=True)
     for source in (HERE / 'src').iterdir():
+        if source.name == '__pycache__':
+            continue
         if source.is_file():
             shutil.copy2(source, output / source.name)
         elif source.is_dir():

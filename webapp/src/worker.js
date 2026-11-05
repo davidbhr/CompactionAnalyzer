@@ -21,6 +21,9 @@ matplotlib.use("Agg")
   const desktopExport = await fetch("saenopy_export.py");
   if (!desktopExport.ok) throw new Error("The export adapter could not be loaded.");
   engine.FS.writeFile("saenopy_export.py", await desktopExport.text());
+  const calibration = await fetch("calibration.py");
+  if (!calibration.ok) throw new Error("The image calibration module could not be loaded.");
+  engine.FS.writeFile("calibration.py", await calibration.text());
   const comparison = await fetch("comparison.py");
   if (!comparison.ok) throw new Error("The comparison module could not be loaded.");
   engine.FS.writeFile("comparison.py", await comparison.text());

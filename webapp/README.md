@@ -87,11 +87,13 @@ GitHub's setup instructions:
 
 ## Results and limits
 
-- One 2D image at a time, up to 2.5 million pixels and 32 MB per input file.
+- One 2D image at a time, up to 12 million pixels (for example 4000 × 3000) and
+  128 MB per input file. Analysis and export retain the original resolution.
+  Large images need more browser memory; use the desktop GUI if memory runs out.
   Images are not resized for calculation. Stacks are rejected.
 - RGB images are converted to grayscale using the same conversion as the API.
-- All lengths in the interface are pixels; angles are degrees. Point and line
-  coordinates refer to the original image, before the edge crop.
+- Tensor σ can use pixels or µm. Other analysis lengths use pixels; angles use
+  degrees. Point and line coordinates refer to the original image, before the edge crop.
 - The selected area controls which pixels contribute to maps and summaries.
   In cell-relative mode, the segmented cell is excluded and its center is the
   reference. General/point/line masks select the included area.
@@ -119,18 +121,28 @@ The browser interface and bundled analysis code use the repository's GPL v3 lice
 
 ## Continue in Saenopy
 
-**Saenopy ↓** downloads a ZIP containing `measurement.saenopyOrientation` and
+**Save Saenopy project ↓** downloads a ZIP containing `measurement.saenopyOrientation` and
 the corresponding grayscale images. Extract the entire ZIP, then drag the
 measurement file into the updated Saenopy Orientation GUI. Keep the `data/`
 folder beside the result. The project uses relative image paths and the
 `ResultOrientation` 1.1 format, including axis maps, masks and references.
+Keep this project for later comparisons: the extracted `.saenopyOrientation`
+file can also be dropped into **Compare data** in the browser (up to 512 MB per
+result file). The source images are only needed to reopen the image analysis in
+the desktop GUI.
 
-Enter the measured pixel size beside the tensor window before exporting a Saenopy
-project. The biological presets already contain their calibration. The
-synthetic example does not have a physical calibration. A pixel size is not
-needed for the angular measurements, PNGs or NumPy export.
-The **All results** ZIP also works without it. A missing or invalid pixel size
-shows a message beside the download buttons and highlights the pixel-size field.
+Pixel size is read from OME-TIFF or ImageJ TIFF microscopy metadata when available.
+The biological presets contain their calibration. Otherwise, the field starts at
+**1 µm/px**, highlighted as an assumed value that you can replace. Ordinary image
+DPI is not used as a microscopy calibration. The assumption is also recorded in
+the downloads; check it before interpreting physical distances in Saenopy.
+
+Enter the tensor window σ in **px or µm** using the unit selector beside it.
+Switching units converts the current value. Changing the pixel size while using
+µm requires a new analysis. Angular measurements do not need a physical scale.
+A blank or invalid pixel size prevents Saenopy export and shows a message beside
+the download buttons; PNG, NumPy and **All results** exports still work for an
+analysis made with σ in pixels.
 
 For cell-relative projects the exporter calls the existing full workflow to
 include its weighted statistics and distance shells. This takes additional

@@ -10,8 +10,6 @@ Hepatic stellate cell compacting a collagen type I hydrogel over time.
 </p>
 
 
-**[Try it online →](https://davidbhr.github.io/CompactionAnalyzer/)** Analyze fiber orientation in your browser. Load an example or your own data and compare measurements without installation.
-
 
 ### Choose the reference for your image
 
@@ -23,6 +21,9 @@ CompactionAnalyzer analyzes the orientation of fibers and other structures in im
 | **Main method: a marker of contractility.**<br>Fiber alignment towards a cell and matrix compaction around it. | Alignment relative to the X and Y axes.<br>**Whole image**, or an optional mask to select the analysis area. | Choose **one point** for radial alignment or **two points** for alignment along a line. |
 
 Start with the **[examples](#examples-in-pictures)**, the **[Orientation interface in Saenopy](#graphical-user-interface-gui)**, or the **[Python API](#api-analyze-an-image-with-a-single-call)**.
+
+Or simply **[Try it online →](https://davidbhr.github.io/CompactionAnalyzer/)**: Analyze fiber orientation in your browser. Load an example or your own data and compare measurements without installation.
+
 
 ## Alignment around contractile cells
 

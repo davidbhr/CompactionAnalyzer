@@ -1,7 +1,5 @@
 # CompactionAnalyzer
 
-**[Try it online →](https://davidbhr.github.io/CompactionAnalyzer/)** Analyze fiber orientation in your browser. Load an example or your own data and compare measurements without installation.
-
 Cells apply contractile forces to their surroundings, for example during migration, development, wound healing, or disease. To study these processes, cellular forces can be measured using traction force microscopy. However, 3D traction force microscopy can be laborious, requiring nonlinear finite-element models, rheology and regularization. In 3D fiber networks, alignment and compaction of fibers are consequences of cellular forces. CompactionAnalyzer quantifies fiber alignment and changes in fiber image intensity around cells in fiber matrices. These quantities can be used as indirect measures of cell contractility and to resolve drug-induced changes in the surrounding matrix.
 
 <p align="center">
@@ -10,6 +8,10 @@ Cells apply contractile forces to their surroundings, for example during migrati
 <p align="center">
 Hepatic stellate cell compacting a collagen type I hydrogel over time.
 </p>
+
+
+**[Try it online →](https://davidbhr.github.io/CompactionAnalyzer/)** Analyze fiber orientation in your browser. Load an example or your own data and compare measurements without installation.
+
 
 ### Choose the reference for your image
 

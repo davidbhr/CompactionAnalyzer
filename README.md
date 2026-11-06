@@ -123,9 +123,11 @@ See the [GUI walkthrough below](#graphical-user-interface-gui) for examples.
 
 ## Graphical User Interface (GUI)
 
-CompactionAnalyzer is included in [Saenopy](https://github.com/rgerum/saenopy). Select the **Orientation** tab, then choose cell-relative analysis, X/Y orientation, or a point/line reference. Load individual images or use `*` to load a batch.
+CompactionAnalyzer is available in the [Saenopy GUI](https://github.com/rgerum/saenopy) and the [web app](https://davidbhr.github.io/CompactionAnalyzer/). Both support cell-relative analysis, X/Y orientation, and point or line references.
 
-<img src="docs/images/GUI_choose_analysis.png" alt="Saenopy analysis choices: cell, image axes, and point or line" width="1000" />
+Download the [Windows app (`.exe`)](https://github.com/rgerum/saenopy/releases/latest/download/saenopy.exe) or find other downloads on the [Saenopy releases page](https://github.com/rgerum/saenopy/releases). No Python installation is required.
+
+In Saenopy, open **Orientation**. Use `*` to load multiple images or image pairs for **batch processing**. The web app analyzes one image or image pair at a time. Both interfaces can compare completed measurements.
 
 <details>
 <summary>Load images, check the mask and compare results</summary>

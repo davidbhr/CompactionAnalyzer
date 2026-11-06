@@ -13,14 +13,16 @@ Hepatic stellate cell compacting a collagen type I hydrogel over time.
 
 ### Choose the reference for your image
 
-CompactionAnalyzer analyzes the orientation of fibers and other structures in images. Depending on the analysis mode, orientation is measured relative to **a cell center obtained from a cell mask**, **the X or Y axis**, **a selected point**, or **a line**. Cell-relative alignment in a fiber network is the main method and serves as a marker of contractility. The other references extend the analysis to applications such as actin alignment within cells or fiber alignment along a tissue axis.
+CompactionAnalyzer measures fiber orientation relative to **a cell center obtained from a cell mask**, **the X/Y axes**, **a selected point**, or **a line**. Cell-relative alignment in fiber networks is the main method and a marker of contractility. The other modes also support an optional mask from the same image or a second image.
 
 | [Cell Relative Alignment](#alignment-around-contractile-cells) | [General Alignment Analysis](#additional-orientation-modes) | [Relative to a point or line](#additional-orientation-modes) |
 |:---:|:---:|:---:|
 | <img src="docs/images/reference-cell.svg" alt="Schematic of fibers aligned around a cell" width="290" /> | <img src="docs/images/reference-image.svg" alt="Schematic of fiber alignment relative to X and Y" width="290" /> | <img src="docs/images/reference-point-line.svg" alt="Schematic of a radial point reference and a fixed line reference" width="290" /> |
 | **Main method: a marker of contractility.**<br>Fiber alignment towards a cell and matrix compaction around it. | Alignment relative to the X and Y axes.<br>**Whole image**, or an optional mask to select the analysis area. | Choose **one point** for radial alignment or **two points** for alignment along a line. |
 
-Start with the **[examples](#examples-in-pictures)**, the **[Orientation interface in Saenopy](#graphical-user-interface-gui)**, or the **[Python API](#api-analyze-an-image-with-a-single-call)**.
+**Use it in Saenopy:** Open **Orientation**, choose a reference and load your images or an example via **Add Measurements → Examples**. Drag saved `.saenopyOrientation` files into **Data Analysis** to compare alignment, angular deviation, coherency and angle histograms across conditions.
+
+[GUI guide](#graphical-user-interface-gui) · [Examples](#examples-in-pictures) · [Python API](#api-analyze-an-image-with-a-single-call)
 
 Or simply **[Try it online →](https://davidbhr.github.io/CompactionAnalyzer/)** ([https://davidbhr.github.io/CompactionAnalyzer/](https://davidbhr.github.io/CompactionAnalyzer/)): Analyze fiber orientation in your browser. Load an example or your own data and compare measurements without installation.
 
@@ -176,8 +178,8 @@ a main example below; expand the named alternatives to see the other cases.
 
 | Analysis mode | Examples | Python script | API call | Saenopy |
 |---|---|---|---|---|
-| 🔵 **Cell-relative orientation**<br>Marker of contractility | [Cell in collagen](#-cell-relative-orientation--marker-of-contractility) | [Cell example](Tutorial/Example_Quickstart.py) | [Cell alignment](#cell-relative-alignment-collagen) | [Open in GUI](https://github.com/rgerum/saenopy#fiber-orientation) |
-| 🟢 **Orientation to X/Y axes** | [α-Actinin mask](#mask-from-a-second-image)<br>[Whole collagen image](#whole-image)<br>[Stress fibers in the cell area](#mask-from-the-same-image) | [Cardiomyocytes](Tutorial/Example_BiologicalOrientation.py)<br>[Collagen / stress fibers](Tutorial/Example_GeneralOrientation.py) | [Second-image mask](#mask-from-a-second-image)<br>[Whole image](#whole-image-orientation)<br>[Same-image mask](#orientation-inside-a-mask) | [Open in GUI](https://github.com/rgerum/saenopy#fiber-orientation) |
+| 🔵 **Cell-relative orientation**<br>Marker of contractility | [Cell in collagen](#-cell-relative-orientation--marker-of-contractility) | [Cell example](Tutorial/Example_Quickstart.py) | [Cell alignment](#cell-relative-alignment-collagen) | [Open in GUI](#graphical-user-interface-gui) |
+| 🟢 **Orientation to X/Y axes** | [α-Actinin mask](#mask-from-a-second-image)<br>[Whole collagen image](#whole-image)<br>[Stress fibers in the cell area](#mask-from-the-same-image) | [Cardiomyocytes](Tutorial/Example_BiologicalOrientation.py)<br>[Collagen / stress fibers](Tutorial/Example_GeneralOrientation.py) | [Second-image mask](#mask-from-a-second-image)<br>[Whole image](#whole-image-orientation)<br>[Same-image mask](#orientation-inside-a-mask) | [Open in GUI](#graphical-user-interface-gui) |
 | 🟣 **Orientation towards a point** | [Spheroid center](#spheroid-center)<br>[Point in a cell](#lamellipodia-around-a-cell-point)<br>[Synthetic fiber field](#synthetic-fiber-field-around-a-point) | [Spheroid / cell](Tutorial/Example_BiologicalOrientation.py)<br>[Synthetic field](Tutorial/Example_SyntheticReferences.py) | [Spheroid](#spheroid-center)<br>[Cell](#lamellipodia-around-a-cell-point)<br>[Synthetic point](#orientation-towards-a-point) | [Open / create results](#biological-examples-in-saenopy) |
 | 🟣 **Orientation relative to a line** | [Cardiomyocytes](#cardiomyocytes-aligned-along-a-line)<br>[Synthetic fibers](#synthetic-fibers) | [Cardiomyocytes](Tutorial/Example_CardiomyocyteLine.py)<br>[Synthetic fibers](Tutorial/Example_SyntheticReferences.py) | [Cell image](#cardiomyocytes-aligned-along-a-line)<br>[Synthetic line](#orientation-relative-to-a-line) | [Open / create results](#biological-examples-in-saenopy) |
 
